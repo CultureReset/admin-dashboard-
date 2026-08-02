@@ -1,12 +1,13 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { supabase } from './supabaseClient'
+import { LOGIN_DOMAIN } from './config'
 
 const AuthContext = createContext(null)
 
 // Businesses sign in with their slug. Supabase Auth is email-based, so the slug
 // maps to a derived login address — the same one the provisioning script uses.
 // No real email is required to start; one can be added later.
-export const LOGIN_DOMAIN = 'biz.gulfcoastradar.com'
+export { LOGIN_DOMAIN }
 const toLoginEmail = (identifier) =>
   identifier.includes('@')
     ? identifier.trim()

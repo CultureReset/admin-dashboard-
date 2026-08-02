@@ -1,3 +1,7 @@
+// Explicit extension: this module is also imported by scripts/check-discovery.mjs
+// under plain node, which does not do extensionless resolution.
+import { TABLE_TO_API_KEY } from './tableMap.js'
+
 // Section discovery: walk the entity payload from GCR API Clean and turn
 // every data domain that actually has rows into a dashboard section.
 //
@@ -154,8 +158,13 @@ export function mergeEntitySources(entity, tableRows = {}) {
   const merged = { ...(entity || {}) }
   for (const [table, rows] of Object.entries(tableRows)) {
     if (NESTED_IN_PARENT.has(table)) continue
+    // The API renames most tables on the way out (entity_hours → hours). Check
+    // the name it would have arrived under, or the swept table shows up a
+    // second time as its own near-identical section.
+    const apiKey = TABLE_TO_API_KEY[table]
+    if (apiKey && hasData(merged[apiKey])) continue
     if (hasData(merged[table])) continue // API already supplied a richer version
-    merged[table] = rows
+    merged[apiKey || table] = rows
   }
   return merged
 }

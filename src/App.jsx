@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { AuthProvider, useAuth } from './lib/AuthContext'
 import Login from './pages/Login'
+import Claim from './pages/Claim'
 import Dashboard from './pages/Dashboard'
 import BusinessPicker from './pages/BusinessPicker'
 
@@ -23,6 +25,7 @@ function NoBusinessLinked() {
 
 function Root() {
   const { loading, user, isAdmin, gcrSlug } = useAuth()
+  const [claiming, setClaiming] = useState(false)
 
   if (loading) {
     return (
@@ -32,7 +35,13 @@ function Root() {
     )
   }
 
-  if (!user) return <Login />
+  if (!user) {
+    return claiming ? (
+      <Claim onBack={() => setClaiming(false)} />
+    ) : (
+      <Login onClaim={() => setClaiming(true)} />
+    )
+  }
 
   // Admin with no business selected picks one; deep links land straight in.
   if (isAdmin && !gcrSlug) return <BusinessPicker />

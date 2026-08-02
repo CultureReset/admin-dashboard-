@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../lib/AuthContext'
 
-export default function Login() {
+export default function Login({ onClaim }) {
   const { signIn } = useAuth()
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
@@ -56,6 +56,11 @@ export default function Login() {
         <button type="submit" disabled={busy}>
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
+        {onClaim && (
+          <button type="button" className="auth-switch" onClick={onClaim}>
+            Don't have a login? Claim your business
+          </button>
+        )}
       </form>
     </div>
   )

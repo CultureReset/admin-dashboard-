@@ -2,14 +2,18 @@ import { useState } from 'react'
 import GenericSection from './GenericSection'
 import RowEditor from '../components/RowEditor'
 import { createRow, updateRow, deleteRow } from '../lib/writeEntityData'
+import { tableFor } from '../lib/tableMap'
 
 // Wraps a discovered section with add / edit / delete. Works for any table,
 // since both the display and the form derive from the data and schema.
 export default function EditableSection({ section, slug, onChanged, children }) {
   const [editing, setEditing] = useState(null) // row object, or 'new'
 
-  const table = section.key
-  const isList = section.kind === 'list'
+  // section.key is whatever the payload called this domain; writes need the
+  // table it actually lives in. null means the API assembled it and there is
+  // nothing to write back to.
+  const table = tableFor(section.key)
+  const isList = section.kind === 'list' && !!table
 
   async function save(values) {
     if (editing === 'new') await createRow(table, slug, values)

@@ -57,14 +57,15 @@ input { font: inherit; }
 .claim-card { max-width: 440px; }
 .auth-card h1, .claim-card h1 { margin: 0 0 4px; font-size: 1.4rem; }
 .claim-sub { margin: 0; color: var(--muted); font-size: 0.9rem; }
-.auth-card label { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; font-weight: 600; }
-.auth-card input, .claim-card input {
+.auth-card label, .claim-card label { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; font-weight: 600; }
+.auth-card input, .claim-card input, .claim-card textarea {
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--border);
   font-size: 0.95rem;
 }
-.auth-card button[type="submit"], .claim-result button {
+.claim-card textarea { font-family: inherit; resize: vertical; }
+.auth-card button[type="submit"], .claim-card button[type="submit"], .claim-result button {
   background: var(--accent);
   color: #fff;
   border: none;
@@ -72,7 +73,9 @@ input { font: inherit; }
   padding: 11px;
   font-weight: 700;
 }
-.auth-card button[type="submit"]:disabled, .claim-result button:disabled { opacity: 0.6; }
+.auth-card button[type="submit"]:disabled,
+.claim-card button[type="submit"]:disabled,
+.claim-result button:disabled { opacity: 0.6; }
 .auth-switch {
   background: none;
   border: none;

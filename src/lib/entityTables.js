@@ -34,6 +34,26 @@ function writeTableCache(slug, rows) {
   }
 }
 
+// Set once per page load: null = untried, true/false = whether the RPC exists.
+let rpcAvailable = null
+
+/** Every slug-scoped table for this business in one call, or null if unavailable. */
+async function fetchViaRpc(slug) {
+  if (rpcAvailable === false) return null
+  const { data, error } = await supabase.rpc('entity_sections', { p_slug: slug })
+  if (error || !data || typeof data !== 'object') {
+    rpcAvailable = false
+    return null
+  }
+  rpcAvailable = true
+  // Drop tables that came back empty so the shape matches the sweep's.
+  const out = {}
+  for (const [table, rows] of Object.entries(data)) {
+    if (Array.isArray(rows) && rows.length) out[table] = rows
+  }
+  return out
+}
+
 async function mapLimit(items, limit, worker) {
   let cursor = 0
   const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
@@ -52,6 +72,18 @@ async function mapLimit(items, limit, worker) {
  * @returns {Promise<Record<string, object[]>>}
  */
 export async function fetchTablesForSlug(slug, tables, { onFound, onProgress } = {}) {
+  // One round trip instead of ~305, when sql/entity_sections.sql has been run.
+  // SECURITY INVOKER, so row-level security applies exactly as it does to the
+  // sweep below. Until that function exists PostgREST returns PGRST202 and we
+  // fall through — the dashboard works either way.
+  const viaRpc = await fetchViaRpc(slug)
+  if (viaRpc) {
+    for (const [table, rows] of Object.entries(viaRpc)) onFound?.(table, rows)
+    onProgress?.(tables.length, tables.length)
+    writeTableCache(slug, viaRpc)
+    return viaRpc
+  }
+
   const found = {}
   let done = 0
 

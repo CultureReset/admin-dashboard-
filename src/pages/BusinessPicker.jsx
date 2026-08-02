@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../lib/AuthContext'
-import { supabase } from '../lib/supabaseClient'
+import { searchEntities } from '../lib/gcrApi'
 
 // Admin landing screen: search every business and open its dashboard.
+//
+// Search goes through gcr-api-clean rather than straight to PostgREST, so the
+// picker keeps working once the open anon grants are revoked and it stays on
+// the same is_active filtering the public site uses.
 export default function BusinessPicker() {
   const { openBusiness, signOut } = useAuth()
   const [query, setQuery] = useState('')
@@ -14,23 +18,16 @@ export default function BusinessPicker() {
     let cancelled = false
     setLoading(true)
     const t = setTimeout(async () => {
-      let req = supabase
-        .from('entity')
-        .select('slug, name, city, state, entity_type, hero_image_url')
-        .eq('is_active', true)
-        .order('name')
-        .limit(40)
-
-      if (query.trim()) req = req.ilike('name', `%${query.trim()}%`)
-
-      const { data, error } = await req
-      if (cancelled) return
-      if (error) setError(error.message)
-      else {
-        setResults(data || [])
+      try {
+        const found = await searchEntities(query)
+        if (cancelled) return
+        setResults(found)
         setError('')
+      } catch (err) {
+        if (!cancelled) setError(err.message)
+      } finally {
+        if (!cancelled) setLoading(false)
       }
-      setLoading(false)
     }, 250)
 
     return () => {
