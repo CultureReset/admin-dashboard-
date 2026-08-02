@@ -13,6 +13,12 @@ Species, Meeting Points, Weather Rules. Same code, different data.
 Add a table to the database and it appears in every business that has data in
 it. Drop it and the section disappears. No deploy, no code change.
 
+The business decides what goes in their dashboard. The **Add** tab lists every
+slug table the schema supports that they aren't using yet — grouped, searchable,
+including tables nobody has written any code for. Pick one, fill in the form
+built from that table's columns, and it becomes a live section. A business with
+nothing entered starts from that catalog rather than an empty screen.
+
 ## Run it
 
 ```bash
@@ -65,6 +71,7 @@ already be a real table name, so a table added tomorrow still works untouched.
 | `schemaDiscovery.js` | Reads the live PostgREST OpenAPI spec every load. Finds every table with an `entity_slug` column, and each table's columns — which is how edit forms build themselves. |
 | `entityTables.js` | Sweeps those tables for one slug. Tries the `entity_sections` RPC first (one call); falls back to 12-at-a-time streaming requests when it isn't installed. |
 | `discoverSections.js` | Turns raw results into sections. Merges the API payload with the swept tables, labels and icons them. |
+| `sectionCatalog.js` | The other half — everything the business *could* add but isn't using yet. Holds back internal tables (AI indexes, bookings, customer records, access control, backups). |
 | `tableMap.js` | API payload key ↔ real table name. |
 | `gcrApi.js` | The three gcr-api-clean calls: entity, search, claim. |
 | `writeEntityData.js` | **Every write goes through here.** Forces the business's own slug onto inserts; filters updates and deletes by slug as well as row id. |
@@ -74,8 +81,8 @@ already be a real table name, so a table added tomorrow still works untouched.
 **Screens — `src/pages/`** — `Login`, `Claim`, `Dashboard`, `BusinessPicker` (admin only).
 
 **Layout — `src/components/`** — `TopBar`, `BottomNav` (one tab per discovered
-section; mobile-first, no sidebar), `MainContent`, `RowEditor` (builds a form
-from a table's columns).
+section plus a permanent Add tab; mobile-first, no sidebar), `MainContent`,
+`AddSection` (the catalog), `RowEditor` (builds a form from a table's columns).
 
 **Sections — `src/sections/`** — `GenericSection` renders *any* table by
 inspecting the shape of its rows. `registry.jsx` maps a handful of purpose-built
@@ -119,8 +126,14 @@ is what creates the account and the `entity_owners` row.
 
 ## Status
 
-**Verified:** builds clean; `npm run check` passes; section discovery and table
-mapping tested against realistic restaurant and charter payloads.
+**Verified:** builds clean; `npm run check` passes; section discovery, table
+mapping and the add catalog tested against realistic restaurant and charter
+payloads.
+
+**Note on writes:** the Add catalog offers every table the schema supports, but
+`sql/ownership_and_write_access.sql` only grants write access to 8 of them. Until
+that list is widened, most things a business picks will fail at save time with a
+permissions error. See `docs/PORT_REVIEW.md`.
 
 **Never run:** this app has not been opened in a browser against live data, has
 not authenticated against Supabase, and has not saved an edit. Treat every

@@ -66,7 +66,26 @@ The RPC that turns ~305 requests into one existed only as a proposal file.
 `entityTables.js` now tries it first and falls back to the sweep when it isn't
 installed, so running the SQL is the only step needed to get the speedup.
 
-### 7. Nothing was runnable
+### 7. A business could only ever see the data it already had
+
+Discovery builds sections from tables that already have rows for this slug. That
+made the dashboard a viewer, not something a business could build out: a
+restaurant with no menu had no Menu section and no way to make one, and a
+brand-new business landed on "No sections yet" with nothing to click.
+
+The dashboard is supposed to be modular — the business decides what they keep in
+it, not whichever tables happen to be populated. `src/lib/sectionCatalog.js` +
+`src/components/AddSection.jsx` add the other half: every slug table in the live
+schema that this business isn't using yet, grouped and searchable. Pick one, fill
+in the form `RowEditor` builds from that table's columns, save, and it becomes a
+live section. Reached from a permanent **Add** tab and from the empty state.
+
+Internal tables are held back — AI indexes, access control, bookings, payments,
+customer records, SMS, audit logs, backups, and `song_requests` (which carries
+`fan_phone`). Everything else is offered, including tables nobody has written any
+code for, which is the same open-ended rule the rest of discovery follows.
+
+### 8. Nothing was runnable
 
 `scripts/check-discovery.mjs` (`npm run check`) exercises discovery, merging and
 table mapping against realistic restaurant and charter payloads. No network, no
@@ -112,13 +131,6 @@ the section row; the items have no editor. Same for `drink_items`,
 Adding a dish to a menu — the single most common edit a restaurant makes — is
 not possible. `RowEditor` already builds itself from any table's columns, so
 this is a matter of letting a nested list open one.
-
-### A business with no data in a table can never start
-
-A section only appears once its table already has rows, so a restaurant with no
-menu has no Menu section and no way to create the first item. `schemaDiscovery`
-already knows every slug table that exists — an "add a section" screen listing
-the ones this business doesn't use yet closes the gap.
 
 ### Writes will fail on most sections
 
@@ -208,8 +220,10 @@ is invisible in a hand-built dashboard and unavoidable in this one. Resolve thos
 2. Run `ownership_and_write_access.sql` (with the rename in §"the RPC is named
    after an existing table" applied to the other file), then provision with
    `--limit=5` and confirm one real business can sign in and save.
-3. Run the `REVOKE` in section 5, and fix the two leaking policies.
-4. Add the Profile section and nested-row editing.
-5. Close the empty-table gap.
+3. Widen the editable-table list — the Add catalog now offers ~200 tables and
+   only 8 of them accept writes, so most of what a business picks will fail at
+   save time until the policy list grows.
+4. Run the `REVOKE` in section 5, and fix the two leaking policies.
+5. Add the Profile section and nested-row editing.
 6. Resolve the 6 duplicate-table collisions.
 7. Then the app framework, then Composio, then AI routing.

@@ -16,6 +16,7 @@
 
 import { mergeEntitySources, discoverSections } from '../src/lib/discoverSections.js'
 import { tableFor, API_KEY_TO_TABLE } from '../src/lib/tableMap.js'
+import { buildCatalog } from '../src/lib/sectionCatalog.js'
 
 let failures = 0
 function check(label, condition, detail = '') {
@@ -110,6 +111,70 @@ check('derived payload keys are read-only',
   tableFor('industry_facts') === null && tableFor('parent') === null)
 check('an unknown table maps straight through',
   tableFor('some_table_added_tomorrow') === 'some_table_added_tomorrow')
+
+console.log('\nAdd-a-section catalog')
+// A slice of the live schema: tables this business uses, tables it doesn't,
+// and the internal ones it should never be offered.
+const liveTables = [
+  'entity_hours',
+  'entity_photos',
+  'menu_sections',
+  'entity_events',
+  'faqs',
+  'happy_hour_sections',
+  // not in use by the restaurant above
+  'drink_sections',
+  'entity_specials', // the payload carried `specials: []` — empty is not "in use"
+  'entity_policies',
+  'room_types',
+  'fish_species',
+  'dockside_extras', // a table nobody has written code for
+  // internal — must never be offered
+  'ai_photo_index_full',
+  'entity_owners',
+  'platform_admins',
+  'business_claims',
+  'bookings',
+  'customer_leads',
+  'sms_messages',
+  'song_requests',
+  'entity_reviews',
+  'menu_sections_backup',
+  'entity_tags_old',
+  'user_preference_scores',
+]
+const catalog = buildCatalog(liveTables, mergedKeys)
+const offered = catalog.flatMap((g) => g.entries.map((e) => e.table))
+
+check('a table the business already uses is not offered again',
+  !offered.includes('entity_hours') &&
+    !offered.includes('menu_sections') &&
+    !offered.includes('happy_hour_sections'),
+  `offered: ${offered.join(', ')}`)
+check('the API-renamed key resolves before comparing',
+  !offered.includes('entity_photos') && !offered.includes('entity_events'))
+check('unused tables ARE offered',
+  ['drink_sections', 'entity_specials', 'entity_policies', 'room_types', 'fish_species']
+    .every((t) => offered.includes(t)),
+  `missing from: ${offered.join(', ')}`)
+check('a table present but empty for this business is offered',
+  offered.includes('entity_specials'))
+check('a table nobody wrote code for is offered anyway',
+  offered.includes('dockside_extras'))
+
+for (const internal of [
+  'ai_photo_index_full', 'entity_owners', 'platform_admins', 'business_claims',
+  'bookings', 'customer_leads', 'sms_messages', 'song_requests', 'entity_reviews',
+  'menu_sections_backup', 'entity_tags_old', 'user_preference_scores',
+]) {
+  check(`${internal} is not offered`, !offered.includes(internal))
+}
+
+check('entries carry the label they will have as a section',
+  catalog.flatMap((g) => g.entries).find((e) => e.table === 'drink_sections')?.label ===
+    'Drinks')
+check('everything lands in a named group',
+  catalog.every((g) => g.group && g.entries.length))
 
 console.log(failures ? `\n${failures} failed\n` : '\nAll checks passed\n')
 process.exit(failures ? 1 : 0)

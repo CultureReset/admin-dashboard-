@@ -159,6 +159,53 @@ input { font: inherit; }
 }
 .bottom-nav-item.active { color: var(--accent); font-weight: 700; }
 .bottom-nav-icon { font-size: 1.1rem; }
+/* Add is pinned to the end and always reachable, including with no sections. */
+.bottom-nav-add {
+  position: sticky;
+  right: 0;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  color: var(--accent);
+}
+
+/* Add-a-section catalog */
+.catalog-group { margin-top: 18px; }
+.catalog-group-name {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+.catalog-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-align: left;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  font-size: 0.85rem;
+  color: inherit;
+}
+.catalog-item:hover { border-color: var(--accent); color: var(--accent); }
+.catalog-icon { font-size: 1.05rem; flex: none; }
+.catalog-label { overflow-wrap: anywhere; }
+.main-empty button.primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 18px;
+  font-weight: 700;
+}
 
 /* Admin */
 .admin-banner {
@@ -228,7 +275,7 @@ input { font: inherit; }
 }
 
 .main-content { padding: 16px; flex: 1; }
-.main-empty { display: flex; align-items: center; justify-content: center; min-height: 50vh; color: var(--muted); }
+.main-empty { display: flex; flex-direction: column; gap: 14px; align-items: center; justify-content: center; min-height: 50vh; color: var(--muted); }
 
 /* Panels / sections */
 .panel { margin-bottom: 26px; }

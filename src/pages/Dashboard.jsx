@@ -4,12 +4,14 @@ import { fetchEntity } from '../lib/gcrApi'
 import { fetchEntityTables } from '../lib/schemaDiscovery'
 import { fetchTablesForSlug, readTableCache } from '../lib/entityTables'
 import { discoverSections, mergeEntitySources } from '../lib/discoverSections'
+import { TABLE_TO_API_KEY } from '../lib/tableMap'
 import { CUSTOM_RENDERERS } from '../sections/registry'
 import GenericSection from '../sections/GenericSection'
 import EditableSection from '../sections/EditableSection'
 import TopBar from '../components/TopBar'
 import BottomNav from '../components/BottomNav'
 import MainContent from '../components/MainContent'
+import AddSection from '../components/AddSection'
 
 export default function Dashboard() {
   const { gcrSlug } = useAuth()
@@ -20,6 +22,8 @@ export default function Dashboard() {
   const [sweep, setSweep] = useState(null) // { done, total } while scanning
   const [activeKey, setActiveKey] = useState(null)
   const [reloadKey, setReloadKey] = useState(0) // bumped after an edit saves
+  const [allTables, setAllTables] = useState([]) // every slug table in the schema
+  const [adding, setAdding] = useState(false)
 
   // The API payload — richest source for the domains it covers.
   useEffect(() => {
@@ -55,6 +59,9 @@ export default function Dashboard() {
       try {
         const tables = await fetchEntityTables()
         if (cancelled) return
+        // Kept whole, not just the ones with rows — this is what the business
+        // gets offered when they want to add something they don't have yet.
+        setAllTables(tables)
         if (!cached) setSweep({ done: 0, total: tables.length })
 
         const fresh = await fetchTablesForSlug(gcrSlug, tables, {
@@ -122,23 +129,47 @@ export default function Dashboard() {
           Checking your data… {sweep.done}/{sweep.total}
         </div>
       )}
-      <MainContent empty={sections.length === 0}>
-        {active && (
-          <EditableSection
-            key={active.key}
-            section={active}
+      <MainContent empty={!adding && sections.length === 0} onAdd={() => setAdding(true)}>
+        {adding ? (
+          <AddSection
+            allTables={allTables}
+            activeKeys={sections.map((s) => s.key)}
             slug={gcrSlug}
-            onChanged={() => setReloadKey((k) => k + 1)}
-          >
-            {Custom ? (
-              <Custom entity={merged} section={active} />
-            ) : (
-              <GenericSection entity={merged} section={active} />
-            )}
-          </EditableSection>
+            onCancel={() => setAdding(false)}
+            onDone={(table) => {
+              setAdding(false)
+              // The new row makes this table a section on the next pass.
+              setActiveKey(TABLE_TO_API_KEY[table] || table)
+              setReloadKey((k) => k + 1)
+            }}
+          />
+        ) : (
+          active && (
+            <EditableSection
+              key={active.key}
+              section={active}
+              slug={gcrSlug}
+              onChanged={() => setReloadKey((k) => k + 1)}
+            >
+              {Custom ? (
+                <Custom entity={merged} section={active} />
+              ) : (
+                <GenericSection entity={merged} section={active} />
+              )}
+            </EditableSection>
+          )
         )}
       </MainContent>
-      <BottomNav sections={sections} activeKey={activeKey} onSelect={setActiveKey} />
+      <BottomNav
+        sections={sections}
+        activeKey={activeKey}
+        onSelect={(key) => {
+          setAdding(false)
+          setActiveKey(key)
+        }}
+        onAdd={() => setAdding(true)}
+        adding={adding}
+      />
     </div>
   )
 }
