@@ -1,5 +1,6 @@
 import { labelFor, iconFor } from './discoverSections.js'
 import { TABLE_TO_API_KEY, tableFor } from './tableMap.js'
+import { ARTIST_GROUP, ARTIST_TABLES, ARTIST_FAN_TABLES } from './artistModule.js'
 
 // What a business COULD add, as opposed to what it already has.
 //
@@ -37,6 +38,7 @@ const INTERNAL_PATTERNS = [
 
 /** Is this a table the business should be able to create rows in? */
 export function isOfferable(table) {
+  if (ARTIST_FAN_TABLES.has(table)) return false
   return !INTERNAL_PATTERNS.some((re) => re.test(table))
 }
 
@@ -44,6 +46,9 @@ export function isOfferable(table) {
 // Keyword match, first hit wins; anything unmatched lands in "Everything else",
 // which is where a brand-new table shows up until someone gives it a home.
 const GROUPS = [
+  // Artist first — it matches on explicit table names, so it must win over the
+  // keyword buckets below (`songs` would otherwise fall into "About & content").
+  [ARTIST_GROUP, (t) => ARTIST_TABLES.has(t)],
   ['Food & drink', /menu|drink|food|dish|beverage|happy_hour|side|dessert|wine|beer|cocktail/],
   ['Hours & availability', /hour|schedule|availability|calendar|season|closure|holiday/],
   ['Photos & media', /photo|image|media|gallery|video|logo|banner/],
@@ -58,8 +63,12 @@ const GROUPS = [
   ['Contact & location', /address|location|contact|phone|email|social|link|direction|parking/],
 ]
 
+// A group matcher is either a regex over the table name or a predicate.
 function groupFor(table) {
-  for (const [name, re] of GROUPS) if (re.test(table)) return name
+  for (const [name, match] of GROUPS) {
+    const hit = typeof match === 'function' ? match(table) : match.test(table)
+    if (hit) return name
+  }
   return 'Everything else'
 }
 

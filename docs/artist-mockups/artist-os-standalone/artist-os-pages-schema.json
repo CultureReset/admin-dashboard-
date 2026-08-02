@@ -1,0 +1,140 @@
+{
+  "project": "Get Sideways Artist OS Standalone Section Demo",
+  "artist_id": "get_sideways",
+  "business_data_policy": "Business/venue data is separate and linked by venue_id/business_id/event_id.",
+  "pages": [
+    {
+      "file": "01-live-availability.html",
+      "title": "Live Availability Bar",
+      "purpose": "Shows whether the artist is live, accepting requests, on break, paused, or finished. This is the real-time layer that makes the page feel alive."
+    },
+    {
+      "file": "02-artist-profile.html",
+      "title": "Artist Profile Page",
+      "purpose": "The core public band profile: identity, lineup, genre, bio, member cards, and the main fan actions."
+    },
+    {
+      "file": "03-song-request.html",
+      "title": "Request a Song",
+      "purpose": "A fan submits a song request, receives a payment/reference code, and the request appears in the artist queue."
+    },
+    {
+      "file": "04-tip-jar.html",
+      "title": "Tip Jar",
+      "purpose": "Fans tip the band without needing a song request. Tips can be anonymous, public, or tied to a message."
+    },
+    {
+      "file": "05-paid-shoutout.html",
+      "title": "Paid Shoutout",
+      "purpose": "A shoutout is a paid product: birthdays, bachelorettes, anniversaries, business shoutouts, and dedications."
+    },
+    {
+      "file": "06-crowdfund-song.html",
+      "title": "Crowdfund a Song",
+      "purpose": "Fans contribute toward a song goal. The artist keeps control and approves what can actually be played."
+    },
+    {
+      "file": "07-upcoming-shows.html",
+      "title": "Upcoming Shows",
+      "purpose": "Artist event records link to venue IDs. The venue/business profile stays separate."
+    },
+    {
+      "file": "08-text-alerts.html",
+      "title": "Text Alerts / Fan Signup",
+      "purpose": "Turns a one-time show visitor into a reusable fan contact segmented by city, venue, and tourist/local status."
+    },
+    {
+      "file": "09-booking-inquiry.html",
+      "title": "Booking Inquiry",
+      "purpose": "Captures serious private-event, venue, wedding, corporate, college, and festival booking leads."
+    },
+    {
+      "file": "10-socials.html",
+      "title": "Social Links",
+      "purpose": "Socials are important, but they should come after money actions so the page captures value before sending fans away."
+    },
+    {
+      "file": "11-merch.html",
+      "title": "Merch Page",
+      "purpose": "Optional artist commerce: shirts, hats, stickers, pickup-at-show, ship later, and inventory fields."
+    },
+    {
+      "file": "12-vote-next-song.html",
+      "title": "Vote Next Song",
+      "purpose": "Fans vote from artist-approved options. Easier and safer than open song requests."
+    },
+    {
+      "file": "13-sponsor-show.html",
+      "title": "Sponsor Tonight\u2019s Show",
+      "purpose": "A local business or fan can buy exposure: logo, stage shoutout, sponsored song, or weekend sponsorship."
+    },
+    {
+      "file": "14-epk-press-kit.html",
+      "title": "EPK / Press Kit",
+      "purpose": "For bookers and venues: quick band bio, photos, live clips, stage plot, tech rider, and downloadable assets."
+    },
+    {
+      "file": "15-qr-nfc-manager.html",
+      "title": "QR / NFC Manager",
+      "purpose": "The artist gets one link that can be printed on table tents, banners, stickers, wristbands, NFC cards, or social posts."
+    },
+    {
+      "file": "16-payment-verification.html",
+      "title": "Payment Verification Tracker",
+      "purpose": "Shows whether a request, tip, shoutout, sponsor, or merch payment has been matched by the parser."
+    },
+    {
+      "file": "17-parser-match-log.html",
+      "title": "Email Parser Match Log",
+      "purpose": "This page shows the real engine: raw payment emails get turned into structured payment events."
+    },
+    {
+      "file": "18-admin-controls.html",
+      "title": "Admin Controls",
+      "purpose": "Artist/manager controls for what is live, paused, public, paid, requestable, and visible."
+    },
+    {
+      "file": "19-artist-dashboard.html",
+      "title": "Artist Dashboard",
+      "purpose": "The private dashboard where the artist sees money, requests, fans, booking leads, parser matches, and show performance."
+    },
+    {
+      "file": "20-gcr-tourist-discovery.html",
+      "title": "GCR Tourist Discovery",
+      "purpose": "The tourist side: things to do, places to eat, live music, late-night food, happy hours, and nearby events."
+    },
+    {
+      "file": "21-artist-data-structure.html",
+      "title": "Artist Data Structure",
+      "purpose": "The artist-only schema needed for CyberCheck Artist OS. Business/venue data is separate."
+    }
+  ],
+  "artist_tables": [
+    "artist_profiles",
+    "artist_members",
+    "artist_genres",
+    "artist_social_links",
+    "artist_media",
+    "artist_events",
+    "artist_live_status",
+    "artist_availability_windows",
+    "artist_qr_codes",
+    "song_requests",
+    "tip_events",
+    "shoutout_products",
+    "shoutout_orders",
+    "crowdfund_goals",
+    "crowdfund_contributions",
+    "artist_payment_methods",
+    "payment_events",
+    "parser_matches",
+    "parser_match_attempts",
+    "fan_contacts",
+    "booking_leads",
+    "artist_sponsor_orders",
+    "artist_analytics",
+    "artist_dashboard_settings",
+    "artist_moderation_logs",
+    "artist_request_settings"
+  ]
+}

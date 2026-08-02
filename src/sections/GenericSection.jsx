@@ -1,5 +1,6 @@
 import { labelFor } from '../lib/discoverSections'
 import { money } from '../lib/format'
+import { FAN_PII_FIELDS, maskContact } from '../lib/artistModule'
 
 // Universal renderer for any data domain that doesn't have a purpose-built
 // component. Works off the shape of the rows themselves, so a table added to
@@ -46,10 +47,14 @@ function pick(row, candidates) {
   return null
 }
 
-function renderValue(v) {
-  if (Array.isArray(v)) return v.map(renderValue).filter(Boolean).join(', ')
+function renderValue(v, field) {
+  if (Array.isArray(v)) return v.map((x) => renderValue(x, field)).filter(Boolean).join(', ')
   if (v && typeof v === 'object') return ''
   if (typeof v === 'boolean') return v ? 'Yes' : 'No'
+  // Fan phone numbers and emails arrive on song_requests, shoutouts, follows
+  // and contributions. Showing them in full turns every section into a contact
+  // list; the last four digits are enough to match a payment to a person.
+  if (field && FAN_PII_FIELDS.has(field)) return maskContact(v)
   return String(v)
 }
 
@@ -75,14 +80,14 @@ function Row({ row }) {
     <div className="generic-row">
       <div className="generic-row-main">
         <div>
-          {title && <div className="generic-title">{renderValue(title.value)}</div>}
-          {body && <div className="generic-body">{renderValue(body.value)}</div>}
+          {title && <div className="generic-title">{renderValue(title.value, title.field)}</div>}
+          {body && <div className="generic-body">{renderValue(body.value, body.field)}</div>}
         </div>
         {price && (
           <div className="generic-price">
             {price.field === 'price_label'
-              ? renderValue(price.value)
-              : money(price.value) || renderValue(price.value)}
+              ? renderValue(price.value, price.field)
+              : money(price.value) || renderValue(price.value, price.field)}
           </div>
         )}
       </div>
@@ -90,7 +95,7 @@ function Row({ row }) {
         <div className="generic-chips">
           {extras.map(([k, v]) => (
             <span key={k} className="chip">
-              <b>{labelFor(k)}:</b> {renderValue(v)}
+              <b>{labelFor(k)}:</b> {renderValue(v, k)}
             </span>
           ))}
         </div>
@@ -127,7 +132,7 @@ export default function GenericSection({ section }) {
           {entries.map(([k, v]) => (
             <div key={k} className="fact">
               <b>{labelFor(k)}</b>
-              <span>{renderValue(v)}</span>
+              <span>{renderValue(v, k)}</span>
             </div>
           ))}
         </div>

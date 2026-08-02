@@ -1,6 +1,7 @@
 // Explicit extension: this module is also imported by scripts/check-discovery.mjs
 // under plain node, which does not do extensionless resolution.
 import { TABLE_TO_API_KEY } from './tableMap.js'
+import { ARTIST_LABELS, ARTIST_ICONS } from './artistModule.js'
 
 // Section discovery: walk the entity payload from GCR API Clean and turn
 // every data domain that actually has rows into a dashboard section.
@@ -116,11 +117,11 @@ function humanize(key) {
 }
 
 export function labelFor(key) {
-  return LABEL_OVERRIDES[key] || humanize(key)
+  return LABEL_OVERRIDES[key] || ARTIST_LABELS[key] || humanize(key)
 }
 
 export function iconFor(key) {
-  return ICONS[key] || '📋'
+  return ICONS[key] || ARTIST_ICONS[key] || '📋'
 }
 
 /** Does this value represent real, displayable data? */

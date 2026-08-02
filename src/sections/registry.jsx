@@ -8,6 +8,8 @@ import ReviewsSection from './ReviewsSection'
 import FaqsSection from './FaqsSection'
 import PoliciesSection from './PoliciesSection'
 import OfferingsSection from './OfferingsSection'
+import ArtistPricesSection from './ArtistPricesSection'
+import ArtistGoalSection from './ArtistGoalSection'
 
 // Purpose-built renderers, only for data domains where a generic list layout
 // genuinely falls short (day-of-week mapping, image grids, nested pricing
@@ -33,4 +35,10 @@ export const CUSTOM_RENDERERS = {
   faqs: FaqsSection,
   policies: PoliciesSection,
   sections: OfferingsSection,
+
+  // Artist module. These keys are table names — the GCR API doesn't rename
+  // them, so discovery and the sweep both key them the same way.
+  artist_price_tiers: ArtistPricesSection,
+  artist_goals: ArtistGoalSection,
+  song_cooperatives: ArtistGoalSection,
 }

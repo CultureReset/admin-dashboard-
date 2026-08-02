@@ -88,6 +88,45 @@ section plus a permanent Add tab; mobile-first, no sidebar), `MainContent`,
 inspecting the shape of its rows. `registry.jsx` maps a handful of purpose-built
 renderers; it does **not** define which sections exist — discovery does.
 
+## Artist module
+
+Artists are businesses like any other — same slug, same discovery, same editor.
+Most of the module already exists in the database (`artist_profiles`, `songs`,
+`song_requests`, `shoutouts`, `artist_goals`, `song_cooperatives`, `tip_links`,
+`artist_shows`, `artist_follows`, `artist_booking_requests`).
+
+What did not exist is the part the artist needs to control: **what anything
+costs.** `sql/artist_module.sql` adds it —
+
+| Thing | Where the artist sets it |
+|---|---|
+| Price per song | `songs.price` (falls back to `artist_profiles.default_min_request_amount`) |
+| Custom-song price | `artist_profiles.custom_song_price` |
+| Shoutout tiers | `artist_price_tiers` where `kind = 'shoutout'` |
+| Tip buttons | `artist_price_tiers` where `kind = 'tip'` |
+| Crowdfund amounts | `artist_price_tiers` where `kind = 'crowdfund'` |
+| Crowdfund targets | `artist_goals`, `song_cooperatives` |
+| Cash App / Venmo / PayPal | `tip_links` (platform, handle, deep-link prefix) |
+| Requests open right now | `artist_profiles.requests_open` |
+
+`artist_price_tiers` is one table behind every money button on the fan pages, so
+a new kind of paid thing is a row — not a schema change and not a deploy.
+
+`src/lib/artistModule.js` is configuration only: labels, icons, catalog
+grouping, and which fields hold fan contact details. It does not decide what an
+artist dashboard contains — discovery still does that, and an artist table added
+to the database tomorrow appears, renders and edits with no code here.
+
+Fan-submitted tables (requests, shoutouts, contributions, follows, booking
+leads) show up as sections once they have rows, but are never offered in the Add
+catalog — an artist doesn't "add a song request". Fan phone numbers and emails
+are masked on screen.
+
+**The fan-facing pages live in `gcr-unified`, not here** — `/artist/:slug` and
+`/artist/:slug/live`. They currently hardcode their amounts; once this SQL is
+run they should read `artist_price_tiers` and `tip_links` instead. See
+`docs/PORT_REVIEW.md`.
+
 ## Access
 
 1. `sql/ownership_and_write_access.sql` — **required before editing works.**

@@ -168,6 +168,42 @@ input { font: inherit; }
   color: var(--accent);
 }
 
+/* Artist module — prices and goals */
+.price-kind { margin-top: 16px; }
+.price-kind-name { margin: 0 0 2px; font-size: 0.95rem; }
+.price-kind-help { margin: 0 0 9px; color: var(--muted); font-size: 0.8rem; }
+.price-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.price-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 108px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.price-chip b { font-size: 1.05rem; color: var(--accent); }
+.price-chip span { font-size: 0.82rem; }
+.price-chip small { font-size: 0.72rem; color: var(--muted); }
+.price-chip em { font-size: 0.7rem; color: var(--muted); font-style: normal; }
+.price-chip.off { opacity: 0.55; }
+
+.goal-row { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.goal-row:last-child { border-bottom: 0; }
+.goal-row.closed { opacity: 0.6; }
+.goal-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.goal-amount { white-space: nowrap; font-weight: 700; color: var(--accent); text-align: right; }
+.goal-amount span { display: block; font-weight: 400; font-size: 0.78rem; color: var(--muted); }
+.goal-bar {
+  height: 10px;
+  margin: 10px 0 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--border);
+}
+.goal-fill { height: 100%; border-radius: 999px; background: var(--accent); }
+
 /* Add-a-section catalog */
 .catalog-group { margin-top: 18px; }
 .catalog-group-name {

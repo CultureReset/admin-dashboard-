@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberCheck Artist Profile - Final Front End</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --bg: #050814;
+      --panel: #0b1220;
+      --card: #111827;
+      --card2: #172033;
+      --card3: #0a0f1d;
+      --line: rgba(255,255,255,.11);
+      --text: #f8fafc;
+      --muted: #aab7c9;
+      --green: #22c55e;
+      --green2: #86efac;
+      --blue: #38bdf8;
+      --venmo: #3d95ce;
+      --cash: #00d632;
+      --pink: #ec4899;
+      --purple: #8b5cf6;
+      --gold: #facc15;
+      --red: #fb7185;
+      --shadow: 0 18px 60px rgba(0,0,0,.42);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,.17), transparent 30%),
+        radial-gradient(circle at top right, rgba(236,72,153,.16), transparent 30%),
+        linear-gradient(180deg, #05070d 0%, #08111f 48%, #020617 100%);
+      color: var(--text);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .app {
+      width: min(500px, 100%);
+      margin: 0 auto;
+      min-height: 100vh;
+      padding-bottom: 112px;
+      background: rgba(2,6,23,.56);
+      border-left: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+    }
+
+    .hero {
+      min-height: 360px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.08), rgba(2,6,23,.92)),
+        url("https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80") center/cover;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      display: grid;
+      place-items: center;
+      color: #00130b;
+      font-weight: 1000;
+    }
+
+    .brand small {
+      display: block;
+      color: #d8e2ef;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      font-weight: 900;
+    }
+
+    .brand b {
+      font-size: 15px;
+    }
+
+    .live {
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: rgba(34,197,94,.16);
+      border: 1px solid rgba(34,197,94,.35);
+      color: #b8ffd3;
+      font-weight: 950;
+      font-size: 12px;
+      display: flex;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 16px var(--green);
+    }
+
+    .artist-main {
+      display: flex;
+      gap: 14px;
+      align-items: flex-end;
+      margin-top: 115px;
+    }
+
+    .avatar {
+      width: 104px;
+      height: 104px;
+      border-radius: 28px;
+      border: 3px solid rgba(255,255,255,.88);
+      background:
+        linear-gradient(135deg, rgba(34,197,94,.25), rgba(56,189,248,.25)),
+        url("https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=600&q=80") center/cover;
+      box-shadow: 0 18px 44px rgba(0,0,0,.45);
+      flex: 0 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 35px;
+      line-height: .95;
+      letter-spacing: -.05em;
+    }
+
+    .sub {
+      margin: 0;
+      color: #dde8f5;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 13px;
+    }
+
+    .tag {
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.11);
+      border: 1px solid rgba(255,255,255,.13);
+      backdrop-filter: blur(8px);
+      font-weight: 850;
+    }
+
+    .hero-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 16px;
+    }
+
+    .hero-actions button,
+    .hero-actions a {
+      min-height: 48px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.10);
+      color: var(--text);
+      font-weight: 950;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .hero-actions .primary {
+      border: 0;
+      color: #03120a;
+      background: linear-gradient(135deg, var(--green), var(--green2));
+    }
+
+    .quick-nav {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px;
+      background: rgba(7,10,18,.93);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      scrollbar-width: none;
+    }
+
+    .quick-nav::-webkit-scrollbar { display: none; }
+
+    .quick-nav button {
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 10px 13px;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .quick-nav button.active {
+      color: #03120a;
+      background: linear-gradient(135deg, var(--green), var(--green2));
+      border-color: transparent;
+    }
+
+    .section {
+      padding: 16px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(17,24,39,.98), rgba(15,23,42,.98));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      letter-spacing: -.03em;
+      line-height: 1.08;
+    }
+
+    .helper {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .label {
+      display: block;
+      margin: 12px 0 7px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: #d7e1ef;
+      font-weight: 900;
+    }
+
+    .bio {
+      color: #dce6f3;
+      font-size: 14px;
+      line-height: 1.58;
+      margin: 0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .stat {
+      background: var(--card3);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 13px;
+      text-align: center;
+    }
+
+    .stat b {
+      display: block;
+      color: var(--green2);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .goal {
+      background: linear-gradient(135deg, rgba(250,204,21,.16), rgba(34,197,94,.10));
+      border: 1px solid rgba(250,204,21,.28);
+      border-radius: 22px;
+      padding: 16px;
+    }
+
+    .goal-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .goal-top b {
+      font-size: 15px;
+    }
+
+    .goal-top span {
+      color: var(--gold);
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .bar {
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      overflow: hidden;
+      margin: 12px 0 8px;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .fill {
+      height: 100%;
+      width: 65%;
+      background: linear-gradient(90deg, var(--green), var(--gold));
+      border-radius: 999px;
+    }
+
+    .goal-note {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .status-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .status-pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.07);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+    }
+
+    .status-pill.open {
+      color: #c8ffdc;
+      border-color: rgba(34,197,94,.35);
+      background: rgba(34,197,94,.12);
+    }
+
+    .hidden { display: none !important; }
+
+    .action {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--text);
+      border-radius: 20px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: .15s ease;
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .action:hover,
+    .action.active {
+      border-color: rgba(34,197,94,.75);
+      background: rgba(34,197,94,.08);
+      transform: translateY(-1px);
+    }
+
+    .action:active,
+    .song:active,
+    .addon:active,
+    .pill:active,
+    .btn:active,
+    .mini-btn:active {
+      transform: scale(.985);
+    }
+
+    .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      background: #0b1018;
+      display: grid;
+      place-items: center;
+      color: var(--green2);
+      border: 1px solid rgba(255,255,255,.07);
+      font-size: 20px;
+    }
+
+    .action strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 3px;
+    }
+
+    .action small,
+    .song small,
+    .addon span,
+    .summary small,
+    .request-card small,
+    .event small,
+    .link-card small {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .price {
+      color: var(--green2);
+      font-weight: 1000;
+      white-space: nowrap;
+    }
+
+    .song-panel {
+      margin-top: 9px;
+      border: 1px solid rgba(34,197,94,.28);
+      background: rgba(34,197,94,.05);
+      border-radius: 22px;
+      padding: 12px;
+      animation: open .15s ease;
+    }
+
+    @keyframes open {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-title {
+      display: block;
+      font-size: 14px;
+      font-weight: 950;
+      margin-bottom: 4px;
+    }
+
+    .panel-note {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      margin-bottom: 10px;
+    }
+
+    .song {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #0b1220;
+      color: var(--text);
+      border-radius: 18px;
+      padding: 13px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      text-align: left;
+      align-items: flex-start;
+      position: relative;
+      margin-top: 9px;
+    }
+
+    .song.active {
+      border-color: var(--green);
+      background: rgba(34,197,94,.11);
+    }
+
+    .song strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    label {
+      display: block;
+      margin-top: 13px;
+    }
+
+    label > span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+      margin-bottom: 7px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.14);
+      background: #090f1d;
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(56,189,248,.16);
+    }
+
+    .selected {
+      margin-top: 14px;
+      border: 1px solid rgba(250,204,21,.25);
+      background: rgba(250,204,21,.08);
+      border-radius: 18px;
+      padding: 13px;
+    }
+
+    .selected strong,
+    .selected span {
+      display: block;
+    }
+
+    .selected span {
+      color: #f6d991;
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    .selected button {
+      margin-top: 10px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 9px 11px;
+      cursor: pointer;
+      font-weight: 850;
+    }
+
+    .addon {
+      border: 1px solid var(--line);
+      background: var(--card2);
+      border-radius: 18px;
+      padding: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+      margin-top: 14px;
+      user-select: none;
+    }
+
+    .addon.active {
+      border-color: rgba(34,197,94,.75);
+      background: rgba(34,197,94,.08);
+    }
+
+    .addon strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .pill-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .pill {
+      border: 1px solid rgba(255,255,255,.14);
+      background: var(--card2);
+      color: var(--text);
+      border-radius: 15px;
+      padding: 12px 7px;
+      font-weight: 950;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .pill.active {
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      color: #00130b;
+      border-color: transparent;
+    }
+
+    .live-total {
+      margin-top: 14px;
+      background: var(--card3);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .live-total strong {
+      color: var(--muted);
+    }
+
+    .live-total b {
+      font-size: 23px;
+      color: var(--green2);
+    }
+
+    .btn {
+      width: 100%;
+      border: 0;
+      border-radius: 17px;
+      min-height: 54px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 1000;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: grid;
+      place-items: center;
+      margin-top: 12px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      color: #00130b;
+    }
+
+    .btn-secondary {
+      background: var(--card2);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .venmo { background: var(--venmo); color: white; }
+    .cash { background: var(--cash); color: #041007; }
+
+    .back {
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      padding: 12px 0 0;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .checkout {
+      background: var(--card3);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      padding: 9px 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .summary b {
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .total-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid rgba(255,255,255,.12);
+      margin-top: 10px;
+      padding-top: 14px;
+      font-size: 25px;
+      font-weight: 1000;
+    }
+
+    .code {
+      margin-top: 14px;
+      text-align: center;
+      border: 1px dashed rgba(34,197,94,.75);
+      background: rgba(34,197,94,.08);
+      border-radius: 20px;
+      padding: 14px;
+    }
+
+    .code span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .code strong {
+      font-size: 21px;
+      letter-spacing: .3px;
+      word-break: break-word;
+    }
+
+    .copy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .copy-grid button {
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--text);
+      border-radius: 15px;
+      padding: 12px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .status {
+      min-height: 19px;
+      color: var(--green2);
+      font-weight: 900;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+
+    .warning {
+      background: rgba(250,204,21,.08);
+      border: 1px solid rgba(250,204,21,.22);
+      color: #f6d991;
+      border-radius: 17px;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      margin-top: 12px;
+    }
+
+    .payload {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      padding: 12px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .payload summary {
+      cursor: pointer;
+      color: var(--muted);
+      font-weight: 850;
+      font-size: 13px;
+    }
+
+    .payload pre {
+      overflow: auto;
+      color: #d8ffe6;
+      font-size: 11px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .request-list,
+    .event-list,
+    .link-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .request-card,
+    .event,
+    .link-card {
+      background: var(--card3);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .request-top,
+    .event {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .request-card strong,
+    .event strong,
+    .link-card strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .request-amount {
+      color: var(--green2);
+      font-weight: 1000;
+      white-space: nowrap;
+    }
+
+    .request-meta {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .mini-pill {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      font-weight: 800;
+    }
+
+    .mini-pill.paid {
+      color: #c8ffdc;
+      border-color: rgba(34,197,94,.30);
+      background: rgba(34,197,94,.10);
+    }
+
+    .mini-pill.pending {
+      color: #fde68a;
+      border-color: rgba(250,204,21,.30);
+      background: rgba(250,204,21,.09);
+    }
+
+    .date-box {
+      width: 54px;
+      border-radius: 15px;
+      background: rgba(56,189,248,.10);
+      border: 1px solid rgba(56,189,248,.25);
+      text-align: center;
+      padding: 8px 5px;
+      flex: 0 0 auto;
+    }
+
+    .date-box b {
+      display: block;
+      color: var(--blue);
+      font-size: 18px;
+    }
+
+    .date-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .event-content {
+      flex: 1;
+    }
+
+    .mini-btn {
+      border: 1px solid var(--line);
+      background: var(--card2);
+      color: var(--text);
+      border-radius: 13px;
+      padding: 9px 10px;
+      font-size: 12px;
+      font-weight: 950;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .link-card {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .song-mini-bar {
+      height: 9px;
+      background: #1f2937;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .song-mini-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--blue), var(--pink));
+      border-radius: 999px;
+    }
+
+    .confirm {
+      background: rgba(34,197,94,.08);
+      border: 1px solid rgba(34,197,94,.25);
+      border-radius: 18px;
+      padding: 14px;
+      margin-top: 12px;
+      color: #d9ffe7;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .sticky {
+      position: fixed;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      width: min(476px, calc(100% - 24px));
+      background: rgba(17,24,39,.96);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 10px;
+      box-shadow: 0 15px 45px rgba(0,0,0,.45);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      z-index: 50;
+    }
+
+    .sticky span {
+      color: var(--muted);
+      font-size: 12px;
+      display: block;
+    }
+
+    .sticky b {
+      color: var(--green2);
+      font-size: 22px;
+    }
+
+    .sticky button {
+      width: auto;
+      min-height: 44px;
+      margin: 0;
+      padding: 10px 15px;
+      border-radius: 16px;
+    }
+
+    @media (max-width: 430px) {
+      .hero-actions { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      .pill-row, .copy-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats { grid-template-columns: 1fr 1fr 1fr; }
+      h1 { font-size: 32px; }
+      .action { grid-template-columns: auto 1fr; }
+      .action > .price { grid-column: 2; }
+      .event { display: grid; grid-template-columns: auto 1fr; }
+      .event .mini-btn { grid-column: 1 / -1; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero" id="profile">
+      <div class="hero-top">
+        <div class="brand">
+          <div class="logo">CC</div>
+          <div>
+            <small>CyberCheck Artist</small>
+            <b>Fan Profile</b>
+          </div>
+        </div>
+        <div class="live"><span class="dot"></span> Requests Open</div>
+      </div>
+
+      <div>
+        <div class="artist-main">
+          <div class="avatar"></div>
+          <div>
+            <h1>Jake Miller</h1>
+            <p class="sub">Country • Acoustic Rock • Beach Bar Covers • Original Songs</p>
+          </div>
+        </div>
+
+        <div class="tags">
+          <span class="tag">Live Tonight</span>
+          <span class="tag">Orange Beach, AL</span>
+          <span class="tag">Accepting Song Requests</span>
+        </div>
+
+        <div class="hero-actions">
+          <button class="primary" type="button" data-jump="requests">Send Request</button>
+          <button type="button" data-jump="fanRequests">Fan Requests</button>
+          <button type="button" data-jump="booking">Book Artist</button>
+        </div>
+      </div>
+    </section>
+
+    <nav class="quick-nav">
+      <button class="active" type="button" data-jump="profile">Profile</button>
+      <button type="button" data-jump="requests">Requests</button>
+      <button type="button" data-jump="fanRequests">Fan Requests</button>
+      <button type="button" data-jump="shows">Shows</button>
+      <button type="button" data-jump="links">Links</button>
+      <button type="button" data-jump="booking">Booking</button>
+    </nav>
+
+    <section class="section">
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>About Jake</h2>
+            <p class="helper">Artist bio and profile details.</p>
+          </div>
+        </div>
+
+        <p class="bio">
+          Jake Miller is a Gulf Coast acoustic artist playing country, beach bar favorites, sing-along classics,
+          and original songs. Fans can request songs, send shoutouts, tip the artist, or help fund the next song
+          directly from this profile.
+        </p>
+
+        <div class="stats">
+          <div class="stat"><b>4.9</b><span>Fan rating</span></div>
+          <div class="stat"><b>127</b><span>Requests sent</span></div>
+          <div class="stat"><b>32</b><span>Shows listed</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="goal">
+          <div class="goal-top">
+            <div>
+              <b>Tonight’s Road Fund</b>
+              <p class="goal-note">Trying to raise $100 for a room, food, and gas after the show.</p>
+            </div>
+            <span>$65 / $100</span>
+          </div>
+          <div class="bar"><div class="fill"></div></div>
+          <p class="goal-note">Fans can support the artist without requesting a specific song.</p>
+        </div>
+
+        <div class="status-row">
+          <span class="status-pill open">Requests Open</span>
+          <span class="status-pill">Shoutouts On</span>
+          <span class="status-pill">Cash App + Venmo</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="requests">
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Send Something to Jake</h2>
+            <p class="helper">Tap a section. Request a Song opens the artist’s song list and prices right below.</p>
+          </div>
+        </div>
+
+        <button class="action" id="songAction" type="button">
+          <span class="icon">♪</span>
+          <span>
+            <strong>Request a Song</strong>
+            <small>Pick from the artist’s available song list.</small>
+          </span>
+          <span class="price">From $20</span>
+        </button>
+
+        <div class="song-panel hidden" id="songPanel">
+          <strong class="panel-title">Artist Song List</strong>
+          <span class="panel-note">Artist adds songs and prices here. Fans pick one; the request goes to the fan request list.</span>
+          <div id="songList"></div>
+          <button class="song" id="customSongBtn" type="button">
+            <span>
+              <strong>Custom Song Request</strong>
+              <small>Fan types any song. Artist can charge a higher custom fee.</small>
+            </span>
+            <b>$30</b>
+          </button>
+        </div>
+
+        <button class="action" data-action="shoutout" type="button">
+          <span class="icon">🎤</span>
+          <span>
+            <strong>Send a Shoutout</strong>
+            <small>Birthday, table shoutout, message, or dedication.</small>
+          </span>
+          <span class="price">$10</span>
+        </button>
+
+        <button class="action" data-action="tip" type="button">
+          <span class="icon">♡</span>
+          <span>
+            <strong>Tip the Artist</strong>
+            <small>Send support without requesting anything.</small>
+          </span>
+          <span class="price">Custom</span>
+        </button>
+
+        <button class="action" data-action="goal" type="button">
+          <span class="icon">◎</span>
+          <span>
+            <strong>Support Tonight’s Goal</strong>
+            <small>Help with the artist’s road fund.</small>
+          </span>
+          <span class="price">Custom</span>
+        </button>
+
+        <button class="action" data-action="crowdfund" type="button">
+          <span class="icon">☷</span>
+          <span>
+            <strong>Fund a Song</strong>
+            <small>Add money toward a crowd-funded song request.</small>
+          </span>
+          <span class="price">Custom</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="section hidden" id="detailsScreen">
+      <div class="card">
+        <span class="status-pill open">Request Details</span>
+        <h2 id="detailsTitle" style="margin-top:12px;">Request Details</h2>
+        <p class="helper" id="detailsHelper">Fill out the details below.</p>
+
+        <div class="grid">
+          <label>
+            <span>Your Name</span>
+            <input id="fanName" placeholder="Sarah">
+          </label>
+          <label>
+            <span>Phone or Email</span>
+            <input id="fanContact" placeholder="251-555-1234">
+          </label>
+        </div>
+
+        <div class="selected hidden" id="selectedSongBox">
+          <strong>Selected Song</strong>
+          <span id="selectedSongText">No song selected</span>
+          <button type="button" id="changeSongBtn">Change Song</button>
+
+          <label class="hidden" id="customSongField">
+            <span>Custom Song Name</span>
+            <input id="customSongName" placeholder="Type the song you want">
+          </label>
+        </div>
+
+        <label class="hidden" id="shoutoutField">
+          <span>What should the artist say?</span>
+          <textarea id="shoutoutText" placeholder="Tell Ashley happy birthday from table 8"></textarea>
+        </label>
+
+        <label class="hidden" id="tipOnlyField">
+          <span>Tip Amount</span>
+          <input id="tipOnlyAmount" type="number" min="0" placeholder="20">
+        </label>
+
+        <label class="hidden" id="goalField">
+          <span>Amount to Add to Tonight’s Goal</span>
+          <input id="goalAmount" type="number" min="0" placeholder="20">
+        </label>
+
+        <div class="hidden" id="crowdfundFields">
+          <label>
+            <span>Choose a Song to Fund</span>
+            <select id="crowdfundSong">
+              <option>Tennessee Whiskey — $45 / $75 raised</option>
+              <option>Sweet Home Alabama — $20 / $60 raised</option>
+              <option>Free Bird — $10 / $100 raised</option>
+            </select>
+          </label>
+          <label>
+            <span>Amount to Add</span>
+            <input id="crowdfundAmount" type="number" min="0" placeholder="10">
+          </label>
+        </div>
+
+        <div id="addons">
+          <div class="addon" id="addonShoutout">
+            <div>
+              <strong>Add Shoutout</strong>
+              <span>Add a quick message for +$10.</span>
+            </div>
+            <b>+$10</b>
+          </div>
+
+          <label class="hidden" id="extraShoutoutField">
+            <span>Shoutout Message</span>
+            <textarea id="extraShoutoutText" placeholder="Say happy birthday to Ashley"></textarea>
+          </label>
+
+          <label>
+            <span>Extra Tip</span>
+            <div class="pill-row">
+              <button class="pill active" data-tip="0" type="button">$0</button>
+              <button class="pill" data-tip="5" type="button">$5</button>
+              <button class="pill" data-tip="10" type="button">$10</button>
+              <button class="pill" data-tip="20" type="button">$20</button>
+            </div>
+          </label>
+
+          <label>
+            <span>Custom Extra Tip</span>
+            <input id="customTip" type="number" min="0" placeholder="Optional">
+          </label>
+        </div>
+
+        <div class="live-total">
+          <strong>Current Total</strong>
+          <b id="detailsTotal">$0</b>
+        </div>
+
+        <button class="btn btn-primary" id="toPay" type="button">Continue to Pay</button>
+        <button class="back" id="backRequests" type="button">← Back to requests</button>
+      </div>
+    </section>
+
+    <section class="section hidden" id="payScreen">
+      <div class="card">
+        <span class="status-pill open">Checkout</span>
+        <h2 style="margin-top:12px;">Review & Pay</h2>
+        <p class="helper">Send the exact total below. Put the request code in the payment note.</p>
+
+        <div class="checkout">
+          <div id="summaryLines"></div>
+
+          <div class="total-line">
+            <span>Total</span>
+            <b id="payTotal">$0</b>
+          </div>
+
+          <div class="code">
+            <span>Payment Note</span>
+            <strong id="paymentNote">REQ-00000</strong>
+          </div>
+
+          <div class="copy-grid">
+            <button id="copyNote" type="button">Copy Note</button>
+            <button id="copyAmount" type="button">Copy Amount</button>
+          </div>
+          <div class="status" id="copyStatus"></div>
+        </div>
+
+        <a class="btn venmo" id="venmoPay" href="#">Pay with Venmo</a>
+        <a class="btn cash" id="cashPay" href="#">Pay with Cash App</a>
+
+        <div class="warning">
+          Payment supports the artist and sends the request. The artist chooses what they play based on timing, setlist, and venue rules.
+        </div>
+
+        <div class="confirm hidden" id="confirmationBox">
+          Request submitted locally for demo. In the real app, this would save to your database as pending payment, then update after the Cash App/Venmo confirmation email is parsed.
+        </div>
+
+        <button class="btn btn-secondary" id="fakeSubmit" type="button">Demo: Add to Fan Requests Tonight</button>
+
+        <details class="payload">
+          <summary>Database payload preview</summary>
+          <pre id="payload"></pre>
+        </details>
+
+        <button class="back" id="backDetails" type="button">← Edit request</button>
+      </div>
+    </section>
+
+    <section class="section" id="fanRequests">
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Fan Requests Tonight</h2>
+            <p class="helper">This is only a request log. It does not force what the artist plays next.</p>
+          </div>
+        </div>
+
+        <div class="request-list" id="fanRequestList">
+          <div class="request-card">
+            <div class="request-top">
+              <div>
+                <strong>Tennessee Whiskey</strong>
+                <small>Song request from Sarah</small>
+              </div>
+              <div class="request-amount">$20</div>
+            </div>
+            <div class="request-meta">
+              <span class="mini-pill paid">Paid</span>
+              <span class="mini-pill">Song Request</span>
+              <span class="mini-pill">REQ-18422</span>
+            </div>
+          </div>
+
+          <div class="request-card">
+            <div class="request-top">
+              <div>
+                <strong>Birthday shoutout for Ashley</strong>
+                <small>Shoutout from Table 8</small>
+              </div>
+              <div class="request-amount">$10</div>
+            </div>
+            <div class="request-meta">
+              <span class="mini-pill pending">Pending</span>
+              <span class="mini-pill">Shoutout</span>
+              <span class="mini-pill">REQ-44291</span>
+            </div>
+          </div>
+
+          <div class="request-card">
+            <div class="request-top">
+              <div>
+                <strong>Free Bird</strong>
+                <small>Crowdfunded song contribution</small>
+              </div>
+              <div class="request-amount">$50</div>
+            </div>
+            <div class="song-mini-bar"><div class="song-mini-fill" style="width:50%;"></div></div>
+            <div class="request-meta">
+              <span class="mini-pill paid">Paid</span>
+              <span class="mini-pill">Crowdfund</span>
+              <span class="mini-pill">$50 / $100</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="shows">
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Upcoming Shows</h2>
+            <p class="helper">Shows can feed into Gulf Coast Radar and artist calendars.</p>
+          </div>
+        </div>
+
+        <div class="event-list">
+          <div class="event">
+            <div class="date-box"><span>JUN</span><b>25</b></div>
+            <div class="event-content">
+              <strong>The Wharf Afterparty</strong>
+              <small>Orange Beach, AL • 7:00 PM - 10:00 PM</small>
+            </div>
+            <button class="mini-btn" type="button" data-jump="requests">Request</button>
+          </div>
+
+          <div class="event">
+            <div class="date-box"><span>JUN</span><b>28</b></div>
+            <div class="event-content">
+              <strong>Flora-Bama Acoustic Set</strong>
+              <small>Perdido Key, FL • 6:00 PM - 9:00 PM</small>
+            </div>
+            <button class="mini-btn" type="button" data-jump="requests">Request</button>
+          </div>
+
+          <div class="event">
+            <div class="date-box"><span>JUL</span><b>03</b></div>
+            <div class="event-content">
+              <strong>Beach House Kitchen & Cocktails</strong>
+              <small>Gulf Shores, AL • 5:30 PM - 8:30 PM</small>
+            </div>
+            <button class="mini-btn" type="button" data-jump="requests">Request</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="links">
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Follow Jake</h2>
+            <p class="helper">Socials, music, and SMS updates.</p>
+          </div>
+        </div>
+
+        <div class="link-list">
+          <div class="link-card">
+            <div>
+              <strong>Follow for Show Updates</strong>
+              <small>Fans can opt into SMS alerts for future shows.</small>
+            </div>
+            <button class="mini-btn" type="button">Follow</button>
+          </div>
+
+          <div class="link-card">
+            <div>
+              <strong>Instagram</strong>
+              <small>@jakemillerlive</small>
+            </div>
+            <a class="mini-btn" href="#">Open</a>
+          </div>
+
+          <div class="link-card">
+            <div>
+              <strong>Spotify / Music</strong>
+              <small>Original songs and recordings.</small>
+            </div>
+            <a class="mini-btn" href="#">Listen</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="booking">
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Book Jake</h2>
+            <p class="helper">For venues, restaurants, private parties, and events.</p>
+          </div>
+        </div>
+
+        <label>
+          <span>Your Name / Venue</span>
+          <input placeholder="Venue or contact name">
+        </label>
+        <label>
+          <span>Phone or Email</span>
+          <input placeholder="booking@example.com">
+        </label>
+        <label>
+          <span>Event Date</span>
+          <input type="date">
+        </label>
+        <label>
+          <span>Message</span>
+          <textarea placeholder="Tell Jake about the event, location, budget, and time."></textarea>
+        </label>
+        <button class="btn btn-primary" type="button">Send Booking Request</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="sticky">
+    <div>
+      <span>Current Total</span>
+      <b id="stickyTotal">$0</b>
+    </div>
+    <button class="btn btn-primary" id="stickyCheckout" type="button">Checkout</button>
+  </div>
+
+  <script>
+    const artist = {
+      id: "artist_123",
+      name: "Jake Miller",
+      venmoHandle: "ArtistVenmo",
+      cashTag: "ArtistCashTag",
+      shoutoutPrice: 10,
+      customSongPrice: 30,
+      songs: [
+        { id: "song_001", title: "Tennessee Whiskey", artist: "Chris Stapleton", price: 20, note: "Popular country request" },
+        { id: "song_002", title: "Sweet Home Alabama", artist: "Lynyrd Skynyrd", price: 25, note: "Crowd favorite" },
+        { id: "song_003", title: "Wagon Wheel", artist: "Old Crow Medicine Show", price: 20, note: "Sing-along request" },
+        { id: "song_004", title: "Free Bird", artist: "Lynyrd Skynyrd", price: 50, note: "Premium long-song request" }
+      ]
+    };
+
+    const state = {
+      action: null,
+      selectedSongId: null,
+      customSong: false,
+      addShoutout: false,
+      tip: 0,
+      requestCode: "REQ-" + Math.floor(10000 + Math.random() * 90000)
+    };
+
+    const $ = id => document.getElementById(id);
+    const money = n => "$" + Number(n || 0).toFixed(0);
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, ch => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      }[ch]));
+    }
+
+    function selectedSong() {
+      return artist.songs.find(s => s.id === state.selectedSongId) || null;
+    }
+
+    function songName() {
+      if (state.customSong) return $("customSongName").value.trim() || "Custom Song Request";
+      return selectedSong()?.title || "Song Request";
+    }
+
+    function songPrice() {
+      if (state.customSong) return artist.customSongPrice;
+      return selectedSong()?.price || 0;
+    }
+
+    function jumpTo(id) {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.querySelectorAll(".quick-nav button").forEach(t => t.classList.toggle("active", t.dataset.jump === id));
+    }
+
+    document.querySelectorAll("[data-jump]").forEach(el => {
+      el.addEventListener("click", () => jumpTo(el.dataset.jump));
+    });
+
+    function setActiveAction(action) {
+      document.querySelectorAll(".action").forEach(btn => btn.classList.remove("active"));
+      if (action === "song") $("songAction").classList.add("active");
+      else document.querySelector(`[data-action="${action}"]`)?.classList.add("active");
+    }
+
+    function renderSongs() {
+      const list = $("songList");
+      list.innerHTML = "";
+      artist.songs.forEach(song => {
+        const button = document.createElement("button");
+        button.className = "song";
+        button.type = "button";
+        button.dataset.songId = song.id;
+        button.innerHTML = `
+          <span>
+            <strong>${escapeHtml(song.title)}</strong>
+            <small>${escapeHtml(song.artist)} · ${escapeHtml(song.note)}</small>
+          </span>
+          <b>${money(song.price)}</b>
+        `;
+        button.addEventListener("click", () => {
+          state.action = "song";
+          state.selectedSongId = song.id;
+          state.customSong = false;
+          setActiveAction("song");
+          document.querySelectorAll(".song").forEach(s => s.classList.remove("active"));
+          button.classList.add("active");
+          showDetails();
+        });
+        list.appendChild(button);
+      });
+    }
+
+    function showDetails() {
+      setActiveAction(state.action);
+
+      $("detailsScreen").classList.remove("hidden");
+      $("payScreen").classList.add("hidden");
+
+      $("selectedSongBox").classList.add("hidden");
+      $("customSongField").classList.add("hidden");
+      $("shoutoutField").classList.add("hidden");
+      $("tipOnlyField").classList.add("hidden");
+      $("goalField").classList.add("hidden");
+      $("crowdfundFields").classList.add("hidden");
+      $("addons").classList.remove("hidden");
+
+      const map = {
+        song: ["Song Request", "Confirm the selected song, add your info, then add a shoutout or tip if you want."],
+        shoutout: ["Shoutout", "Type the message you want the artist to say. You can add an extra tip before paying."],
+        tip: ["Tip the Artist", "Send support directly. No request needed."],
+        goal: ["Support Tonight’s Goal", "Add money toward the artist’s public nightly goal."],
+        crowdfund: ["Fund a Song", "Help fund a crowd-supported song request."]
+      };
+
+      $("detailsTitle").textContent = map[state.action]?.[0] || "Request Details";
+      $("detailsHelper").textContent = map[state.action]?.[1] || "Fill out the details below.";
+
+      if (state.action === "song") {
+        $("selectedSongBox").classList.remove("hidden");
+        $("selectedSongText").textContent = `${songName()} — ${money(songPrice())}`;
+        if (state.customSong) $("customSongField").classList.remove("hidden");
+      }
+
+      if (state.action === "shoutout") $("shoutoutField").classList.remove("hidden");
+      if (state.action === "tip") {
+        $("tipOnlyField").classList.remove("hidden");
+        $("addons").classList.add("hidden");
+      }
+      if (state.action === "goal") $("goalField").classList.remove("hidden");
+      if (state.action === "crowdfund") $("crowdfundFields").classList.remove("hidden");
+
+      $("detailsScreen").scrollIntoView({ behavior: "smooth", block: "start" });
+      updateAll();
+    }
+
+    function calculate() {
+      const lines = [];
+      let total = 0;
+
+      if (state.action === "song") {
+        const price = songPrice();
+        total += price;
+        lines.push({ label: "Song: " + songName(), amount: price, meta: state.customSong ? "Custom request" : selectedSong()?.artist });
+      }
+
+      if (state.action === "shoutout") {
+        total += artist.shoutoutPrice;
+        lines.push({ label: "Shoutout", amount: artist.shoutoutPrice, meta: $("shoutoutText").value || "Message added by fan" });
+      }
+
+      if (state.action === "tip") {
+        const amount = Number($("tipOnlyAmount").value || 0);
+        total += amount;
+        lines.push({ label: "Tip", amount, meta: "Direct support" });
+      }
+
+      if (state.action === "goal") {
+        const amount = Number($("goalAmount").value || 0);
+        total += amount;
+        lines.push({ label: "Tonight’s Road Fund", amount, meta: "Goal support" });
+      }
+
+      if (state.action === "crowdfund") {
+        const amount = Number($("crowdfundAmount").value || 0);
+        total += amount;
+        lines.push({ label: "Fund Song: " + $("crowdfundSong").value.split(" — ")[0], amount, meta: "Crowdfunded song contribution" });
+      }
+
+      if (state.addShoutout && state.action !== "shoutout" && state.action !== "tip") {
+        total += artist.shoutoutPrice;
+        lines.push({ label: "Added Shoutout", amount: artist.shoutoutPrice, meta: $("extraShoutoutText").value || "Extra message" });
+      }
+
+      const customTip = Number($("customTip").value || 0);
+      const tip = customTip > 0 ? customTip : state.tip;
+      if (tip > 0 && state.action !== "tip") {
+        total += tip;
+        lines.push({ label: "Extra Tip", amount: tip, meta: "Extra support" });
+      }
+
+      return { total, lines };
+    }
+
+    function note() {
+      const parts = [state.requestCode];
+      if (state.action === "song") parts.push("Song");
+      if (state.action === "shoutout") parts.push("Shoutout");
+      if (state.action === "tip") parts.push("Tip");
+      if (state.action === "goal") parts.push("RoadFund");
+      if (state.action === "crowdfund") parts.push("CrowdfundSong");
+      if (state.addShoutout) parts.push("AddShoutout");
+      return parts.join(" ");
+    }
+
+    function payload(calc) {
+      return {
+        request_code: state.requestCode,
+        artist_id: artist.id,
+        artist_name: artist.name,
+        fan_name: $("fanName").value,
+        fan_contact: $("fanContact").value,
+        selected_action: state.action,
+        selected_song_id: selectedSong()?.id || null,
+        selected_song_title: state.customSong ? $("customSongName").value : selectedSong()?.title || null,
+        custom_song: state.customSong,
+        add_shoutout: state.addShoutout,
+        total_expected: calc.total,
+        payment_note: note(),
+        status: "pending_payment",
+        line_items: calc.lines
+      };
+    }
+
+    function updateAll() {
+      if (state.action === "song" && !$("selectedSongBox").classList.contains("hidden")) {
+        $("selectedSongText").textContent = `${songName()} — ${money(songPrice())}`;
+      }
+
+      const calc = calculate();
+
+      $("detailsTotal").textContent = money(calc.total);
+      $("stickyTotal").textContent = money(calc.total);
+      $("payTotal").textContent = money(calc.total);
+      $("paymentNote").textContent = note();
+
+      const summary = $("summaryLines");
+      summary.innerHTML = "";
+      if (!calc.lines.length) {
+        summary.innerHTML = `<div class="summary"><span>No amount selected yet</span><b>$0</b></div>`;
+      } else {
+        calc.lines.forEach(item => {
+          const row = document.createElement("div");
+          row.className = "summary";
+          row.innerHTML = `
+            <span>${escapeHtml(item.label)}${item.meta ? `<small>${escapeHtml(item.meta)}</small>` : ""}</span>
+            <b>${money(item.amount)}</b>
+          `;
+          summary.appendChild(row);
+        });
+      }
+
+      $("venmoPay").href = `venmo://paycharge?txn=pay&recipients=${encodeURIComponent(artist.venmoHandle)}&amount=${encodeURIComponent(calc.total.toFixed(2))}&note=${encodeURIComponent(note())}`;
+      $("cashPay").href = `https://cash.app/$${encodeURIComponent(artist.cashTag)}/${encodeURIComponent(calc.total.toFixed(2))}`;
+      $("payload").textContent = JSON.stringify(payload(calc), null, 2);
+    }
+
+    function addRequestToList() {
+      const calc = calculate();
+      if (!state.action || calc.total <= 0) {
+        $("copyStatus").textContent = "Choose something and set an amount first.";
+        setTimeout(() => $("copyStatus").textContent = "", 2200);
+        return;
+      }
+
+      const label = calc.lines[0]?.label || "Fan Request";
+      const meta = calc.lines[0]?.meta || "New request";
+      const list = $("fanRequestList");
+
+      const card = document.createElement("div");
+      card.className = "request-card";
+      card.innerHTML = `
+        <div class="request-top">
+          <div>
+            <strong>${escapeHtml(label.replace("Song: ", ""))}</strong>
+            <small>${escapeHtml(meta)}${$("fanName").value ? " from " + escapeHtml($("fanName").value) : ""}</small>
+          </div>
+          <div class="request-amount">${money(calc.total)}</div>
+        </div>
+        <div class="request-meta">
+          <span class="mini-pill pending">Pending Email Match</span>
+          <span class="mini-pill">${escapeHtml(state.action || "request")}</span>
+          <span class="mini-pill">${escapeHtml(state.requestCode)}</span>
+        </div>
+      `;
+
+      list.prepend(card);
+      $("confirmationBox").classList.remove("hidden");
+      jumpTo("fanRequests");
+    }
+
+    $("songAction").addEventListener("click", () => {
+      state.action = "song";
+      setActiveAction("song");
+      $("songPanel").classList.toggle("hidden");
+      updateAll();
+    });
+
+    $("customSongBtn").addEventListener("click", () => {
+      state.action = "song";
+      state.selectedSongId = null;
+      state.customSong = true;
+      setActiveAction("song");
+      document.querySelectorAll(".song").forEach(s => s.classList.remove("active"));
+      $("customSongBtn").classList.add("active");
+      showDetails();
+    });
+
+    document.querySelectorAll("[data-action]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state.action = btn.dataset.action;
+        state.selectedSongId = null;
+        state.customSong = false;
+        $("songPanel").classList.add("hidden");
+        showDetails();
+      });
+    });
+
+    $("changeSongBtn").addEventListener("click", () => {
+      $("detailsScreen").classList.add("hidden");
+      $("payScreen").classList.add("hidden");
+      $("songPanel").classList.remove("hidden");
+      jumpTo("requests");
+      setActiveAction("song");
+    });
+
+    $("addonShoutout").addEventListener("click", () => {
+      state.addShoutout = !state.addShoutout;
+      $("addonShoutout").classList.toggle("active", state.addShoutout);
+      $("extraShoutoutField").classList.toggle("hidden", !state.addShoutout);
+      updateAll();
+    });
+
+    document.querySelectorAll(".pill").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        state.tip = Number(btn.dataset.tip || 0);
+        $("customTip").value = "";
+        updateAll();
+      });
+    });
+
+    ["fanName","fanContact","customSongName","shoutoutText","tipOnlyAmount","goalAmount","crowdfundSong","crowdfundAmount","extraShoutoutText","customTip"].forEach(id => {
+      $(id).addEventListener("input", updateAll);
+      $(id).addEventListener("change", updateAll);
+    });
+
+    $("toPay").addEventListener("click", () => {
+      updateAll();
+      $("payScreen").classList.remove("hidden");
+      $("payScreen").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    $("stickyCheckout").addEventListener("click", () => {
+      if (!state.action) {
+        jumpTo("requests");
+        return;
+      }
+      updateAll();
+      $("payScreen").classList.remove("hidden");
+      $("payScreen").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    $("backRequests").addEventListener("click", () => {
+      $("detailsScreen").classList.add("hidden");
+      jumpTo("requests");
+    });
+
+    $("backDetails").addEventListener("click", () => {
+      $("payScreen").classList.add("hidden");
+      $("detailsScreen").classList.remove("hidden");
+      $("detailsScreen").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    $("fakeSubmit").addEventListener("click", addRequestToList);
+
+    function copyText(text, msg) {
+      navigator.clipboard?.writeText(text).then(() => {
+        $("copyStatus").textContent = msg;
+        setTimeout(() => $("copyStatus").textContent = "", 2200);
+      }).catch(() => {
+        $("copyStatus").textContent = "Copy failed. Press and hold to copy.";
+        setTimeout(() => $("copyStatus").textContent = "", 2200);
+      });
+    }
+
+    $("copyNote").addEventListener("click", () => copyText(note(), "Payment note copied."));
+    $("copyAmount").addEventListener("click", () => copyText(calculate().total.toFixed(2), "Amount copied."));
+
+    ["venmoPay", "cashPay"].forEach(id => {
+      $(id).addEventListener("click", e => {
+        if (calculate().total <= 0) {
+          e.preventDefault();
+          $("copyStatus").textContent = "Choose an amount before paying.";
+          setTimeout(() => $("copyStatus").textContent = "", 2200);
+        }
+      });
+    });
+
+    renderSongs();
+    updateAll();
+  </script>
+</body>
+</html>

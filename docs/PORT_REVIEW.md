@@ -93,6 +93,70 @@ database.
 
 ---
 
+---
+
+## The artist module — what's done and what's left
+
+Checked against the live `cyber check` Supabase project, not against the design
+docs. Most of the module already exists: `artist_profiles` (390 rows),
+`artists` (390), `songs`, `song_requests`, `shoutouts`, `artist_goals`,
+`artist_goal_contributions`, `song_cooperatives`, `tip_links`, `artist_shows`,
+`artist_follows`, `artist_booking_requests`, `artist_qr_codes`,
+`payment_confirmations`, `email_parser_log`.
+
+The fan-facing pages exist too, in **`gcr-unified`**: `/artist/:slug`
+(`ArtistProfile.jsx` — about, songs, events, booking, reviews, gallery) and
+`/artist/:slug/live` (`ArtistLive.jsx` — the money layer: request, shoutout,
+tip, with a live queue).
+
+**The gap is pricing.** Nothing in the database says what a song costs, what a
+shoutout costs, or what the tip buttons should be. `songs` has no price column.
+`artist_profiles` has one `default_min_request_amount`, and `ArtistLive.jsx`
+turns it into buttons with `[min, min*2, min*4, min*10]` — computed in
+JavaScript, unchangeable by the artist. Shoutout tiers and crowdfund amounts
+exist only in the HTML mockups.
+
+`sql/artist_module.sql` (never run, like the others) closes it:
+
+- `songs.price`, `original_artist`, `note`, `is_available`, `is_featured`
+- `artist_profiles.custom_song_price`, `shoutout_price`, `min_tip`,
+  `requests_open`, `crowdfund_enabled`, `request_note`, `payment_instructions`
+- **`artist_price_tiers`** — one table behind every money button, keyed by
+  `kind` (request / shoutout / tip / crowdfund / addon). A new kind of paid
+  thing is a row, not a migration.
+- `tip_links` gains `label`, `sort_order`, `active` and becomes *the* payment
+  method table
+- `entity_slug` added to `song_cooperatives`, `artist_goal_contributions` and
+  `artist_qr_codes`, with backfills — without it the dashboard can't see them
+  and RLS can't scope them
+- owner-scoped RLS split two ways: the artist owns their catalogue and prices;
+  fan-submitted rows are insert-by-anyone, manage-by-owner, with **no public
+  SELECT** because they carry `fan_phone`, `tourist_phone` and
+  `contributor_phone`
+
+### Still to do on the artist side
+
+1. **`artist_profiles` has four columns for two handles** — `cashtag`, `venmo`,
+   `cashapp_handle`, `venmo_handle`. Nothing says which wins, and a page reading
+   the wrong pair silently shows no payment button. The SQL backfills whichever
+   is populated into `tip_links` and leaves the old columns alone; pick a
+   winner and drop the rest once the fan pages read `tip_links`.
+2. **`gcr-unified` still hardcodes its amounts.** `ArtistLive.jsx` needs to read
+   `artist_price_tiers` and `tip_links` instead of computing multiples of
+   `default_min`. That's the change that makes the prices the artist sets
+   actually reach fans — this repo can't do it alone.
+3. **Two crowdfund models coexist** — `artist_goals` (goal_type, target_amount)
+   and `song_cooperatives` (song_title, target_amount). Both are rendered here,
+   but one of them should win before either gets real data.
+4. **No live-status control.** The mockups show "Live Now / On Break / Requests
+   Closed"; `requests_open` covers the switch, but nothing surfaces it yet.
+5. **The payment parser is unbuilt.** `payment_confirmations` and
+   `email_parser_log` exist and `song_requests.req_code` is the join key, but
+   nothing writes the match. Until then every request stays `pending_payment`
+   and the artist confirms by eye.
+
+---
+
 ## Still open — fix before anyone signs in
 
 ### `entity_owners.user_id` now holds three different kinds of id

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Sideways | Live Fan Hub</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --bg2:#121933;
+      --card:#171f3d;
+      --line:rgba(255,255,255,.12);
+      --text:#f4f7ff;
+      --muted:#b9c4ea;
+      --accent:#7c9cff;
+      --accent2:#31d0aa;
+      --danger:#ff6f8f;
+      --gold:#ffcc66;
+      --shadow:0 12px 40px rgba(0,0,0,.35);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:linear-gradient(180deg,var(--bg),#090d18 70%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+    a{color:inherit}
+    .wrap{max-width:540px;margin:0 auto;padding:18px 16px 90px;}
+    .hero{background:linear-gradient(180deg,rgba(124,156,255,.18),rgba(49,208,170,.12)),var(--bg2);border:1px solid var(--line);border-radius:28px;padding:20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .hero::after{content:"";position:absolute;right:-40px;top:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(124,156,255,.34),transparent 70%)}
+    .topline{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .badge{display:inline-flex;align-items:center;gap:8px;background:rgba(49,208,170,.14);color:#dffcf4;border:1px solid rgba(49,208,170,.3);padding:8px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--accent2);box-shadow:0 0 0 4px rgba(49,208,170,.15)}
+    .cover{display:flex;gap:16px;align-items:center;margin-top:14px}
+    .art{width:86px;height:86px;border-radius:22px;background:linear-gradient(135deg,#23315e,#17213f);display:flex;align-items:center;justify-content:center;border:1px solid var(--line);font-weight:800;font-size:22px;letter-spacing:.08em}
+    h1{margin:0;font-size:32px;line-height:1.05}
+    .sub{margin-top:8px;color:var(--muted);font-size:14px;line-height:1.45}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+    .stat{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:18px;padding:12px;text-align:center}
+    .stat b{display:block;font-size:18px}
+    .stat span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+    .now-card,.queue-card,.next-card,.about-card{margin-top:16px;background:var(--bg2);border:1px solid var(--line);border-radius:24px;padding:16px;box-shadow:var(--shadow)}
+    .section-title{font-size:15px;font-weight:800;letter-spacing:.02em;margin:0 0 10px}
+    .mini{color:var(--muted);font-size:13px;line-height:1.45}
+    .queue-list,.show-list{display:grid;gap:10px}
+    .queue-item,.show-item{background:rgba(255,255,255,.04);border:1px solid var(--line);padding:12px;border-radius:16px}
+    .queue-item strong,.show-item strong{display:block;font-size:15px}
+    .queue-item span,.show-item span{display:block;color:var(--muted);font-size:13px;margin-top:4px}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+    .action{appearance:none;border:none;text-align:left;background:linear-gradient(180deg,#1b2549,#141d3b);color:var(--text);padding:16px;border-radius:22px;border:1px solid var(--line);box-shadow:var(--shadow);cursor:pointer;min-height:96px;transition:transform .15s ease, border-color .15s ease}
+    .action:hover,.action:focus{transform:translateY(-2px);border-color:rgba(124,156,255,.45);outline:none}
+    .action .icon{font-size:22px;display:block;margin-bottom:8px}
+    .action strong{display:block;font-size:15px}
+    .action small{display:block;color:var(--muted);font-size:12px;line-height:1.35;margin-top:6px}
+    .socials{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .socials a,.chip{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:13px;text-decoration:none;color:var(--text)}
+    .chip{margin:5px 8px 0 0}
+    .footer-note{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.45;text-align:center}
+
+    .stickybar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px 16px;background:linear-gradient(180deg,rgba(9,13,24,0),rgba(9,13,24,.92) 30%,rgba(9,13,24,.98));backdrop-filter:blur(8px)}
+    .stickyinner{max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .stickyinner button{appearance:none;border:none;background:linear-gradient(180deg,#7c9cff,#5c7fff);color:white;font-weight:800;padding:13px 10px;border-radius:16px;box-shadow:var(--shadow);cursor:pointer}
+    .stickyinner button:nth-child(2){background:linear-gradient(180deg,#31d0aa,#1fb28f)}
+    .stickyinner button:nth-child(3){background:linear-gradient(180deg,#ff7b98,#f65d7e)}
+
+    .modal{position:fixed;inset:0;background:rgba(5,8,16,.74);display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:1000}
+    .modal.open{display:flex}
+    .modal-card{width:100%;max-width:540px;max-height:92vh;overflow:auto;background:linear-gradient(180deg,#151d3a,#0f1630);border:1px solid var(--line);border-radius:28px 28px 22px 22px;box-shadow:var(--shadow);padding:18px;position:relative}
+    .grab{width:56px;height:6px;border-radius:999px;background:rgba(255,255,255,.2);margin:0 auto 14px}
+    .close{position:absolute;right:14px;top:14px;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.08);color:white;font-size:22px;cursor:pointer}
+    .modal h2{margin:0 40px 6px 0;font-size:24px}
+    .modal p.lead{margin:0 0 16px;color:var(--muted);font-size:14px;line-height:1.45}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{display:block;font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#d9e4ff;margin:12px 0 8px}
+    input,select,textarea{width:100%;background:#0b1227;color:white;border:1px solid rgba(255,255,255,.11);border-radius:16px;padding:14px 14px;font:inherit}
+    textarea{min-height:110px;resize:vertical}
+    .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .btn{appearance:none;border:none;border-radius:16px;padding:14px 16px;font-weight:800;cursor:pointer}
+    .btn.primary{background:linear-gradient(180deg,#7c9cff,#5c7fff);color:#fff}
+    .btn.secondary{background:rgba(255,255,255,.08);color:#fff;border:1px solid var(--line)}
+    .quick{display:flex;gap:10px;flex-wrap:wrap}
+    .quick .pill{appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.05);color:white;padding:10px 14px;border-radius:999px;cursor:pointer;font-size:13px}
+    .pricegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .pricecard{background:rgba(255,255,255,.04);border:1px solid var(--line);padding:14px;border-radius:18px}
+    .pricecard strong{display:block}
+    .pricecard span{display:block;color:var(--muted);font-size:13px;margin-top:4px}
+    .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .kpi .box{background:rgba(255,255,255,.04);border:1px solid var(--line);padding:14px;border-radius:18px}
+    .box b{font-size:18px;display:block}
+    .box span{color:var(--muted);font-size:12px;display:block;margin-top:4px}
+    .list{display:grid;gap:10px}
+    .item{background:rgba(255,255,255,.04);border:1px solid var(--line);padding:12px;border-radius:16px}
+    .item strong{display:block}
+    .item small{display:block;color:var(--muted);margin-top:4px;line-height:1.4}
+    .notice{margin-top:14px;padding:12px 14px;background:rgba(255,204,102,.08);border:1px solid rgba(255,204,102,.24);border-radius:16px;color:#ffe4a8;font-size:13px;line-height:1.45}
+    @media (max-width:420px){
+      .actions,.stats,.row,.pricegrid,.kpi{grid-template-columns:1fr}
+      h1{font-size:28px}
+      .cover{align-items:flex-start}
+      .stickyinner{grid-template-columns:1fr 1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="topline">
+        <div class="badge"><span class="dot"></span> Live Now • Flora-Bama Tent Stage</div>
+        <div class="chip">Birmingham, Alabama</div>
+      </div>
+      <div class="cover">
+        <div class="art">GS</div>
+        <div>
+          <h1>Get Sideways</h1>
+          <div class="sub">High-energy 90s / 2000s pop-rock and party-country cover band known for sing-along crowds, big holiday shows, and major Southeast gigs.</div>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>Live</b><span>Taking Requests</span></div>
+        <div class="stat"><b>4</b><span>Core Members</span></div>
+        <div class="stat"><b>1 QR</b><span>Everything Fans Need</span></div>
+      </div>
+    </section>
+
+    <section class="now-card">
+      <h3 class="section-title">Tonight’s Show</h3>
+      <div class="mini">Scan, request a song, tip the band, buy a shoutout, join text alerts, or book the band — all from this one page. Every action opens a popup only.</div>
+      <div class="socials">
+        <span class="chip">🎸 90s / 2000s Rock</span>
+        <span class="chip">🤠 Party Country</span>
+        <span class="chip">🎉 Sing-Along Crowd</span>
+      </div>
+    </section>
+
+    <section class="actions" aria-label="Fan actions">
+      <button class="action" data-open="request"><span class="icon">🎵</span><strong>Request a Song</strong><small>Submit a request, dedication, or priority song with a reference code.</small></button>
+      <button class="action" data-open="tip"><span class="icon">💸</span><strong>Tip the Band</strong><small>Quick tip amounts with payment links and optional public message.</small></button>
+      <button class="action" data-open="shoutout"><span class="icon">📣</span><strong>Buy a Shoutout</strong><small>Birthday, bachelorette, anniversary, dedication, or sponsor mention.</small></button>
+      <button class="action" data-open="crowdfund"><span class="icon">🔥</span><strong>Crowdfund a Song</strong><small>Team up with the crowd to fund a high-demand song.</small></button>
+      <button class="action" data-open="shows"><span class="icon">📅</span><strong>Upcoming Shows</strong><small>See where the band is playing next and add it to your calendar.</small></button>
+      <button class="action" data-open="alerts"><span class="icon">📲</span><strong>Join Text Alerts</strong><small>Get notified when Get Sideways is playing near you.</small></button>
+      <button class="action" data-open="booking"><span class="icon">📝</span><strong>Book the Band</strong><small>Private events, bars, weddings, college shows, and festivals.</small></button>
+      <button class="action" data-open="socials"><span class="icon">🔗</span><strong>Social Links</strong><small>Instagram, Facebook, YouTube, and booking/agency links.</small></button>
+      <button class="action" data-open="epk"><span class="icon">🎬</span><strong>EPK / Press Kit</strong><small>Band bio, lineup, show style, and booking-ready highlights.</small></button>
+      <button class="action" data-open="dashboard"><span class="icon">🖥️</span><strong>Artist Dashboard</strong><small>Preview how the manager controls requests, payments, and live mode.</small></button>
+    </section>
+
+    <section class="queue-card">
+      <h3 class="section-title">Live Queue Preview</h3>
+      <div class="queue-list">
+        <div class="queue-item"><strong>Mr. Brightside</strong><span>Requested by Katie • Priority request • $20 matched</span></div>
+        <div class="queue-item"><strong>Sweet Caroline</strong><span>Birthday shoutout for Mark • $10 verified</span></div>
+        <div class="queue-item"><strong>Tennessee Whiskey</strong><span>Crowdfund goal • $18 / $25 raised</span></div>
+      </div>
+    </section>
+
+    <section class="next-card">
+      <h3 class="section-title">Next Shows</h3>
+      <div class="show-list">
+        <div class="show-item"><strong>Flora-Bama • Perdido Key, FL</strong><span>Holiday weekend show • Big crowd / high-energy sing-along set</span></div>
+        <div class="show-item"><strong>Auburn Gameday Weekend</strong><span>College crowd party set • Booking context / seasonal favorite</span></div>
+      </div>
+    </section>
+
+    <section class="about-card">
+      <h3 class="section-title">Band Snapshot</h3>
+      <div class="mini">Members: James Curtis (lead vocals, guitar, piano), Jeff Allen (bass, DJ, backing vocals), Nick Mitchell (lead guitar), Dave Lynam (drums, backing vocals). Repertoire spans Blink-182, Panic! At The Disco, Taylor Swift, Luke Combs, and more.</div>
+      <div class="socials">
+        <a href="https://musicgardenbands.com/general-bands/get-sideways.html" target="_blank" rel="noopener">Music Garden</a>
+        <a href="https://crescentmoonentertainment.com/get-sideways/" target="_blank" rel="noopener">Crescent Moon</a>
+        <a href="https://southeasternattractions.com/get-sideways/" target="_blank" rel="noopener">Southeastern Attractions</a>
+      </div>
+    </section>
+
+    <div class="footer-note">Popup-only fan experience. No extra pages for fan actions. Built to feel like an app, not a long website.</div>
+  </div>
+
+  <div class="stickybar">
+    <div class="stickyinner">
+      <button data-open="request">Request</button>
+      <button data-open="tip">Tip</button>
+      <button data-open="booking">Book</button>
+    </div>
+  </div>
+
+  <!-- Request Modal -->
+  <div class="modal" id="request">
+    <div class="modal-card">
+      <div class="grab"></div>
+      <button class="close" data-close>&times;</button>
+      <h2>Request a Song</h2>
+      <p class="lead">Submit a song request, dedication, or priority request. A reference code helps match payment to the request.</p>
+      <div class="quick">
+        <button class="pill">Mr. Brightside</button>
+        <button class="pill">All The Small Things</button>
+        <button class="pill">Sweet Caroline</button>
+        <button class="pill">Tennessee Whiskey</button>
+      </div>
+      <div class="row">
+        <div>
+          <label>Your Name</label><input placeholder="Katie" />
+        </div>
+        <div>
+          <label>Phone (optional)</label><input placeholder="(555) 555-5555" />
+        </div>
+      </div>
+      <label>Song Title</label><input placeholder="Mr. Brightside" />
+      <label>Original Artist</label><input placeholder="The Killers" />
+      <label>Request Type</label>
+      <select>
+        <option>Free Request</option>
+        <option>Priority Request</option>
+        <option>Dedication</option>
+        <option>Guaranteed (if approved)</option>
+      </select>
+      <label>Message / Dedication</label><textarea placeholder="Play this for Sarah!"></textarea>
+      <div class="notice"><strong>Reference Code:</strong> GS-8421 — put this in the Venmo/Cash App note so the payment parser can match your request.</div>
+      <div class="btnrow">
+        <button class="btn primary">Submit Request</button>
+        <button class="btn secondary">Pay with Venmo</button>
+        <button class="btn secondary">Pay with Cash App</button>
+      </div>
+      <div class="notice">Requests are reviewed by the artist and are not guaranteed to be played.</div>
+    </div>
+  </div>
+
+  <!-- Tip Modal -->
+  <div class="modal" id="tip">
+    <div class="modal-card">
+      <div class="grab"></div>
+      <button class="close" data-close>&times;</button>
+      <h2>Tip the Band</h2>
+      <p class="lead">Fast tip flow. Ideal for one-thumb mobile use during a live show.</p>
+      <div class="pricegrid">
+        <div class="pricecard"><strong>$5</strong><span>Quick tip</span></div>
+        <div class="pricecard"><strong>$10</strong><span>Show some love</span></div>
+        <div class="pricecard"><strong>$20</strong><span>Buy the band a round</span></div>
+        <div class="pricecard"><strong>$50</strong><span>Keep the party going</span></div>
+      </div>
+      <label>Tip Message (optional)</label><textarea placeholder="Y’all are killing it tonight."></textarea>
+      <div class="row">
+        <div>
+          <label>Display Name</label><input placeholder="Matt" />
+        </div>
+        <div>
+          <label>Show publicly?</label>
+          <select><option>Yes</option><option>No / Anonymous</option></select>
+        </div>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary">Pay with Venmo</button>
+        <button class="btn secondary">Pay with Cash App</button>
+        <button class="btn secondary">Pay with Card</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shoutout Modal -->
+  <div class="modal" id="shoutout">
+    <div class="modal-card">
+      <div class="grab"></div>
+      <button class="close" data-close>&times;</button>
+      <h2>Buy a Shoutout</h2>
+      <p class="lead">Monetize the crowd with fast, fun stage shoutouts.</p>
+      <div class="pricegrid">
+        <div class="pricecard"><strong>Birthday • $10</strong><span>Personal birthday shoutout</span></div>
+        <div class="pricecard"><strong>Bachelorette • $15</strong><span>Group celebration moment</span></div>
+        <div class="pricecard"><strong>Dedication • $15</strong><span>Personal message on stage</span></div>
+        <div class="pricecard"><strong>Sponsor • $25+</strong><span>Business / crowd sponsor mention</span></div>
+      </div>
+      <label>Shoutout Type</label>
+      <select>
+        <option>Birthday</option>
+        <option>Bachelorette</option>
+        <option>Anniversary</option>
+        <option>Dedication</option>
+        <option>Business Sponsor</option>
+      </select>
+      <label>Who is it for?</label><input placeholder="Sarah" />
+      <label>What should the band say?</label><textarea placeholder="Happy 30th birthday Sarah from the girls! We love you."></textarea>
+      <div class="btnrow">
+        <button class="btn primary">Continue to Pay</button>
+        <button class="btn secondary">Use Reference Code</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Crowdfund Modal -->
+  <div class="modal" id="crowdfund">
+    <div class="modal-card">
+      <div class="grab"></div>
+      <button class="close" data-close>&times;</button>
+      <h2>Crowdfund a Song</h2>
+      <p class="lead">Let multiple fans contribute toward a crowd-favorite song.</p>
+      <div class="item"><strong>Mr. Brightside</strong><small>$18 raised of $25 goal • 4 contributors • Open now</small></div>
+      <div class="quick" style="margin-top:12px">
+        <button class="pill">$1</button>
+        <button class="pill">$5</button>
+        <button class="pill">$10</button>
+        <button class="pill">Custom</button>
+      </div>
+      <label>Add a note (optional)</label><textarea placeholder="Let’s get this one played next."></textarea>
+      <div class="btnrow">
+        <button class="btn primary">Contribute Now</button>
+        <button class="btn secondary">Choose a Different Song</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shows Modal -->
+  <div class="modal" id="shows">
+    <div class="modal-card">
+      <div class="grab"></div>
+      <button class="close" data-close>&times;</button>
+      <h2>Upcoming Shows</h2>
+      <p class="lead">Public show schedule. Venue/business data stays separate and is linked by venue ID.</p>
+      <div class="list">
+        <div class="item"><strong>Flora-Bama • Perdido Key, FL</strong><small>Major holiday crowd • add to calendar • get directions • link to venue profile</small></div>
+        <div class="item"><strong>Auburn Gameday Weekend</strong><small>College crowd event • party-country / 2000s sing-along focus</small></div>
+        <div class="item"><strong>Private Events & Festivals</strong><small>Available for private parties, bars, weddings, and corporate events</small></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary">Add to Calendar</button>
+        <button class="btn secondary">Get Directions</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerts Modal -->
+  <div class="modal" id="alerts">
+    <div class="modal-card">
+      <div class="grab"></div>
+      <button class="close" data-close>&times;</button>
+      <h2>Join Text Alerts</h2>
+      <p class="lead">Capture fans so the band can notify them about future shows by city or region.</p>
+      <div class="row">
+        <div><label>Name</label><input placeholder="Matthew" /></div>
+        <div><label>Phone</label><input placeholder="(555) 555-5555" /></div>
+      </div>
+      <label>Favorite City</label>
+      <select>
+        <option>Orange Beach / Perdido Key</option>
+        <option>Gulf Shores</option>
+        <option>Birmingham</option>
+        <option>Auburn</option>
+      </select>
+      <label>Email (optional)</label><input placeholder="you@example.com" />
+      <div class="notice">By joining, you agree to receive show alerts and updates. Reply STOP to opt out.</div>
+      <div class="btnrow"><button class="btn primary">Join Alerts</button></div>
+    </div>
+  </div>
+
+  <!-- Booking Modal -->
+  <div class="modal" id="booking">
+    <div class="modal-card">
+      <div class="grab"></div>
+      <button class="close" data-close>&times;</button>
+      <h2>Book Get Sideways</h2>
+      <p class="lead">Bars, festivals, weddings, private parties, college events, and corporate shows.</p>
+      <div class="row">
+        <div><label>Name</label><input placeholder="Your Name" /></div>
+        <div><label>Phone</label><input placeholder="(555) 555-5555" /></div>
+      </div>
+      <div class="row">
+        <div><label>Email</label><input placeholder="you@example.com" /></div>
+        <div><label>Event Date</label><input placeholder="MM/DD/YYYY" /></div>
+      </div>
+      <div class="row">
+        <div><label>Event Type</label><select><option>Bar / Venue</option><option>Wedding</option><option>Private Party</option><option>Corporate</option><option>Festival</option></select></div>
+        <div><label>Budget Range</label><select><option>$1,000 - $2,500</option><option>$2,500 - $5,000</option><option>$5,000+</option></select></div>
+      </div>
+      <label>City / Venue</label><input placeholder="Auburn, AL / Venue Name" />
+      <label>Message</label><textarea placeholder="Tell us about your event."></textarea>
+      <div class="btnrow">
+        <button class="btn primary">Send Booking Inquiry</button>
+        <button class="btn secondary">Call Booking Contact</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Socials Modal -->
+  <div class="modal" id="socials">
+    <div class="modal-card">
+      <div class="grab"></div>
+      <button class="close" data-close>&times;</button>
+      <h2>Social Links</h2>
+      <p class="lead">Use this for discovery, but keep money actions above socials on the main page.</p>
+      <div class="list">
+        <div class="item"><strong>Instagram</strong><small>@getsidewaysband</small></div>
+        <div class="item"><strong>Facebook</strong><small>Get Sideways Facebook Page</small></div>
+        <div class="item"><strong>YouTube</strong><small>Live performance / promo clips</small></div>
+        <div class="item"><strong>Booking / Agency Links</strong><small>Music Garden, Crescent Moon, Southeastern Attractions</small></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EPK Modal -->
+  <div class="modal" id="epk">
+    <div class="modal-card">
+      <div class="grab"></div>
+      <button class="close" data-close>&times;</button>
+      <h2>EPK / Press Kit</h2>
+      <p class="lead">Booking-ready overview of the band.</p>
+      <div class="list">
+        <div class="item"><strong>About the Band</strong><small>Birmingham-based 90s/2000s pop-rock and country cover band with high-energy sing-along shows.</small></div>
+        <div class="item"><strong>Lineup</strong><small>James Curtis, Jeff Allen, Nick Mitchell, Dave Lynam.</small></div>
+        <div class="item"><strong>Show Style</strong><small>Big-crowd holiday shows, college-bar energy, party-country crossover, and nostalgic power pop-rock.</small></div>
+        <div class="item"><strong>Sample Repertoire</strong><small>Blink-182, Panic! At The Disco, Taylor Swift, Luke Combs, Neil Diamond, Chris Stapleton.</small></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary">Download EPK</button>
+        <button class="btn secondary">Send to Venue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Modal -->
+  <div class="modal" id="dashboard">
+    <div class="modal-card">
+      <div class="grab"></div>
+      <button class="close" data-close>&times;</button>
+      <h2>Artist Dashboard Preview</h2>
+      <p class="lead">Private side for the band or manager. This controls live mode, requests, payments, shows, and fan data.</p>
+      <div class="kpi">
+        <div class="box"><b>284</b><span>Tonight’s QR Scans</span></div>
+        <div class="box"><b>37</b><span>Song Requests</span></div>
+        <div class="box"><b>$186</b><span>Tips Collected</span></div>
+        <div class="box"><b>$95</b><span>Paid Shoutouts</span></div>
+      </div>
+      <div class="list" style="margin-top:14px">
+        <div class="item"><strong>Live Show Controls</strong><small>Live now • taking requests • taking tips • request cutoff time • current venue.</small></div>
+        <div class="item"><strong>Request Queue</strong><small>Approve, deny, mark played, move up, or refund as needed.</small></div>
+        <div class="item"><strong>Payment / Parser</strong><small>Match payment emails to reference codes like GS-8421 and verify requests.</small></div>
+        <div class="item"><strong>Booking Leads & Fan List</strong><small>Capture private-event inquiries and segment fans by city.</small></div>
+      </div>
+      <div class="notice">This dashboard stays separate from the public fan page. The public page is popup-only.</div>
+    </div>
+  </div>
+
+  <script>
+    const openButtons = document.querySelectorAll('[data-open]');
+    const modals = document.querySelectorAll('.modal');
+    const closeButtons = document.querySelectorAll('[data-close]');
+
+    function openModal(id){
+      const modal = document.getElementById(id);
+      if(modal){
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+    function closeModal(modal){
+      modal.classList.remove('open');
+      if(!document.querySelector('.modal.open')) document.body.style.overflow = '';
+    }
+
+    openButtons.forEach(btn=>btn.addEventListener('click', ()=>openModal(btn.dataset.open)));
+    closeButtons.forEach(btn=>btn.addEventListener('click', ()=>closeModal(btn.closest('.modal'))));
+    modals.forEach(modal=>{
+      modal.addEventListener('click', e=>{ if(e.target === modal) closeModal(modal); });
+    });
+    document.addEventListener('keydown', e=>{
+      if(e.key === 'Escape') document.querySelectorAll('.modal.open').forEach(closeModal);
+    });
+  </script>
+</body>
+</html>

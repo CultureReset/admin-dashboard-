@@ -17,6 +17,7 @@
 import { mergeEntitySources, discoverSections } from '../src/lib/discoverSections.js'
 import { tableFor, API_KEY_TO_TABLE } from '../src/lib/tableMap.js'
 import { buildCatalog } from '../src/lib/sectionCatalog.js'
+import { maskContact } from '../src/lib/artistModule.js'
 
 let failures = 0
 function check(label, condition, detail = '') {
@@ -175,6 +176,45 @@ check('entries carry the label they will have as a section',
     'Drinks')
 check('everything lands in a named group',
   catalog.every((g) => g.group && g.entries.length))
+
+console.log('\nArtist module')
+const artistLive = [
+  // exists today
+  'artist_profiles', 'songs', 'artist_goals', 'song_cooperatives', 'tip_links',
+  'artist_shows', 'artist_qr_codes',
+  // added by sql/artist_module.sql
+  'artist_price_tiers',
+  // fan-submitted — must never be offered as "add this"
+  'song_requests', 'shoutouts', 'artist_follows', 'artist_booking_requests',
+  'artist_goal_contributions', 'payment_confirmations',
+]
+const artistCatalog = buildCatalog(artistLive, [])
+const artistGroup = artistCatalog.find((g) => g.group === 'Artist & live shows')
+const artistOffered = artistGroup ? artistGroup.entries.map((e) => e.table) : []
+
+check('artist tables land in their own group',
+  !!artistGroup, `groups: ${artistCatalog.map((g) => g.group).join(', ')}`)
+check('the artist can add their setlist, prices, goals and handles',
+  ['songs', 'artist_price_tiers', 'artist_goals', 'song_cooperatives', 'tip_links']
+    .every((t) => artistOffered.includes(t)),
+  `offered: ${artistOffered.join(', ')}`)
+check('songs is grouped as artist, not swept into About & content',
+  artistOffered.includes('songs'))
+for (const fanTable of [
+  'song_requests', 'shoutouts', 'artist_follows', 'artist_booking_requests',
+  'artist_goal_contributions', 'payment_confirmations',
+]) {
+  check(`${fanTable} is not offered — fans create it`,
+    !artistCatalog.some((g) => g.entries.some((e) => e.table === fanTable)))
+}
+check('artist tables get real labels, not humanized table names',
+  artistOffered.length > 0 &&
+    artistGroup.entries.find((e) => e.table === 'songs')?.label === 'Setlist' &&
+    artistGroup.entries.find((e) => e.table === 'artist_price_tiers')?.label === 'Prices')
+check('fan contact details are masked, not printed',
+  maskContact('251-555-1234') === '•••-•••-1234' &&
+    maskContact('sarah@example.com') === 'sa•••@example.com',
+  `got ${maskContact('251-555-1234')} / ${maskContact('sarah@example.com')}`)
 
 console.log(failures ? `\n${failures} failed\n` : '\nAll checks passed\n')
 process.exit(failures ? 1 : 0)
