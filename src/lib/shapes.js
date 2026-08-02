@@ -38,8 +38,15 @@ const AMOUNT_RE = /^(amount|price|value|cost|rate|fee)$/
 const CONTACT_OWNER_RE = /^(fan|contributor|requester|tourist|customer|guest|patron|attendee|lead|contact|payer|sender|from|reviewer|recipient|subscriber|member)_/
 const CONTACT_FIELD_RE = /(^|_)(phone|mobile|email|address|whatsapp|handle_private)$/
 
-/** Table names that describe something submitted TO the business. */
-const INBOX_NAME_RE = /(_requests|_leads|_contributions|_follows|_followers|_confirmations|_submissions|_signups|_optins|_opt_ins|_responses|_replies|_inquiries|_applications|_votes|_entries)$/
+/**
+ * Table names that describe something submitted TO the business — by a
+ * customer, a fan, a lead. This is the business's data and it renders as a
+ * section; it just isn't something the business "adds".
+ */
+const INBOX_NAME_RE =
+  /(_requests|_leads|_contributions|_follows|_followers|_confirmations|_submissions|_signups|_optins|_opt_ins|_responses|_replies|_inquiries|_applications|_votes|_entries)$/
+const INBOX_CONCEPT_RE =
+  /(^|_)(booking|bookings|reservation|reservations|order|orders|payment|payments|invoice|invoices|transaction|transactions|claim|claims|review|reviews|waiver|waivers|signature|signatures|customer|customers|lead|leads|shoutouts?)(_|$)/
 
 const numeric = (v) => v !== null && v !== undefined && v !== '' && !Number.isNaN(Number(v))
 
@@ -124,7 +131,7 @@ export function detectPriceList(rows = [], columns = []) {
  * author.
  */
 export function detectInbox(table, columns = [], rows = []) {
-  if (INBOX_NAME_RE.test(table)) return true
+  if (INBOX_NAME_RE.test(table) || INBOX_CONCEPT_RE.test(table)) return true
   const names = fieldNames(rows, columns)
   return names.some((n) => CONTACT_OWNER_RE.test(n))
 }

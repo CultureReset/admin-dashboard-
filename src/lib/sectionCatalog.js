@@ -19,23 +19,38 @@ import { detectInbox } from './shapes.js'
 // Like everything else here it reads the live schema. A table added to the
 // database tomorrow appears in this catalog with no code change.
 
-// Tables that carry a slug but aren't the business's own content to author.
-// Everything else is offered. Erring toward offering too much is the right
-// failure here — the point is that a business can add whatever they want.
+// Platform machinery — never the business's data in any sense. Hidden from the
+// catalog AND from the dashboard, because a business opening its own page and
+// finding `ai_photo_index_full` next to its menu is just broken.
+//
+// This list is deliberately narrow. Bookings, orders, reviews and song requests
+// are NOT here: they are the business's data, they just arrive from customers
+// rather than being authored. detectInbox() handles those — they render as
+// sections and are only held back from "add".
 const INTERNAL_PATTERNS = [
   /^ai_/, // AI / derived indexes
   /_(embedding|embeddings|vector|vectors|index|index_full)$/,
-  /^(entity_owners|platform_admins|business_claims)$/, // access control
-  /(^|_)(booking|bookings|reservation|reservations|order|orders|payment|payments|invoice|invoices|transaction|transactions)(_|$)/,
-  /(^|_)(customer|customers|lead|leads|waiver|waivers|signature|signatures)(_|$)/,
+  /^(entity_owners|platform_admins)$/, // access control
   /(^|_)(audit|log|logs|history|impression|impressions|click|clicks|analytics|tracking|events_log)(_|$)/,
-  /^(user_|tourist_|swipe|saved_)/, // Trip Swipe / end-user data
+  /^(user_|tourist_|swipe|saved_)/, // other people's Trip Swipe data
   /(^|_)(sms|message|messages|inbox|notification|notifications)(_|$)/,
-  /^song_requests$/, // carries fan_phone
   /(^|_)(backup|bak|old|legacy|tmp|temp|migration|import|staging)(_|$)/,
   /_(backup|old|legacy|tmp|temp|v1|v2|copy)$/,
-  /^entity_reviews$/, // reviews are written by customers, not the business
 ]
+
+/**
+ * Machinery, not content — AI indexes, access control, audit logs, backups.
+ *
+ * These are hidden EVERYWHERE: not offered in the catalog, and not rendered as
+ * sections either. Swept straight from the database, a business would otherwise
+ * open its dashboard and find `ai_photo_index_full` sitting next to its menu.
+ *
+ * Distinct from detectInbox(): a song request is real content the business
+ * needs to see, it just isn't theirs to author.
+ */
+export function isInternal(table) {
+  return INTERNAL_PATTERNS.some((re) => re.test(table))
+}
 
 /**
  * Is this a table the business should be able to create rows in?
@@ -47,7 +62,7 @@ const INTERNAL_PATTERNS = [
  * just isn't the one who authors them.
  */
 export function isOfferable(table, columns = []) {
-  if (INTERNAL_PATTERNS.some((re) => re.test(table))) return false
+  if (isInternal(table)) return false
   if (detectInbox(table, columns)) return false
   return true
 }

@@ -81,6 +81,7 @@ console.log('\nSwept tables merged against the API payload')
 // What the direct table sweep returns: real table names, including the ones the
 // API renames (entity_hours → hours) and one the API never sends.
 const swept = {
+  ai_photo_index_full: [{ id: 1, entity_slug: 'flora-bama', vec: 'x' }], // machinery
   entity_hours: [{ id: 99, day_of_week: 1, opens_at: '09:00', closes_at: '17:00' }],
   entity_photos: [{ id: 98, url: 'https://example.test/b.jpg' }],
   song_requests: [{ id: 1, song: 'Sweet Home Alabama' }],
@@ -96,9 +97,13 @@ check('entity_photos does not become a second Photos section',
 check('the API version of hours survives the merge',
   mergeEntitySources(restaurant, swept).hours[0].id === 1)
 check('an unanticipated table still becomes its own section',
+  mergedKeys.includes('song_requests'), `got: ${mergedKeys.join(', ')}`)
+check('customer-submitted content IS shown — it is the business\'s data',
   mergedKeys.includes('song_requests'))
 check('menu_items stays nested rather than duplicating as a section',
   !mergedKeys.includes('menu_items'))
+check('AI machinery swept from the database is not rendered as a section',
+  !mergedKeys.includes('ai_photo_index_full'), `got: ${mergedKeys.join(', ')}`)
 
 console.log('\nEvery section resolves to a writable table')
 const allKeys = [...new Set([...mergedKeys, ...cKeys])]

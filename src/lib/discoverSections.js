@@ -2,6 +2,7 @@
 // under plain node, which does not do extensionless resolution.
 import { TABLE_TO_API_KEY } from './tableMap.js'
 import { ARTIST_LABELS, ARTIST_ICONS } from './artistModule.js'
+import { isInternal } from './sectionCatalog.js'
 
 // Section discovery: walk the entity payload from GCR API Clean and turn
 // every data domain that actually has rows into a dashboard section.
@@ -159,6 +160,10 @@ export function mergeEntitySources(entity, tableRows = {}) {
   const merged = { ...(entity || {}) }
   for (const [table, rows] of Object.entries(tableRows)) {
     if (NESTED_IN_PARENT.has(table)) continue
+    // Machinery swept straight out of the database. Verified against a live
+    // business: without this, Flora-Bama's dashboard opens with
+    // ai_photo_index_full and ai_entity_intent_tags_full as sections.
+    if (isInternal(table)) continue
     // The API renames most tables on the way out (entity_hours → hours). Check
     // the name it would have arrived under, or the swept table shows up a
     // second time as its own near-identical section.
