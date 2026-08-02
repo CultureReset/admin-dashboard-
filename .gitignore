@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.vite/
+
+# Local env — never commit real keys
+.env
+.env.local
+.env.*.local
+
+# scripts/provision-accounts.mjs writes plaintext passwords here.
+# This must never reach the repository.
+business-credentials.csv
+setup-links.csv
+
+.DS_Store
+*.log
