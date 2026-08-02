@@ -1,17 +1,20 @@
-// The artist module — configuration, not features.
+// The artist module is naming, and nothing else.
 //
-// Nothing here decides what an artist dashboard contains. Discovery still does
-// that: a table with an entity_slug and rows for this artist becomes a section,
-// and the Add catalog offers the rest. This file only supplies the labels,
-// icons and grouping that make those tables read like a product instead of like
-// a schema dump, plus the small amount of shape knowledge the money renderers
-// need.
+// There is no list here that decides what an artist dashboard contains, which
+// tables are editable, which render as progress bars, or which are fan
+// inboxes. All of that is worked out from the live schema and the shape of the
+// rows — see src/lib/shapes.js. A table called `artist_merch_drops` added to
+// the database tomorrow gets grouped, rendered, priced and edited without this
+// file being touched.
 //
-// Adding a new artist table to the database is still a zero-code change. It
-// will appear, render and edit. It just won't have a pretty name until someone
-// adds one line below — and `humanize()` gives it a decent one meanwhile.
+// What is here: nicer words. `humanize()` turns `artist_price_tiers` into
+// "Artist Price Tiers"; the map below turns it into "Prices". Losing this file
+// entirely would make the dashboard uglier and change nothing about what works.
+//
+// The same is true of every other module. This one is the artist's because
+// that's the vocabulary that came up first, not because artists are special.
 
-/** Section labels for the artist tables. Merged into discoverSections. */
+/** Prettier section names. Anything absent falls back to humanize(). */
 export const ARTIST_LABELS = {
   artist_profiles: 'Artist Profile',
   songs: 'Setlist',
@@ -48,68 +51,27 @@ export const ARTIST_ICONS = {
   artist_aliases: '🏷️',
 }
 
-/** Catalog grouping, so the artist tables cluster instead of scattering. */
+/**
+ * Catalog grouping — a pattern, not a membership list, so a new `artist_*`
+ * table clusters with the rest instead of falling into "Everything else".
+ */
 export const ARTIST_GROUP = 'Artist & live shows'
-export const ARTIST_TABLES = new Set(Object.keys(ARTIST_LABELS))
+export const ARTIST_TABLE_RE =
+  /^artists?(_|$)|^songs?(_|$)|^setlist|^shoutouts?(_|$)|^tip_links$|^gigs?(_|$)|^band(_|$)/
+
+export function isArtistTable(table) {
+  return ARTIST_TABLE_RE.test(table)
+}
 
 /**
- * Tables fans write, not the artist: requests, shoutouts, contributions,
- * follows, booking leads, parsed payment emails. They still appear as sections
- * once they have rows — that's the artist's queue — but they are never offered
- * in the Add catalog, because "add a song request" is not a thing an artist
- * does. Mirrors the `inbox` array in sql/artist_module.sql.
+ * Optional friendly names for `artist_price_tiers.kind`. The Prices section
+ * reads whatever kinds are actually in the data — this only supplies wording
+ * and a preferred order for the ones we happen to have names for.
  */
-export const ARTIST_FAN_TABLES = new Set([
-  'song_requests',
-  'shoutouts',
-  'artist_goal_contributions',
-  'artist_follows',
-  'artist_booking_requests',
-  'payment_confirmations',
-])
-
-/**
- * The kinds of thing an artist can charge for. Drives the Prices section, and
- * matches artist_price_tiers.kind in sql/artist_module.sql.
- *
- * Adding a kind here is presentation only — an unknown kind still renders, it
- * just gets its raw value as a heading.
- */
-export const PRICE_KINDS = {
+export const PRICE_KIND_LABELS = {
   request: { label: 'Song requests', help: 'What a song costs to request.' },
   shoutout: { label: 'Shoutouts', help: 'Birthday, bachelorette, dedication, sponsor.' },
   tip: { label: 'Tip amounts', help: 'The quick-tip buttons fans see.' },
   crowdfund: { label: 'Crowdfund amounts', help: 'Contribution buttons on a funded song.' },
   addon: { label: 'Add-ons', help: 'Extras a fan can bolt onto a request.' },
-}
-
-/**
- * Progress-bearing sections: which field is raised, which is the target, and
- * what to call the thing. Used by the goal renderer.
- */
-export const PROGRESS_SHAPES = {
-  artist_goals: { raised: 'current_amount', target: 'target_amount', title: 'goal_name' },
-  song_cooperatives: { raised: 'current_amount', target: 'target_amount', title: 'song_title' },
-}
-
-/** Fields that hold fan contact details. Masked in the dashboard by default. */
-export const FAN_PII_FIELDS = new Set([
-  'fan_phone',
-  'tourist_phone',
-  'contributor_phone',
-  'phone',
-  'email',
-])
-
-/** Mask a phone/email for display: keeps enough to recognise, not to misuse. */
-export function maskContact(value) {
-  const s = String(value ?? '')
-  if (!s) return ''
-  if (s.includes('@')) {
-    const [user, domain] = s.split('@')
-    return `${user.slice(0, 2)}${'•'.repeat(Math.max(user.length - 2, 1))}@${domain}`
-  }
-  const digits = s.replace(/\D/g, '')
-  if (digits.length < 4) return '•'.repeat(s.length)
-  return `•••-•••-${digits.slice(-4)}`
 }

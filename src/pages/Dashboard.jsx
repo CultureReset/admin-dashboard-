@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../lib/AuthContext'
 import { fetchEntity } from '../lib/gcrApi'
-import { fetchEntityTables } from '../lib/schemaDiscovery'
+import { fetchEntityTables, getColumns } from '../lib/schemaDiscovery'
 import { fetchTablesForSlug, readTableCache } from '../lib/entityTables'
 import { discoverSections, mergeEntitySources } from '../lib/discoverSections'
-import { TABLE_TO_API_KEY } from '../lib/tableMap'
-import { CUSTOM_RENDERERS } from '../sections/registry'
+import { TABLE_TO_API_KEY, tableFor } from '../lib/tableMap'
+import { rendererFor } from '../sections/registry'
 import GenericSection from '../sections/GenericSection'
 import EditableSection from '../sections/EditableSection'
 import TopBar from '../components/TopBar'
@@ -119,7 +119,10 @@ export default function Dashboard() {
   }
 
   const active = sections.find((s) => s.key === activeKey)
-  const Custom = active ? CUSTOM_RENDERERS[active.key] : null
+  // Columns for the table behind this section, so the renderer can be chosen
+  // from its shape rather than from its name.
+  const activeColumns = active ? getColumns(tableFor(active.key) || active.key) : []
+  const Custom = rendererFor(active, activeColumns)
 
   return (
     <div className="dashboard-shell">
@@ -152,7 +155,7 @@ export default function Dashboard() {
               onChanged={() => setReloadKey((k) => k + 1)}
             >
               {Custom ? (
-                <Custom entity={merged} section={active} />
+                <Custom entity={merged} section={active} columns={activeColumns} />
               ) : (
                 <GenericSection entity={merged} section={active} />
               )}

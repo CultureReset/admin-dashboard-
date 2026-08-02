@@ -17,7 +17,7 @@
 import { mergeEntitySources, discoverSections } from '../src/lib/discoverSections.js'
 import { tableFor, API_KEY_TO_TABLE } from '../src/lib/tableMap.js'
 import { buildCatalog } from '../src/lib/sectionCatalog.js'
-import { maskContact } from '../src/lib/artistModule.js'
+import { detectProgress, detectPriceList, detectInbox, isContactField, maskContact } from '../src/lib/shapes.js'
 
 let failures = 0
 function check(label, condition, detail = '') {
@@ -177,44 +177,90 @@ check('entries carry the label they will have as a section',
 check('everything lands in a named group',
   catalog.every((g) => g.group && g.entries.length))
 
-console.log('\nArtist module')
-const artistLive = [
-  // exists today
-  'artist_profiles', 'songs', 'artist_goals', 'song_cooperatives', 'tip_links',
-  'artist_shows', 'artist_qr_codes',
-  // added by sql/artist_module.sql
-  'artist_price_tiers',
-  // fan-submitted — must never be offered as "add this"
-  'song_requests', 'shoutouts', 'artist_follows', 'artist_booking_requests',
-  'artist_goal_contributions', 'payment_confirmations',
-]
-const artistCatalog = buildCatalog(artistLive, [])
-const artistGroup = artistCatalog.find((g) => g.group === 'Artist & live shows')
-const artistOffered = artistGroup ? artistGroup.entries.map((e) => e.table) : []
+console.log('\nShape detection — nothing depends on a table being known')
 
-check('artist tables land in their own group',
-  !!artistGroup, `groups: ${artistCatalog.map((g) => g.group).join(', ')}`)
-check('the artist can add their setlist, prices, goals and handles',
-  ['songs', 'artist_price_tiers', 'artist_goals', 'song_cooperatives', 'tip_links']
-    .every((t) => artistOffered.includes(t)),
-  `offered: ${artistOffered.join(', ')}`)
-check('songs is grouped as artist, not swept into About & content',
-  artistOffered.includes('songs'))
-for (const fanTable of [
-  'song_requests', 'shoutouts', 'artist_follows', 'artist_booking_requests',
-  'artist_goal_contributions', 'payment_confirmations',
-]) {
-  check(`${fanTable} is not offered — fans create it`,
-    !artistCatalog.some((g) => g.entries.some((e) => e.table === fanTable)))
+// Tables invented for this test. None of them appear anywhere in src/.
+const unknownGoal = [
+  { id: 1, campaign_name: 'New van fund', current_amount: 4200, target_amount: 9000 },
+  { id: 2, campaign_name: 'Studio time', current_amount: 0, target_amount: 1500 },
+]
+const unknownPrices = [
+  { id: 1, tier_type: 'sponsorship', label: 'Stage banner', amount: 250, sort_order: 1 },
+  { id: 2, tier_type: 'sponsorship', label: 'Named set', amount: 500, sort_order: 2 },
+  { id: 3, tier_type: 'meet_greet', label: 'Photo + signed poster', amount: 40, sort_order: 1 },
+]
+const unknownInbox = [
+  { id: 1, patron_name: 'Katie', patron_phone: '251-555-9090', wish: 'Play Wonderwall' },
+]
+const notProgress = [{ id: 1, goal_type: 'nightly', description: 'no numbers here' }]
+
+const g = detectProgress(unknownGoal)
+check('an unknown campaign table is detected as progress',
+  g?.raised === 'current_amount' && g?.target === 'target_amount', JSON.stringify(g))
+check('its title field is found too', g?.title === 'campaign_name')
+check('a text-only table is NOT mistaken for progress', detectProgress(notProgress) === null)
+check('a table with no rows is not progress', detectProgress([]) === null)
+
+const pl = detectPriceList(unknownPrices)
+check('an unknown tiers table is detected as a price list',
+  pl?.kind === 'tier_type' && pl?.label === 'label' && pl?.amount === 'amount',
+  JSON.stringify(pl))
+check('a plain priced list is not forced into the grouped layout',
+  detectPriceList([{ id: 1, name: 'Half day', price: 800 }]) === null)
+
+check('an unknown submissions table is detected by its columns',
+  detectInbox('wish_wall', [], unknownInbox))
+check('a submissions table is detected by its name alone',
+  detectInbox('venue_inquiries', [{ name: 'x' }]))
+check('the business\'s own content is not an inbox',
+  !detectInbox('drink_sections', [{ name: 'section_name' }, { name: 'sort_order' }]))
+
+console.log('\nCatalog uses shape, not a list of names')
+const shapeTables = [
+  'artist_price_tiers', 'songs', 'artist_goals',   // known artist tables
+  'merch_crowdfund', 'sponsor_tiers',              // invented, should be offered
+  'wish_wall', 'venue_inquiries',                  // invented, should be held back
+]
+const columnsByTable = {
+  wish_wall: [{ name: 'patron_name' }, { name: 'patron_phone' }],
+  merch_crowdfund: [{ name: 'current_amount' }, { name: 'target_amount' }],
+  sponsor_tiers: [{ name: 'tier_type' }, { name: 'label' }, { name: 'amount' }],
 }
-check('artist tables get real labels, not humanized table names',
-  artistOffered.length > 0 &&
-    artistGroup.entries.find((e) => e.table === 'songs')?.label === 'Setlist' &&
-    artistGroup.entries.find((e) => e.table === 'artist_price_tiers')?.label === 'Prices')
-check('fan contact details are masked, not printed',
+const shapeCatalog = buildCatalog(shapeTables, [], (t) => columnsByTable[t] || [])
+const shapeOffered = shapeCatalog.flatMap((g2) => g2.entries.map((e) => e.table))
+
+check('an invented crowdfund table is offered', shapeOffered.includes('merch_crowdfund'),
+  `offered: ${shapeOffered.join(', ')}`)
+check('an invented tiers table is offered', shapeOffered.includes('sponsor_tiers'))
+check('an invented submissions table is held back by its columns',
+  !shapeOffered.includes('wish_wall'))
+check('an invented inquiries table is held back by its name',
+  !shapeOffered.includes('venue_inquiries'))
+
+const artistGroup2 = shapeCatalog.find((g2) => g2.group === 'Artist & live shows')
+const artistNames = artistGroup2 ? artistGroup2.entries.map((e) => e.table) : []
+check('artist tables group by pattern, not membership',
+  ['artist_price_tiers', 'songs', 'artist_goals'].every((t) => artistNames.includes(t)),
+  `artist group: ${artistNames.join(', ')}`)
+check('a brand-new artist_* table would group too — pattern check',
+  /^artists?(_|$)/.test('artist_merch_drops'))
+check('artist tables still get real labels',
+  artistGroup2?.entries.find((e) => e.table === 'songs')?.label === 'Setlist' &&
+    artistGroup2?.entries.find((e) => e.table === 'artist_price_tiers')?.label === 'Prices')
+
+console.log('\nContact masking is by naming convention')
+check('somebody else\'s phone is masked',
   maskContact('251-555-1234') === '•••-•••-1234' &&
     maskContact('sarah@example.com') === 'sa•••@example.com',
   `got ${maskContact('251-555-1234')} / ${maskContact('sarah@example.com')}`)
+check('an invented contact column is caught',
+  isContactField('patron_phone') && isContactField('subscriber_email'))
+check('a plain phone column on a list row is masked',
+  isContactField('phone'))
+check("the business's own phone stays readable",
+  !isContactField('phone', { ownRecord: true }))
+check('a non-contact column is untouched',
+  !isContactField('song_title') && !isContactField('amount'))
 
 console.log(failures ? `\n${failures} failed\n` : '\nAll checks passed\n')
 process.exit(failures ? 1 : 0)

@@ -1,6 +1,7 @@
 import { labelFor, iconFor } from './discoverSections.js'
 import { TABLE_TO_API_KEY, tableFor } from './tableMap.js'
-import { ARTIST_GROUP, ARTIST_TABLES, ARTIST_FAN_TABLES } from './artistModule.js'
+import { ARTIST_GROUP, isArtistTable } from './artistModule.js'
+import { detectInbox } from './shapes.js'
 
 // What a business COULD add, as opposed to what it already has.
 //
@@ -36,19 +37,28 @@ const INTERNAL_PATTERNS = [
   /^entity_reviews$/, // reviews are written by customers, not the business
 ]
 
-/** Is this a table the business should be able to create rows in? */
-export function isOfferable(table) {
-  if (ARTIST_FAN_TABLES.has(table)) return false
-  return !INTERNAL_PATTERNS.some((re) => re.test(table))
+/**
+ * Is this a table the business should be able to create rows in?
+ *
+ * `columns` comes from the live schema. When it's supplied, a table that
+ * collects submissions from other people — song requests, booking leads, fan
+ * signups — is recognised by its shape and held back, no matter what it's
+ * called. Those still render as sections once they have rows; the business
+ * just isn't the one who authors them.
+ */
+export function isOfferable(table, columns = []) {
+  if (INTERNAL_PATTERNS.some((re) => re.test(table))) return false
+  if (detectInbox(table, columns)) return false
+  return true
 }
 
 // Coarse buckets so a ~200-entry catalog reads as a menu instead of a wall.
 // Keyword match, first hit wins; anything unmatched lands in "Everything else",
 // which is where a brand-new table shows up until someone gives it a home.
 const GROUPS = [
-  // Artist first — it matches on explicit table names, so it must win over the
-  // keyword buckets below (`songs` would otherwise fall into "About & content").
-  [ARTIST_GROUP, (t) => ARTIST_TABLES.has(t)],
+  // Artist first: its pattern is more specific than the keyword buckets below,
+  // which would otherwise pull `songs` into "About & content".
+  [ARTIST_GROUP, isArtistTable],
   ['Food & drink', /menu|drink|food|dish|beverage|happy_hour|side|dessert|wine|beer|cocktail/],
   ['Hours & availability', /hour|schedule|availability|calendar|season|closure|holiday/],
   ['Photos & media', /photo|image|media|gallery|video|logo|banner/],
@@ -77,9 +87,12 @@ function groupFor(table) {
  *
  * @param {string[]} allTables   every slug table in the live schema
  * @param {string[]} activeKeys  section keys already on the dashboard
+ * @param {(table: string) => object[]} columnsFor  live columns for a table,
+ *        so submission tables can be recognised by shape. Optional — without
+ *        it the catalog still works, it just falls back to name patterns.
  * @returns {{ group: string, entries: {table,label,icon}[] }[]}
  */
-export function buildCatalog(allTables = [], activeKeys = []) {
+export function buildCatalog(allTables = [], activeKeys = [], columnsFor = () => []) {
   // Sections are keyed by the API's name (`hours`); the catalog works in table
   // names (`entity_hours`). Resolve before comparing or the business is offered
   // a table it is already using under a different label.
@@ -87,7 +100,7 @@ export function buildCatalog(allTables = [], activeKeys = []) {
 
   const entries = allTables
     .filter((t) => !inUse.has(t))
-    .filter(isOfferable)
+    .filter((t) => isOfferable(t, columnsFor(t)))
     .map((table) => {
       // Label it the way it will read once it becomes a section.
       const key = TABLE_TO_API_KEY[table] || table

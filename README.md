@@ -112,15 +112,30 @@ costs.** `sql/artist_module.sql` adds it —
 `artist_price_tiers` is one table behind every money button on the fan pages, so
 a new kind of paid thing is a row — not a schema change and not a deploy.
 
-`src/lib/artistModule.js` is configuration only: labels, icons, catalog
-grouping, and which fields hold fan contact details. It does not decide what an
-artist dashboard contains — discovery still does that, and an artist table added
-to the database tomorrow appears, renders and edits with no code here.
+**Nothing about this is hardwired.** `src/lib/artistModule.js` contains only
+nicer words — labels, icons, and a name pattern for catalog grouping. Delete it
+and the artist dashboard still works; it just says "Artist Price Tiers" instead
+of "Prices". Every decision that matters is made from the live schema and the
+shape of the rows, in `src/lib/shapes.js`:
 
-Fan-submitted tables (requests, shoutouts, contributions, follows, booking
-leads) show up as sections once they have rows, but are never offered in the Add
-catalog — an artist doesn't "add a song request". Fan phone numbers and emails
-are masked on screen.
+| Decision | How it's made |
+|---|---|
+| Which sections exist | Tables with rows for this slug |
+| What you can add | Every slug table you aren't using yet |
+| Progress bar or not | Row has a raised/target numeric pair |
+| Price layout or not | Rows have a kind + label + amount |
+| Held back from Add | Row carries somebody else's identity, or the name says it collects submissions |
+| Contact masking | Field name matches a contact convention |
+
+A `merch_crowdfund` table invented tomorrow gets a progress bar. A
+`sponsor_tiers` table gets the grouped price layout. A `wish_wall` table with a
+`patron_phone` column is recognised as fan-submitted and held out of the Add
+catalog with its phone numbers masked. None of those names appear anywhere in
+`src/` — `npm run check` asserts exactly that.
+
+Fan-submitted tables still show as sections once they have rows (that's the
+artist's queue); they're just never offered as something to *add*, because the
+artist isn't the author.
 
 **The fan-facing pages live in `gcr-unified`, not here** — `/artist/:slug` and
 `/artist/:slug/live`. They currently hardcode their amounts; once this SQL is

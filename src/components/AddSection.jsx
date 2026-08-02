@@ -15,8 +15,10 @@ export default function AddSection({ allTables, activeKeys, slug, onDone, onCanc
   const [query, setQuery] = useState('')
   const [picked, setPicked] = useState(null)
 
+  // getColumns comes from the live schema read, so submission tables are
+  // recognised by their shape rather than by being on a list.
   const catalog = useMemo(
-    () => buildCatalog(allTables, activeKeys),
+    () => buildCatalog(allTables, activeKeys, getColumns),
     [allTables, activeKeys]
   )
 
