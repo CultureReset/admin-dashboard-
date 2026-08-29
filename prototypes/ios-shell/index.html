@@ -1,0 +1,1376 @@
+<title>Cupertino Pi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* ---------- workbench chrome (theme-aware) ---------- */
+:root{
+  --ground:#eef0f4; --panel:#ffffff; --line:#d7dbe3; --ink:#171a20;
+  --dim:#666e7d; --accent:#2f6fed; --ok:#1c8f5a; --warn:#b8730d;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ui:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0b0c0f; --panel:#141720; --line:#252a35; --ink:#e6e9f0;
+    --dim:#868e9d; --accent:#5b93ff; --ok:#3ecf8e; --warn:#e0a33a;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0b0c0f; --panel:#141720; --line:#252a35; --ink:#e6e9f0;
+  --dim:#868e9d; --accent:#5b93ff; --ok:#3ecf8e; --warn:#e0a33a;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink); font-family:var(--ui);
+  min-height:100vh; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:22px; padding:28px 16px 34px;
+}
+.wb-head{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.wb-head h1{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.wb-head p{margin:0;font-size:12.5px;color:var(--dim);max-width:52ch;line-height:1.5}
+.wb-legend{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:6px;
+  max-width:min(560px,100%);
+}
+.chip{
+  font-family:var(--mono);font-size:10.5px;line-height:1;padding:6px 9px;
+  border:1px solid var(--line);border-radius:6px;color:var(--dim);
+  background:var(--panel);white-space:nowrap;
+}
+.chip b{color:var(--ink);font-weight:500}
+.wb-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+.wb-btn{
+  font-family:var(--mono);font-size:11px;padding:7px 11px;border-radius:7px;
+  border:1px solid var(--line);background:var(--panel);color:var(--dim);cursor:pointer;
+}
+.wb-btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.wb-btn:focus-visible,.wb-meter:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wb-meter{
+  font-family:var(--mono);font-size:11px;padding:7px 11px;border-radius:7px;
+  border:1px solid var(--line);background:var(--panel);color:var(--dim);
+  font-variant-numeric:tabular-nums;
+}
+.wb-meter b{color:var(--ok);font-weight:500}
+
+/* ---------- device frame ---------- */
+.stage{position:relative;flex:0 0 auto}
+.device{
+  position:relative;width:393px;height:852px;border-radius:56px;overflow:hidden;
+  background:#000;box-shadow:0 0 0 11px #1b1d22,0 0 0 13px #34373f,0 40px 90px -30px rgba(0,0,0,.75);
+  font-family:var(--ui);color:#fff;-webkit-user-select:none;user-select:none;
+  touch-action:none;isolation:isolate;
+}
+@media (max-width:640px),(max-height:940px){
+  body{padding:0;gap:0;justify-content:flex-start}
+  .wb-head,.wb-legend,.wb-controls{display:none}
+  .stage{position:fixed;inset:0}
+  .device{width:100%;height:100%;border-radius:0;box-shadow:none}
+}
+
+/* ---------- shell primitives ---------- */
+.device *{box-sizing:border-box}
+.sq{ -webkit-mask-image:var(--squircle);mask-image:var(--squircle);
+     -webkit-mask-size:100% 100%;mask-size:100% 100%;
+     -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;border-radius:22%; }
+.wall{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(130% 90% at 18% 8%,#3b2a6b 0%,transparent 55%),
+    radial-gradient(120% 80% at 88% 22%,#0f5f7a 0%,transparent 52%),
+    radial-gradient(150% 100% at 50% 105%,#1b1233 0%,transparent 60%),
+    linear-gradient(168deg,#151129 0%,#0a0a14 60%,#07070d 100%);
+}
+.wall.blurred{filter:blur(0px)}
+.dimmer{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:900}
+
+/* status bar */
+.status{
+  position:absolute;top:0;left:0;right:0;height:54px;z-index:860;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;font-size:15px;font-weight:600;letter-spacing:.01em;
+  pointer-events:none;font-variant-numeric:tabular-nums;
+}
+.status .right{display:flex;align-items:center;gap:6px}
+.island{
+  position:absolute;top:11px;left:50%;transform:translateX(-50%);
+  width:124px;height:34px;border-radius:20px;background:#000;z-index:870;pointer-events:none;
+}
+.hbar{
+  position:absolute;bottom:9px;left:50%;transform:translateX(-50%);
+  width:138px;height:5px;border-radius:3px;background:#fff;opacity:.85;z-index:880;
+}
+
+/* home screen */
+.home{position:absolute;inset:0;z-index:100}
+.pager{position:absolute;top:54px;left:0;right:0;bottom:150px;display:flex;will-change:transform}
+.page{flex:0 0 393px;width:393px;padding:14px 0 0}
+.grid{
+  display:grid;grid-template-columns:repeat(4,60px);justify-content:center;
+  column-gap:33px;row-gap:19px;grid-auto-rows:82px;
+}
+.icon{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  background:none;border:0;padding:0;cursor:pointer;color:#fff;font-family:inherit;
+}
+.icon .art{width:60px;height:60px;position:relative;display:grid;place-items:center}
+.icon .art svg{width:32px;height:32px}
+.icon .lab{
+  font-size:11px;font-weight:500;letter-spacing:.005em;line-height:1.1;
+  text-shadow:0 1px 3px rgba(0,0,0,.55);max-width:72px;text-align:center;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.icon:focus-visible .art{outline:2px solid #fff;outline-offset:3px;border-radius:14px}
+.dots{
+  position:absolute;bottom:126px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:110;
+}
+.dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35);transition:background .2s}
+.dots i.on{background:#fff}
+.dock{
+  position:absolute;left:8px;right:8px;bottom:26px;height:94px;border-radius:34px;
+  background:rgba(255,255,255,.13);backdrop-filter:blur(28px) saturate(170%);
+  -webkit-backdrop-filter:blur(28px) saturate(170%);
+  display:flex;align-items:center;justify-content:space-around;padding:0 18px;z-index:110;
+}
+.dock .icon .lab{display:none}
+.noblur .dock,.noblur .cc-card,.noblur .cc-slab,.noblur .nc-card,.noblur .mat{
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+.noblur .dock{background:rgba(58,54,80,.82)}
+</style>
+<style>
+/* ---------- lock screen ---------- */
+.lock{
+  position:absolute;inset:0;z-index:800;will-change:transform,opacity;
+  background:linear-gradient(180deg,rgba(0,0,0,.34),rgba(0,0,0,.1) 42%,rgba(0,0,0,.46));
+}
+.lock .clockwrap{position:absolute;top:96px;left:0;right:0;text-align:center}
+.lock .date{font-size:20px;font-weight:600;opacity:.92}
+.lock .time{font-size:88px;font-weight:600;letter-spacing:-.03em;line-height:1.02;font-variant-numeric:tabular-nums}
+.lock .quick{position:absolute;bottom:96px;left:0;right:0;display:flex;justify-content:space-between;padding:0 44px}
+.lock .qbtn{
+  width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;
+  background:rgba(255,255,255,.16);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  display:grid;place-items:center;color:#fff;
+}
+.lock .hint{position:absolute;bottom:38px;left:0;right:0;text-align:center;font-size:13px;opacity:.62}
+.lock .notif{position:absolute;top:300px;left:14px;right:14px;display:flex;flex-direction:column;gap:8px}
+
+/* ---------- app window ---------- */
+.appwrap{position:absolute;inset:0;z-index:500;transform-origin:0 0;will-change:transform,opacity;overflow:hidden}
+.app{position:absolute;inset:0;background:#0d0d10;display:flex;flex-direction:column;overflow:hidden}
+.app.light{background:#f2f2f7;color:#000}
+.app-nav{
+  flex:0 0 auto;padding:50px 16px 10px;display:flex;flex-direction:column;align-items:flex-start;gap:1px;
+  border-bottom:1px solid rgba(255,255,255,.09);
+}
+.app-nav .back svg{transform:scaleX(-1)}
+.app.light .app-nav{border-bottom-color:rgba(0,0,0,.09);background:#f7f7fa}
+.app-nav h2{margin:0;font-size:32px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+.app-nav .back{
+  background:none;border:0;color:#0a84ff;font:inherit;font-size:17px;cursor:pointer;
+  display:flex;align-items:center;gap:3px;padding:0 8px 3px 0;min-height:26px;
+}
+.app.light .app-nav .back{color:#007aff}
+.app-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:40px}
+.app-body::-webkit-scrollbar{width:0}
+
+/* grouped list (Settings) */
+.gtitle{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:#8e8e93;padding:20px 32px 7px}
+.group{background:#1c1c1e;border-radius:12px;margin:0 16px 18px;overflow:hidden}
+.app.light .group{background:#fff}
+.row{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:46px;
+  border-top:1px solid rgba(255,255,255,.08);background:none;border-left:0;border-right:0;border-bottom:0;
+  width:100%;color:inherit;font:inherit;text-align:left;cursor:default;
+}
+.app.light .row{border-top-color:rgba(0,0,0,.08)}
+.row:first-child{border-top:0}
+.row[data-tap]{cursor:pointer}
+.row[data-tap]:active{background:rgba(255,255,255,.06)}
+.app.light .row[data-tap]:active{background:rgba(0,0,0,.05)}
+.row .ico{width:29px;height:29px;border-radius:7px;display:grid;place-items:center;flex:0 0 auto}
+.row .ico svg{width:17px;height:17px}
+.row .txt{flex:1;min-width:0}
+.row .lab2{font-size:17px;line-height:1.25}
+.row .sub{font-size:12px;color:#8e8e93;margin-top:2px}
+.row.rowcol{flex-direction:column;align-items:stretch;gap:9px;padding-top:12px;padding-bottom:14px}
+.row.rowcol .txt{flex:0 0 auto}
+.row.rowcol .slider{flex:0 0 auto;width:100%}
+.row .val{font-size:16px;color:#8e8e93;flex:0 0 auto;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .chev{color:#5a5a5f;flex:0 0 auto}
+.bind{
+  font-family:var(--mono);font-size:9.5px;color:#6f7480;margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.note{font-size:12.5px;color:#8e8e93;padding:2px 32px 20px;line-height:1.45}
+
+/* switch */
+.sw{
+  width:51px;height:31px;border-radius:16px;background:#39393d;position:relative;flex:0 0 auto;
+  border:0;cursor:pointer;transition:background .22s;
+}
+.sw.on{background:#30d158}
+.sw i{
+  position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;
+  transition:transform .22s cubic-bezier(.3,1.4,.5,1);box-shadow:0 2px 5px rgba(0,0,0,.3);
+}
+.sw.on i{transform:translateX(20px)}
+.sw:focus-visible{outline:2px solid #0a84ff;outline-offset:2px}
+
+/* slider */
+.slider{height:30px;border-radius:8px;background:#39393d;position:relative;overflow:hidden;flex:1;cursor:pointer;touch-action:none}
+.slider .fill{position:absolute;inset:0;right:auto;background:#fff;width:50%}
+
+/* ---------- control center ---------- */
+.cc{
+  position:absolute;inset:0;z-index:820;padding:64px 12px 0;
+  display:flex;flex-direction:column;gap:11px;will-change:transform,opacity;
+}
+.cc .scrim{position:absolute;inset:0;background:rgba(8,7,16,.72);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);z-index:-1}
+.noblur .cc .scrim{background:rgba(12,10,22,.9);backdrop-filter:none;-webkit-backdrop-filter:none}
+.cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.cc-card{
+  background:rgba(148,144,175,.3);backdrop-filter:blur(22px) saturate(180%);
+  -webkit-backdrop-filter:blur(22px) saturate(180%);border-radius:22px;padding:12px;
+}
+.conn{display:grid;grid-template-columns:1fr 1fr;gap:14px;place-items:center}
+.cbtn{
+  width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;
+  background:rgba(255,255,255,.22);color:#fff;transition:background .18s;
+}
+.cbtn.on{background:#0a84ff}
+.cbtn.on[data-k="bt"]{background:#0a84ff}
+.cbtn.on[data-k="air"]{background:#ff9f0a}
+.cc-slabs{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.cc-slab{
+  height:154px;border-radius:22px;position:relative;overflow:hidden;cursor:pointer;touch-action:none;
+  background:rgba(148,144,175,.3);backdrop-filter:blur(22px) saturate(180%);
+  -webkit-backdrop-filter:blur(22px) saturate(180%);
+}
+.cc-slab .lv{position:absolute;inset:0;top:auto;background:#fff;height:60%}
+.cc-slab .gl{position:absolute;bottom:14px;left:0;right:0;display:grid;place-items:center;color:#0d0d12}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.tile{
+  height:70px;border-radius:22px;border:0;cursor:pointer;display:grid;place-items:center;color:#fff;
+  background:rgba(148,144,175,.3);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+}
+.tile.on{background:#fff;color:#000}
+.cc-now{display:flex;align-items:center;gap:11px}
+.cc-now .art2{width:44px;height:44px;border-radius:9px;flex:0 0 auto}
+.cc-now .t1{font-size:14px;font-weight:600}
+.cc-now .t2{font-size:12px;opacity:.7}
+
+/* ---------- notification center ---------- */
+.nc{position:absolute;inset:0;z-index:820;will-change:transform,opacity;padding:64px 12px 0;overflow-y:auto}
+.nc .scrim{position:absolute;inset:0;background:rgba(8,7,16,.76);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:-1}
+.noblur .nc .scrim{background:rgba(10,9,18,.94);backdrop-filter:none;-webkit-backdrop-filter:none}
+.nc-head{text-align:center;padding:12px 0 22px}
+.nc-head .d{font-size:19px;font-weight:600;opacity:.9}
+.nc-head .t{font-size:74px;font-weight:600;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.nc-card,.lock .notif > div{
+  background:rgba(150,146,178,.32);backdrop-filter:blur(20px) saturate(170%);
+  -webkit-backdrop-filter:blur(20px) saturate(170%);
+  border-radius:18px;padding:11px 13px;margin-bottom:8px;
+}
+.noblur .lock .notif > div{background:rgba(60,56,84,.88);backdrop-filter:none;-webkit-backdrop-filter:none}
+.nc-card .hd,.lock .notif .hd{display:flex;align-items:center;gap:7px;font-size:12px;opacity:.78;margin-bottom:4px}
+.nc-card .hd .dot,.lock .notif .hd .dot{width:16px;height:16px;border-radius:4px;flex:0 0 auto}
+.nc-card .ti,.lock .notif .ti{font-size:14.5px;font-weight:600;line-height:1.25}
+.nc-card .bd,.lock .notif .bd{font-size:13.5px;opacity:.85;line-height:1.35;margin-top:1px}
+
+/* ---------- app switcher ---------- */
+.switcher{position:absolute;inset:0;z-index:760;display:flex;align-items:center;overflow:hidden}
+.switcher .scrim{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.sw-track{position:absolute;top:0;bottom:0;display:flex;align-items:center;gap:14px;padding:0 67px;will-change:transform}
+.card{
+  flex:0 0 258px;width:258px;height:560px;border-radius:34px;overflow:hidden;position:relative;
+  box-shadow:0 22px 50px -14px rgba(0,0,0,.7);cursor:pointer;background:#111;
+}
+.card .prev{position:absolute;inset:0;display:flex;flex-direction:column;padding:44px 16px 16px}
+.card .prev h3{margin:0;font-size:26px;font-weight:700;letter-spacing:-.02em}
+.card .prev p{margin:6px 0 0;font-size:12.5px;opacity:.72;line-height:1.4}
+.empty-sw{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;opacity:.6}
+
+/* ---------- misc app content ---------- */
+.stub{padding:44px 26px;text-align:center;color:#8e8e93}
+.stub .k{font-family:var(--mono);font-size:11px;color:#6f7480;margin-top:10px;line-height:1.6}
+.calc{display:flex;flex-direction:column;height:100%;background:#000;padding:0 10px 16px}
+.calc .out{flex:1;display:flex;align-items:flex-end;justify-content:flex-end;padding:0 14px 12px;
+  font-size:74px;font-weight:300;letter-spacing:-.03em;font-variant-numeric:tabular-nums;overflow:hidden}
+.calc .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+.calc button{
+  height:76px;border-radius:50%;border:0;font-family:inherit;font-size:31px;font-weight:400;
+  background:#333;color:#fff;cursor:pointer;
+}
+.calc button:active{filter:brightness(1.45)}
+.calc button.fn{background:#a5a5a5;color:#000;font-size:28px}
+.calc button.op{background:#ff9f0a;font-size:34px}
+.calc button.op.armed{background:#fff;color:#ff9f0a}
+.calc button.wide{grid-column:span 2;border-radius:38px;text-align:left;padding-left:29px}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:0 2px}
+.pgrid button{aspect-ratio:1;border:0;padding:0;cursor:pointer}
+.viewer{position:absolute;inset:0;background:#000;z-index:5;display:grid;place-items:center}
+.viewer .ph{width:88%;aspect-ratio:1;border-radius:6px}
+.notelist .row .lab2{font-size:16px;font-weight:600}
+.notebody{padding:6px 20px 40px;font-size:15.5px;line-height:1.55;white-space:pre-wrap;color:#e6e6ea}
+.tp{display:flex;flex-direction:column;height:100%;background:#0d0d10}
+.tp .hero{padding:58px 20px 18px}
+.tp .hero h2{margin:0;font-size:32px;font-weight:700;letter-spacing:-.02em}
+.tp .hero p{margin:6px 0 0;font-size:13px;color:#8e8e93;line-height:1.45}
+.pill{
+  font-family:var(--mono);font-size:10px;padding:3px 7px;border-radius:20px;flex:0 0 auto;
+  border:1px solid currentColor;
+}
+.pill.ok{color:#30d158}.pill.off{color:#8e8e93}.pill.busy{color:#ffd60a}
+.now{padding:56px 24px 0;display:flex;flex-direction:column;height:100%;background:#0d0d10}
+.now .cover{width:100%;aspect-ratio:1;border-radius:14px;box-shadow:0 24px 50px -18px rgba(0,0,0,.9)}
+.now .meta{margin-top:26px}
+.now .meta .t1{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.now .meta .t2{font-size:19px;color:#ff453a;opacity:.9}
+.now .bar{height:7px;border-radius:4px;background:rgba(255,255,255,.18);margin-top:26px;overflow:hidden}
+.now .bar i{display:block;height:100%;background:rgba(255,255,255,.75);width:0}
+.now .times{display:flex;justify-content:space-between;font-size:11px;color:#8e8e93;margin-top:7px;font-variant-numeric:tabular-nums}
+.now .ctrls{display:flex;align-items:center;justify-content:center;gap:38px;margin-top:22px}
+.now .ctrls button{background:none;border:0;color:#fff;cursor:pointer;padding:6px}
+@media (prefers-reduced-motion:reduce){.sw i{transition:none}}
+</style>
+<div class="wb-head">
+  <h1>Cupertino Pi</h1>
+  <p>A shell prototype for Raspberry&nbsp;Pi. Everything below the bezel is original code — spring physics,
+     squircle masks, gesture-driven transitions, and a Settings app built from a schema rather than by hand.</p>
+</div>
+
+<div class="stage">
+  <div class="device" id="dev">
+    <div class="wall" id="wall"></div>
+    <div class="home" id="home">
+      <div class="pager" id="pager"></div>
+      <div class="dots" id="dots"></div>
+      <div class="dock" id="dock"></div>
+    </div>
+    <div id="layer"></div>
+    <div class="status" id="status">
+      <span id="stime">9:41</span>
+      <span class="right">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg>
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 11.4 6.2 8.9a3.3 3.3 0 0 1 4.6 0zM8.5 6.1a5.6 5.6 0 0 0-4 1.6L2.9 6.1a7.9 7.9 0 0 1 11.2 0l-1.6 1.6a5.6 5.6 0 0 0-4-1.6zM8.5 1.1c2.9 0 5.6 1.1 7.6 3.1L14.5 5.8a9.2 9.2 0 0 0-12 0L.9 4.2A10.8 10.8 0 0 1 8.5 1.1z"/></svg>
+        <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="22" height="12" rx="3.8" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="17" height="9" rx="2.4" fill="currentColor"/><path d="M24 4.4v4.2a2.6 2.6 0 0 0 0-4.2z" fill="currentColor" opacity=".4"/></svg>
+      </span>
+    </div>
+    <div class="island"></div>
+    <div class="hbar" id="hbar"></div>
+    <div class="dimmer" id="dimmer"></div>
+  </div>
+</div>
+
+<div class="wb-legend">
+  <span class="chip"><b>Swipe up</b> from the bottom edge — home</span>
+  <span class="chip"><b>Swipe up &amp; hold</b> — app switcher</span>
+  <span class="chip"><b>Drag down</b> top-right — Control Center</span>
+  <span class="chip"><b>Drag down</b> top-left — Notifications</span>
+  <span class="chip"><b>Drag sideways</b> — pages</span>
+</div>
+<div class="wb-controls">
+  <button class="wb-btn" id="tblur" aria-pressed="false">Live blur: on</button>
+  <button class="wb-btn" id="tlock">Lock</button>
+  <span class="wb-meter" id="fps">-- fps</span>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   Cupertino Pi — an iOS-shaped shell prototype.
+   No framework, no Apple assets. Three things carry the feel:
+   springs, rubber-banding, and interruptible gestures.
+   ============================================================ */
+
+/* Served standalone (file://, or nginx on the Pi) there is no viewport meta,
+   so a phone lays the page out at 980px. Add one if the host has not. */
+if (!document.querySelector('meta[name="viewport"]')) {
+  const m = document.createElement('meta');
+  m.name = 'viewport';
+  m.content = 'width=device-width,initial-scale=1,viewport-fit=cover';
+  document.head.appendChild(m);
+}
+
+const dev = document.getElementById('dev');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---- superellipse mask: iOS icons are squircles, not rounded rects ---- */
+function squirclePath(n = 5, steps = 96) {
+  const pts = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * Math.PI * 2;
+    const c = Math.cos(t), s = Math.sin(t);
+    const x = 50 + 50 * Math.sign(c) * Math.pow(Math.abs(c), 2 / n);
+    const y = 50 + 50 * Math.sign(s) * Math.pow(Math.abs(s), 2 / n);
+    pts.push(x.toFixed(2) + ' ' + y.toFixed(2));
+  }
+  return 'M' + pts.join('L') + 'Z';
+}
+{
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${squirclePath()}" fill="#000"/></svg>`;
+  dev.style.setProperty('--squircle', `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`);
+}
+
+/* ---- spring integrator. Interruptible: stop() hands back position + velocity ---- */
+function spring(opts) {
+  const { from, to, velocity = 0, stiffness = 190, damping = 24, mass = 1, onUpdate, onDone } = opts;
+  let x = from, v = velocity, last = performance.now(), raf = 0, dead = false;
+  if (REDUCED) { onUpdate(to, 0); onDone && onDone(); return { stop: () => ({ x: to, v: 0 }) }; }
+  const step = (now) => {
+    const dt = Math.min((now - last) / 1000, 1 / 30); last = now;
+    const n = Math.max(1, Math.ceil(dt * 240)), h = dt / n;
+    for (let i = 0; i < n; i++) {
+      const f = -stiffness * (x - to) - damping * v;
+      v += (f / mass) * h; x += v * h;
+    }
+    onUpdate(x, v);
+    if (Math.abs(x - to) < 0.04 && Math.abs(v) < 0.06) { onUpdate(to, 0); dead = true; onDone && onDone(); return; }
+    raf = requestAnimationFrame(step);
+  };
+  raf = requestAnimationFrame(step);
+  return { stop() { if (!dead) cancelAnimationFrame(raf); dead = true; return { x, v }; } };
+}
+
+/* ---- UIScrollView rubber-banding, the real formula ---- */
+const rubber = (x, dim, c = 0.55) => (x * dim * c) / (dim + c * Math.abs(x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+
+/* ---- glyphs (original, drawn for this project) ---- */
+const G = {
+  gear: '<path d="M12 8.4a3.6 3.6 0 1 0 0 7.2 3.6 3.6 0 0 0 0-7.2zm9 3.6a8.9 8.9 0 0 0-.13-1.5l2.05-1.55-2-3.46-2.4 1a9 9 0 0 0-2.6-1.5L15.6 2h-4l-.32 2.99a9 9 0 0 0-2.6 1.5l-2.4-1-2 3.46 2.05 1.55a8.9 8.9 0 0 0 0 3l-2.05 1.55 2 3.46 2.4-1a9 9 0 0 0 2.6 1.5L11.6 22h4l.32-2.99a9 9 0 0 0 2.6-1.5l2.4 1 2-3.46-2.05-1.55A8.9 8.9 0 0 0 21 12z"/>',
+  cast: '<path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h13A2.5 2.5 0 0 1 21 5.5v10a2.5 2.5 0 0 1-2.5 2.5H13v-2h5.5a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5h-13a.5.5 0 0 0-.5.5V8H3z"/><path d="M2 20a2 2 0 0 0-2-2v2zM2 16.5A5.5 5.5 0 0 1 7.5 22h2A7.5 7.5 0 0 0 2 14.5zM2 11a11 11 0 0 1 11 11h2A13 13 0 0 0 2 9z"/>',
+  calc: '<path d="M6 2h12a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3zm.5 3.5v3.6h11V5.5zM7 12.6a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8zm5 0a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8zm5 0a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8zM7 17a1.4 1.4 0 1 0 0 2.8A1.4 1.4 0 0 0 7 17zm5 0a1.4 1.4 0 1 0 0 2.8A1.4 1.4 0 0 0 12 17zm5 0a1.4 1.4 0 1 0 0 2.8A1.4 1.4 0 0 0 17 17z"/>',
+  photo: '<path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm3.5 3A2.5 2.5 0 1 0 10 9.5 2.5 2.5 0 0 0 7.5 7zM4 18h16l-5.2-6.8-3.6 4.4-2.3-2.6z"/>',
+  note: '<path d="M5 2h14a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm2.5 5v2h9V7zm0 4.5v2h9v-2zm0 4.5v2h5.5v-2z"/>',
+  music: '<path d="M20 3.2 9 5.6v10.1a3.6 3.6 0 1 0 2 3.2V9l7-1.5v6.2a3.6 3.6 0 1 0 2 3.2z"/>',
+  wifi: '<path d="M12 18.8 9.2 15.7a4 4 0 0 1 5.6 0zM12 12.2a7 7 0 0 0-5 2.1l-2-2.2a10 10 0 0 1 14 0l-2 2.2a7 7 0 0 0-5-2.1zM12 5.5a13.6 13.6 0 0 1 9.6 3.9l-2 2.2a10.8 10.8 0 0 0-15.2 0l-2-2.2A13.6 13.6 0 0 1 12 5.5z"/>',
+  bt: '<path d="m11 2 6.5 5.2L13.4 11l4.1 3.8L11 20v-7l-3.6 3-1.3-1.5 4.4-3.5-4.4-3.5L7.4 6 11 9zm2 3.9V9l1.9-1.5zm0 8.2v3.1l1.9-1.6z"/>',
+  sound: '<path d="M11 4v16l-5-4H3a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h3zm4.2 2.4a8 8 0 0 1 0 11.2l-1.5-1.5a5.9 5.9 0 0 0 0-8.2zm2.9-2.9a12 12 0 0 1 0 17l-1.5-1.5a9.9 9.9 0 0 0 0-14z"/>',
+  bright: '<path d="M12 7.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zM11 1h2v3.5h-2zm0 19.5h2V24h-2zM1 11h3.5v2H1zm18.5 0H23v2h-3.5zM4.2 5.6l1.4-1.4 2.5 2.5-1.4 1.4zm12 12 1.4-1.4 2.5 2.5-1.4 1.4zm2.5-13.4 1.4 1.4-2.5 2.5-1.4-1.4zM4.2 18.4l2.5-2.5 1.4 1.4-2.5 2.5z"/>',
+  info: '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 4.5h2v2h-2zm0 3.5h2v8h-2z"/>',
+  plane: '<path d="M22 15.5 13.5 10V4a1.5 1.5 0 0 0-3 0v6L2 15.5V18l8.5-2.6V20L8 21.5V23l4-1 4 1v-1.5L13.5 20v-4.6L22 18z"/>',
+  cell: '<path d="M4 20a1 1 0 0 1-1-1v-3h3v4zm5 0v-7h3v7zm5 0V8h3v12zm5 0V3h3v17z"/>',
+  torch: '<path d="M8 2h8v4l-2 3v13H10V9L8 6zm2 2v1.4l2 3 2-3V4z"/>',
+  timer: '<path d="M12 4a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm1 4v5.6l3.7 2.2-1 1.7-4.7-2.8V8zM9 1h6v2H9z"/>',
+  cam: '<path d="M9.5 3h5l1.3 2H20a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3.2zM12 8a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/>',
+  chev: '<path d="M9 4.5 16.5 12 9 19.5 7.6 18.1 13.7 12 7.6 5.9z"/>',
+  play: '<path d="M6 3.5 20 12 6 20.5z"/>',
+  pause: '<path d="M6 4h4v16H6zm8 0h4v16h-4z"/>',
+  prev: '<path d="M6 4h2.6v16H6zm12 0v16L8.6 12z"/>',
+  next: '<path d="M18 4h-2.6v16H18zM6 4v16l9.4-8z"/>',
+  grid: '<path d="M3 3h7.5v7.5H3zm10.5 0H21v7.5h-7.5zM3 13.5h7.5V21H3zm10.5 0H21V21h-7.5z"/>',
+  globe: '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 7h-2.6a14 14 0 0 0-1.3-4.2A8 8 0 0 1 18.9 9zM12 4.2c.8 1.1 1.5 2.7 1.9 4.8h-3.8c.4-2.1 1.1-3.7 1.9-4.8zM4.3 15A8 8 0 0 1 4 12a8 8 0 0 1 .3-3H7a17 17 0 0 0 0 6zm.8 2h2.6a14 14 0 0 0 1.3 4.2A8 8 0 0 1 5.1 17zm2.6-10H5.1a8 8 0 0 1 3.9-4.2A14 14 0 0 0 7.7 7zM12 19.8c-.8-1.1-1.5-2.7-1.9-4.8h3.8c-.4 2.1-1.1 3.7-1.9 4.8zM14.3 13H9.7a15 15 0 0 1 0-6h4.6a15 15 0 0 1 0 6zm.7 8.2a14 14 0 0 0 1.3-4.2h2.6a8 8 0 0 1-3.9 4.2zM17 15a17 17 0 0 0 0-6h2.7a8 8 0 0 1 0 6z"/>',
+  lockg: '<path d="M7 10V7a5 5 0 0 1 10 0v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zm2 0h6V7a3 3 0 0 0-6 0z"/>'
+};
+const svgIco = (k, size) => `<svg viewBox="0 0 24 24" fill="currentColor"${size ? ` width="${size}" height="${size}"` : ''}>${G[k] || ''}</svg>`;
+
+/* ---- runtime state the shell actually reads ---- */
+const st = {
+  wifi: true, ssid: 'homenode-5g', bt: true, air: false, cell: true,
+  bright: 0.78, vol: 0.42, torch: false, timer: false, camera: false,
+  bindings: true, appearance: 'Dark', textSize: 'Default', playing: false,
+  transports: { waypipe: 'ok', redroid: 'off', moonlight: 'ok' }
+};
+
+/* ---- app registry ---- */
+const REAL = ['settings', 'transports', 'calc', 'photos', 'notes', 'music'];
+const APPS = {
+  settings:   { name: 'Settings',   glyph: 'gear',  bg: 'linear-gradient(180deg,#9ba0ab,#5d626e)' },
+  transports: { name: 'Displays',   glyph: 'cast',  bg: 'linear-gradient(180deg,#37c1ff,#0a68e0)' },
+  calc:       { name: 'Calculator', glyph: 'calc',  bg: 'linear-gradient(180deg,#3a3a3c,#1c1c1e)' },
+  photos:     { name: 'Photos',     glyph: 'photo', bg: 'linear-gradient(140deg,#ffd60a,#ff375f 55%,#5e5ce6)' },
+  notes:      { name: 'Notes',      glyph: 'note',  bg: 'linear-gradient(180deg,#fee78a,#f2c14a)' },
+  music:      { name: 'Music',      glyph: 'music', bg: 'linear-gradient(180deg,#fc4d6b,#e01e5a)' },
+  browser:    { name: 'Browser',    glyph: 'globe', bg: 'linear-gradient(180deg,#4aa3ff,#1264d8)' },
+  files:      { name: 'Files',      glyph: 'grid',  bg: 'linear-gradient(180deg,#4fb3ff,#1d7fe0)' },
+  clock:      { name: 'Clock',      glyph: 'timer', bg: 'linear-gradient(180deg,#2c2c2e,#0a0a0c)' },
+  weather:    { name: 'Weather',    glyph: 'wifi',  bg: 'linear-gradient(180deg,#4facf7,#1b62c9)' },
+  camera:     { name: 'Camera',     glyph: 'cam',   bg: 'linear-gradient(180deg,#6e6e73,#3a3a3c)' },
+  torchapp:   { name: 'Torch',      glyph: 'torch', bg: 'linear-gradient(180deg,#ffd60a,#e8a90c)' },
+  audio:      { name: 'Audio',      glyph: 'sound', bg: 'linear-gradient(180deg,#ff9f0a,#e06a00)' },
+  network:    { name: 'Network',    glyph: 'cell',  bg: 'linear-gradient(180deg,#30d158,#149a3d)' },
+  pair:       { name: 'Pairing',    glyph: 'bt',    bg: 'linear-gradient(180deg,#5b93ff,#2a4ed6)' },
+  vault:      { name: 'Vault',      glyph: 'lockg', bg: 'linear-gradient(180deg,#8e8e93,#48484a)' },
+  brightapp:  { name: 'Display',    glyph: 'bright',bg: 'linear-gradient(180deg,#64d2ff,#0a84ff)' },
+  about:      { name: 'About',      glyph: 'info',  bg: 'linear-gradient(180deg,#8e8e93,#3a3a3c)' },
+  flights:    { name: 'Offline',    glyph: 'plane', bg: 'linear-gradient(180deg,#ff9f0a,#c96a00)' },
+  media:      { name: 'Media',      glyph: 'play',  bg: 'linear-gradient(180deg,#bf5af2,#7b2fd0)' },
+  logs:       { name: 'Logs',       glyph: 'note',  bg: 'linear-gradient(180deg,#5e5ce6,#3634a3)' },
+  power:      { name: 'Power',      glyph: 'gear',  bg: 'linear-gradient(180deg,#30d158,#0f7a34)' },
+  updates:    { name: 'Updates',    glyph: 'chev',  bg: 'linear-gradient(180deg,#8e8e93,#5a5a5f)' },
+  console:    { name: 'Console',    glyph: 'grid',  bg: 'linear-gradient(180deg,#2c2c2e,#141416)' },
+  sensors:    { name: 'Sensors',    glyph: 'info',  bg: 'linear-gradient(180deg,#ff453a,#b8231b)' },
+  wall:       { name: 'Wallpaper',  glyph: 'photo', bg: 'linear-gradient(140deg,#5ac8fa,#af52de)' },
+  gpio:       { name: 'GPIO',       glyph: 'cell',  bg: 'linear-gradient(180deg,#ac8e68,#6d573c)' },
+  store:      { name: 'Storage',    glyph: 'files', bg: 'linear-gradient(180deg,#0a84ff,#0a4fb0)' },
+  temps:      { name: 'Thermals',   glyph: 'bright',bg: 'linear-gradient(180deg,#ff9f0a,#ff375f)' },
+  keys:       { name: 'Keys',       glyph: 'lockg', bg: 'linear-gradient(180deg,#ffd60a,#c79400)' },
+  net2:       { name: 'Mesh',       glyph: 'globe', bg: 'linear-gradient(180deg,#30d158,#0a84ff)' },
+  jobs:       { name: 'Jobs',       glyph: 'timer', bg: 'linear-gradient(180deg,#5e5ce6,#bf5af2)' },
+  term:       { name: 'Terminal',   glyph: 'grid',  bg: 'linear-gradient(180deg,#1c1c1e,#000)' }
+};
+/* 4 x 6 = 24 per page, plus a 4-slot dock. Both are config, not constants. */
+const COLS = 4, ROWS = 6;
+const PAGES = [
+  ['transports','browser','photos','music','calc','notes','clock','weather','camera','files','network','pair',
+   'brightapp','audio','vault','flights','media','logs','power','updates','console','sensors','wall','gpio'],
+  ['store','temps','keys','net2','jobs','term','torchapp','about']
+];
+const DOCK = ['transports','notes','photos','settings'];
+
+/* ---- home screen ---- */
+const pager = document.getElementById('pager');
+const dotsEl = document.getElementById('dots');
+const dockEl = document.getElementById('dock');
+const layer = document.getElementById('layer');
+const W = 393;
+
+function makeIcon(id) {
+  const a = APPS[id];
+  const b = el('button', 'icon');
+  b.type = 'button';
+  b.dataset.app = id;
+  b.innerHTML = `<span class="art sq" style="background:${a.bg}">${svgIco(a.glyph)}</span><span class="lab">${a.name}</span>`;
+  b.addEventListener('click', () => { if (!draggedJustNow()) openApp(id, b); });
+  return b;
+}
+PAGES.forEach(ids => {
+  const p = el('div', 'page'), g = el('div', 'grid');
+  ids.slice(0, COLS * ROWS).forEach(id => g.appendChild(makeIcon(id)));
+  p.appendChild(g); pager.appendChild(p);
+});
+PAGES.forEach((_, i) => { const d = el('i'); if (!i) d.className = 'on'; dotsEl.appendChild(d); });
+DOCK.forEach(id => dockEl.appendChild(makeIcon(id)));
+
+let page = 0, pagerX = 0, pagerAnim = null;
+const setPagerX = (x) => { pagerX = x; pager.style.transform = `translate3d(${x}px,0,0)`; };
+function goPage(n, v = 0) {
+  page = clamp(n, 0, PAGES.length - 1);
+  [...dotsEl.children].forEach((d, i) => d.classList.toggle('on', i === page));
+  pagerAnim && pagerAnim.stop();
+  pagerAnim = spring({ from: pagerX, to: -page * W, velocity: v, stiffness: 210, damping: 28, onUpdate: setPagerX });
+}
+
+/* ---- status bar clock ---- */
+const fmt = (d) => `${((d.getHours() + 11) % 12) + 1}:${String(d.getMinutes()).padStart(2, '0')}`;
+const longDate = (d) => d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+function tick() {
+  const d = new Date(), t = fmt(d);
+  document.getElementById('stime').textContent = t;
+  document.querySelectorAll('[data-clock]').forEach(n => n.textContent = t);
+  document.querySelectorAll('[data-date]').forEach(n => n.textContent = longDate(d));
+}
+tick(); setInterval(tick, 5000);
+
+/* ---- brightness is real: it dims the screen ---- */
+const dimmer = document.getElementById('dimmer');
+const applyBright = () => dimmer.style.opacity = String((1 - st.bright) * 0.72);
+applyBright();
+
+/* ============================================================
+   App window: open zooms out of the icon, close falls back into it.
+   The same 0..1 progress drives both the spring and the finger,
+   which is what makes the transition grabbable mid-flight.
+   ============================================================ */
+let current = null;      // { id, wrap, origin, t, anim }
+let openStack = [];      // most-recent-first, for the switcher
+
+function iconRect(btn) {
+  if (!btn) return { x: W / 2 - 30, y: 380, w: 60, h: 60 };
+  const d = dev.getBoundingClientRect(), r = btn.querySelector('.art').getBoundingClientRect();
+  const s = d.width / W;
+  return { x: (r.left - d.left) / s, y: (r.top - d.top) / s, w: r.width / s, h: r.height / s };
+}
+function applyProgress(t) {
+  if (!current) return;
+  const o = current.origin, H = 852;
+  const sx = lerp(o.w / W, 1, t), sy = lerp(o.h / H, 1, t);
+  const tx = lerp(o.x, 0, t), ty = lerp(o.y, 0, t);
+  current.wrap.style.transform = `translate3d(${tx}px,${ty}px,0) scale(${sx},${sy})`;
+  current.wrap.style.borderRadius = `${lerp(28, 0, t)}px`;
+  current.wrap.style.opacity = String(clamp(t * 3, 0, 1));
+  document.getElementById('home').style.transform = `scale(${lerp(1, 1.08, t)})`;
+  document.getElementById('home').style.opacity = String(lerp(1, 0, clamp(t * 1.4, 0, 1)));
+  current.t = t;
+}
+function openApp(id, btn) {
+  if (current) closeApp(true);
+  const wrap = el('div', 'appwrap');
+  wrap.appendChild(buildApp(id));
+  layer.appendChild(wrap);
+  current = { id, wrap, origin: iconRect(btn), t: 0, anim: null };
+  openStack = [id, ...openStack.filter(a => a !== id)];
+  applyProgress(0);
+  current.anim = spring({ from: 0, to: 1, stiffness: 200, damping: 26, onUpdate: applyProgress });
+}
+function closeApp(instant, v = 0, then) {
+  if (!current) { then && then(); return; }
+  const c = current;
+  const finish = () => {
+    c.wrap.remove();
+    if (current === c) current = null;
+    const h = document.getElementById('home');
+    h.style.transform = ''; h.style.opacity = '';
+    then && then();
+  };
+  c.anim && c.anim.stop();
+  if (instant) return finish();
+  c.anim = spring({ from: c.t, to: 0, velocity: v, stiffness: 200, damping: 27, onUpdate: applyProgress, onDone: finish });
+}
+
+/* ============================================================
+   Gestures. One pointer handler owns the whole screen and decides
+   which interaction it is on first movement, then commits.
+   ============================================================ */
+let gesture = null;
+dev.addEventListener('pointerdown', (e) => {
+  if (e.target.closest('[data-nograb]')) return;
+  const d = dev.getBoundingClientRect(), s = d.width / W;
+  const x = (e.clientX - d.left) / s, y = (e.clientY - d.top) / s;
+  gesture = { x0: x, y0: y, x, y, t0: performance.now(), kind: null, moved: false, vy: 0, vx: 0, last: performance.now() };
+  if (overlay) gesture.kind = 'overlay-close';
+  else if (y < 44) gesture.kind = x > W / 2 ? 'cc-open' : 'nc-open';
+  else if (y > 852 - 34) gesture.kind = current || switcherOn ? 'app-home' : 'lock-ish';
+  else if (locked) gesture.kind = 'unlock';
+  else if (switcherOn) gesture.kind = 'sw-pan';
+  else if (!current) gesture.kind = 'pages';
+}, { passive: true });
+
+addEventListener('pointermove', (e) => {
+  if (!gesture) return;
+  const d = dev.getBoundingClientRect(), s = d.width / W;
+  const x = (e.clientX - d.left) / s, y = (e.clientY - d.top) / s;
+  const now = performance.now(), dt = Math.max(8, now - gesture.last);
+  gesture.vx = (x - gesture.x) / dt * 1000; gesture.vy = (y - gesture.y) / dt * 1000;
+  gesture.x = x; gesture.y = y; gesture.last = now;
+  const dx = x - gesture.x0, dy = y - gesture.y0;
+  if (!gesture.moved && Math.hypot(dx, dy) > 6) gesture.moved = true;
+  if (!gesture.moved) return;
+  const k = gesture.kind;
+
+  if (k === 'pages') {
+    pagerAnim && pagerAnim.stop();
+    const base = -page * W;
+    let nx = base + dx;
+    if (nx > 0) nx = rubber(nx, W);
+    const min = -(PAGES.length - 1) * W;
+    if (nx < min) nx = min + rubber(nx - min, W);
+    setPagerX(nx);
+  } else if (k === 'app-home' && current) {
+    current.anim && current.anim.stop();
+    applyProgress(clamp(1 - (-dy) / 480, 0.06, 1));
+    if (-dy > 110) scheduleArm(); else disarmSwitcher();
+  } else if (k === 'unlock') {
+    if (!lockEl) return;
+    lockAnim && lockAnim.stop();
+    setLockY(Math.min(0, dy));
+  } else if (k === 'cc-open' || k === 'nc-open') {
+    if (dy > 4) openOverlay(k === 'cc-open' ? 'cc' : 'nc', clamp(dy / 380, 0, 1));
+  } else if (k === 'overlay-close') {
+    if (overlay) setOverlay(clamp(overlay.p0 + dy / 380, 0, 1));
+  } else if (k === 'sw-pan') {
+    swAnim && swAnim.stop();
+    setSwX(swX0 + dx);
+  }
+}, { passive: true });
+
+addEventListener('pointerup', () => {
+  if (!gesture) return;
+  const g = gesture; gesture = null;
+  const dx = g.x - g.x0, dy = g.y - g.y0, k = g.kind;
+  if (g.moved) lastDragEnd = performance.now();
+  if (!g.moved) {
+    if (k === 'overlay-close') closeOverlay();
+    else if (k === 'unlock') { /* tap on lock: ignore */ }
+    return;
+  }
+  if (k === 'pages') {
+    const target = (Math.abs(g.vx) > 320) ? page - Math.sign(g.vx)
+                 : Math.round(-(pagerX) / W);
+    goPage(target, g.vx);
+  } else if (k === 'app-home' && current) {
+    if (switcherArmed) { const id = current.id; disarmSwitcher(); closeApp(true); showSwitcher(id); return; }
+    else if (-dy > 90 || g.vy < -320) closeApp(false, g.vy / 400);
+    else current.anim = spring({ from: current.t, to: 1, velocity: 0, stiffness: 210, damping: 27, onUpdate: applyProgress });
+    disarmSwitcher();
+  } else if (k === 'app-home' && switcherOn) {
+    if (-dy > 60) hideSwitcher();
+  } else if (k === 'unlock') {
+    if (-dy > 110 || g.vy < -400) unlock(g.vy); else settleLock();
+  } else if (k === 'cc-open' || k === 'nc-open') {
+    if (overlay) (dy > 110 || g.vy > 380) ? settleOverlay(1) : closeOverlay();
+  } else if (k === 'overlay-close') {
+    if (overlay) (dy > 90 || g.vy > 380) ? closeOverlay() : settleOverlay(1);
+  } else if (k === 'sw-pan') {
+    snapSwitcher(g.vx);
+  }
+}, { passive: true });
+addEventListener('pointercancel', () => { gesture = null; }, { passive: true });
+
+/* A drag that ends on an icon must not also count as a tap. */
+let lastDragEnd = 0;
+const draggedJustNow = () => performance.now() - lastDragEnd < 260;
+
+/* Swipe up and hold. Velocity is useless here — during a hold no pointermove
+   fires, so the last sample never decays. Dwell time is the honest signal:
+   the timer restarts on every move and only lands once the finger is still. */
+let switcherArmed = false, holdTimer = 0;
+function scheduleArm() {
+  if (switcherArmed) return;
+  clearTimeout(holdTimer);
+  holdTimer = setTimeout(() => {
+    if (!gesture || gesture.kind !== 'app-home' || !current) return;
+    switcherArmed = true;
+    current.anim && current.anim.stop();
+    current.anim = spring({ from: current.t, to: 0.42, stiffness: 260, damping: 31, onUpdate: applyProgress });
+  }, 190);
+}
+function disarmSwitcher() { clearTimeout(holdTimer); switcherArmed = false; }
+
+/* ---- lock screen ---- */
+let locked = true, lockEl = null, lockY = 0, lockAnim = null;
+function buildLock() {
+  const n = el('div', 'lock');
+  n.innerHTML = `
+    <div class="clockwrap">
+      <div class="date" data-date>${longDate(new Date())}</div>
+      <div class="time" data-clock>${fmt(new Date())}</div>
+    </div>
+    <div class="notif">
+      <div>
+        <div class="hd"><span class="dot" style="background:linear-gradient(180deg,#37c1ff,#0a68e0)"></span>Displays · now</div>
+        <div class="ti">Home node is up</div>
+        <div class="bd">waypipe session ready on 10.8.0.2 — 4 apps available.</div>
+      </div>
+      <div>
+        <div class="hd"><span class="dot" style="background:linear-gradient(180deg,#30d158,#149a3d)"></span>Network · 12m ago</div>
+        <div class="ti">Joined homenode-5g</div>
+        <div class="bd">WireGuard tunnel established, 3 peers reachable.</div>
+      </div>
+    </div>
+    <div class="quick">
+      <button class="qbtn" data-nograb aria-label="Torch">${svgIco('torch', 22)}</button>
+      <button class="qbtn" data-nograb aria-label="Camera">${svgIco('cam', 22)}</button>
+    </div>
+    <div class="hint">Swipe up to open</div>`;
+  return n;
+}
+const setLockY = (y) => {
+  lockY = y;
+  const h = document.getElementById('home'), p = clamp(-y / 300, 0, 1);
+  h.style.opacity = String(p);
+  h.style.transform = `scale(${lerp(1.07, 1, p)})`;
+  if (!lockEl) return;
+  lockEl.style.transform = `translate3d(0,${y}px,0)`;
+  lockEl.style.opacity = String(clamp(1 + y / 500, 0, 1));
+};
+function settleLock() { lockAnim && lockAnim.stop(); lockAnim = spring({ from: lockY, to: 0, stiffness: 220, damping: 26, onUpdate: setLockY }); }
+function unlock(v = 0) {
+  /* Commit the state change now, not when the spring settles — otherwise a
+     gesture that lands mid-animation is read as still-locked and snaps back. */
+  if (!locked) return;
+  locked = false;
+  lockAnim && lockAnim.stop();
+  lockAnim = spring({ from: lockY, to: -900, velocity: v, stiffness: 170, damping: 25, onUpdate: setLockY,
+    onDone: () => {
+      if (lockEl) { lockEl.remove(); lockEl = null; }
+      const h = document.getElementById('home'); h.style.opacity = ''; h.style.transform = '';
+    } });
+}
+function lockNow() {
+  if (locked) return;
+  closeApp(true); hideSwitcher(true); closeOverlay(true);
+  locked = true; lockEl = buildLock(); layer.appendChild(lockEl);
+  setLockY(-900); lockAnim = spring({ from: -900, to: 0, stiffness: 200, damping: 28, onUpdate: setLockY });
+}
+lockEl = buildLock(); layer.appendChild(lockEl); setLockY(0);
+
+/* ---- overlays: Control Center and Notification Center ---- */
+let overlay = null;   // { kind, node, p, p0 }
+function setOverlay(p) {
+  if (!overlay) return;
+  overlay.p = p;
+  overlay.node.style.transform = `translate3d(0,${lerp(-852, 0, p)}px,0)`;
+  overlay.node.style.opacity = String(clamp(p * 2.2, 0, 1));
+}
+function openOverlay(kind, p) {
+  if (!overlay) {
+    const node = kind === 'cc' ? buildCC() : buildNC();
+    layer.appendChild(node);
+    overlay = { kind, node, p: 0, p0: 0 };
+  }
+  setOverlay(p);
+}
+function settleOverlay(to) {
+  if (!overlay) return;
+  overlay.p0 = to;
+  spring({ from: overlay.p, to, stiffness: 230, damping: 29, onUpdate: setOverlay });
+}
+function closeOverlay(instant) {
+  if (!overlay) return;
+  const o = overlay; overlay = null;
+  const kill = () => o.node.remove();
+  if (instant) return kill();
+  spring({ from: o.p, to: 0, stiffness: 230, damping: 30, onUpdate: (v) => { o.node.style.transform = `translate3d(0,${lerp(-852, 0, v)}px,0)`; o.node.style.opacity = String(clamp(v * 2.2, 0, 1)); }, onDone: kill });
+}
+
+function buildCC() {
+  const n = el('div', 'cc');
+  n.innerHTML = `<div class="scrim"></div>
+    <div class="cc-grid">
+      <div class="cc-card"><div class="conn">
+        <button class="cbtn ${st.air ? 'on' : ''}" data-k="air" data-nograb aria-label="Offline mode">${svgIco('plane', 22)}</button>
+        <button class="cbtn ${st.cell ? 'on' : ''}" data-k="cell" data-nograb aria-label="Cellular">${svgIco('cell', 22)}</button>
+        <button class="cbtn ${st.wifi ? 'on' : ''}" data-k="wifi" data-nograb aria-label="Wi-Fi">${svgIco('wifi', 22)}</button>
+        <button class="cbtn ${st.bt ? 'on' : ''}" data-k="bt" data-nograb aria-label="Bluetooth">${svgIco('bt', 22)}</button>
+      </div></div>
+      <div class="cc-card cc-now">
+        <div class="art2" style="background:linear-gradient(140deg,#fc4d6b,#5e5ce6)"></div>
+        <div><div class="t1">${st.playing ? 'Bench Loop' : 'Nothing playing'}</div><div class="t2">${st.playing ? 'Compositor Sessions' : 'Music'}</div></div>
+      </div>
+    </div>
+    <div class="cc-slabs">
+      <div class="cc-slab" data-lv="bright" data-nograb><div class="lv"></div><div class="gl">${svgIco('bright', 26)}</div></div>
+      <div class="cc-slab" data-lv="vol" data-nograb><div class="lv"></div><div class="gl">${svgIco('sound', 26)}</div></div>
+    </div>
+    <div class="tiles">
+      <button class="tile ${st.torch ? 'on' : ''}" data-t="torch" data-nograb aria-label="Torch">${svgIco('torch', 24)}</button>
+      <button class="tile ${st.timer ? 'on' : ''}" data-t="timer" data-nograb aria-label="Timer">${svgIco('timer', 24)}</button>
+      <button class="tile" data-open="calc" data-nograb aria-label="Calculator">${svgIco('calc', 24)}</button>
+      <button class="tile" data-open="camera" data-nograb aria-label="Camera">${svgIco('cam', 24)}</button>
+    </div>`;
+  const paint = () => {
+    n.querySelectorAll('.cbtn').forEach(b => b.classList.toggle('on', !!st[b.dataset.k]));
+    n.querySelector('[data-lv="bright"] .lv').style.height = (st.bright * 100) + '%';
+    n.querySelector('[data-lv="vol"] .lv').style.height = (st.vol * 100) + '%';
+  };
+  paint();
+  n.addEventListener('click', (e) => {
+    const c = e.target.closest('.cbtn');
+    if (c) { st[c.dataset.k] = !st[c.dataset.k]; if (c.dataset.k === 'air' && st.air) { st.wifi = false; st.cell = false; } paint(); return; }
+    const t = e.target.closest('.tile[data-t]');
+    if (t) { st[t.dataset.t] = !st[t.dataset.t]; t.classList.toggle('on', st[t.dataset.t]); return; }
+    const o = e.target.closest('[data-open]');
+    if (o) { closeOverlay(); openApp(o.dataset.open, null); }
+  });
+  n.querySelectorAll('.cc-slab').forEach(sl => {
+    const key = sl.dataset.lv === 'bright' ? 'bright' : 'vol';
+    const drag = (ev) => {
+      const r = sl.getBoundingClientRect();
+      st[key] = clamp(1 - (ev.clientY - r.top) / r.height, 0.04, 1);
+      paint(); if (key === 'bright') applyBright();
+    };
+    sl.addEventListener('pointerdown', (ev) => { sl.setPointerCapture(ev.pointerId); drag(ev); });
+    sl.addEventListener('pointermove', (ev) => { if (ev.buttons) drag(ev); });
+  });
+  return n;
+}
+
+function buildNC() {
+  const feed = [
+    ['Displays', 'linear-gradient(180deg,#37c1ff,#0a68e0)', 'now', 'Home node is up', 'waypipe session ready on 10.8.0.2 — 4 apps available.'],
+    ['Network', 'linear-gradient(180deg,#30d158,#149a3d)', '12m ago', 'Joined homenode-5g', 'WireGuard tunnel established, 3 peers reachable.'],
+    ['Thermals', 'linear-gradient(180deg,#ff9f0a,#ff375f)', '31m ago', 'SoC at 61 °C', 'Sustained compositing load. Fan curve stepped to 40%.'],
+    ['Updates', 'linear-gradient(180deg,#8e8e93,#5a5a5f)', '2h ago', 'Shell build 0.4.1 staged', 'Restart the compositor to apply. Nothing else is affected.'],
+    ['Storage', 'linear-gradient(180deg,#0a84ff,#0a4fb0)', 'Yesterday', '18.4 GB free', 'Photos cache trimmed by 2.1 GB during the nightly job.']
+  ];
+  const n = el('div', 'nc');
+  n.innerHTML = `<div class="scrim"></div>
+    <div class="nc-head"><div class="d" data-date>${longDate(new Date())}</div><div class="t" data-clock>${fmt(new Date())}</div></div>
+    ${feed.map(([app, bg, when, ti, bd]) => `<div class="nc-card">
+      <div class="hd"><span class="dot" style="background:${bg}"></span>${app} · ${when}</div>
+      <div class="ti">${ti}</div><div class="bd">${bd}</div></div>`).join('')}`;
+  return n;
+}
+
+/* ---- app switcher ---- */
+let switcherOn = false, swNode = null, swX = 0, swX0 = 0, swAnim = null, swIndex = 0;
+const CARD = 258 + 14;
+const setSwX = (x) => { swX = x; swNode && (swNode.querySelector('.sw-track').style.transform = `translate3d(${x}px,0,0)`); };
+function showSwitcher(focus) {
+  if (switcherOn) return;
+  switcherOn = true;
+  swNode = el('div', 'switcher');
+  const track = el('div', 'sw-track');
+  const list = openStack.length ? openStack : [];
+  list.forEach(id => {
+    const a = APPS[id], c = el('div', 'card');
+    c.dataset.app = id;
+    c.innerHTML = `<div class="prev" style="background:${a.bg}">
+        <h3>${a.name}</h3><p>${previewLine(id)}</p></div>`;
+    c.addEventListener('click', () => { const wasFocus = id; hideSwitcher(true); openApp(wasFocus, null); });
+    track.appendChild(c);
+  });
+  swNode.innerHTML = '<div class="scrim"></div>';
+  swNode.querySelector('.scrim').addEventListener('click', () => hideSwitcher());
+  if (!list.length) swNode.appendChild(el('div', 'empty-sw', 'No open apps'));
+  swNode.appendChild(track);
+  layer.appendChild(swNode);
+  swIndex = Math.max(0, list.indexOf(focus));
+  swX0 = swX = -swIndex * CARD;
+  setSwX(swX);
+}
+function snapSwitcher(v = 0) {
+  const n = openStack.length; if (!n) return;
+  swIndex = clamp(Math.abs(v) > 300 ? swIndex - Math.sign(v) : Math.round(-swX / CARD), 0, n - 1);
+  swAnim && swAnim.stop();
+  swAnim = spring({ from: swX, to: -swIndex * CARD, velocity: v, stiffness: 210, damping: 29, onUpdate: setSwX, onDone: () => swX0 = swX });
+  swX0 = -swIndex * CARD;
+}
+function hideSwitcher(instant) {
+  if (!switcherOn) return;
+  switcherOn = false;
+  const nd = swNode; swNode = null;
+  if (instant) return nd.remove();
+  spring({ from: 1, to: 0, stiffness: 240, damping: 30, onUpdate: (t) => { nd.style.opacity = String(t); nd.style.transform = `scale(${lerp(.92, 1, t)})`; }, onDone: () => nd.remove() });
+}
+function previewLine(id) {
+  return ({
+    settings: 'Every row is a schema entry bound to a real service.',
+    transports: 'waypipe · redroid · Moonlight, each framed as its own app.',
+    calc: 'Arithmetic, laid out on the 4×5 grid.',
+    photos: 'Procedural tiles — no assets ship with the shell.',
+    notes: 'The build plan, kept where the work happens.',
+    music: 'Materials demo: blur, vibrancy, a live scrubber.'
+  })[id] || 'Placeholder slot — not built in this prototype.';
+}
+
+/* ============================================================
+   Settings is a schema, not a screen. One renderer walks this
+   tree; every row names the Linux service it would bind to.
+   Adding a pane is data, not code.
+   ============================================================ */
+const SCHEMA = {
+  root: { title: 'Settings', groups: [
+    { rows: [
+      { t: 'nav', to: 'wifi', icon: 'wifi', tint: '#0a84ff', label: 'Wi-Fi', value: () => st.air ? 'Off' : (st.wifi ? st.ssid : 'Not Connected'), bind: 'org.freedesktop.NetworkManager' },
+      { t: 'nav', to: 'bluetooth', icon: 'bt', tint: '#0a84ff', label: 'Bluetooth', value: () => st.bt ? 'On' : 'Off', bind: 'org.bluez' },
+      { t: 'toggle', key: 'air', icon: 'plane', tint: '#ff9f0a', label: 'Offline Mode', bind: 'org.freedesktop.NetworkManager.Enable' }
+    ] },
+    { rows: [
+      { t: 'nav', to: 'display', icon: 'bright', tint: '#0a84ff', label: 'Display & Brightness', bind: 'org.freedesktop.login1 / backlight' },
+      { t: 'nav', to: 'sound', icon: 'sound', tint: '#ff375f', label: 'Sound & Haptics', bind: 'org.pipewire / DRV2605 over I²C' },
+      { t: 'nav', to: 'general', icon: 'gear', tint: '#8e8e93', label: 'General', bind: 'systemd' }
+    ] },
+    { rows: [ { t: 'toggle', key: 'bindings', icon: 'info', tint: '#5e5ce6', label: 'Show Service Bindings' } ],
+      note: 'Off in a shipping build. On here so you can see what each row would talk to on the Pi.' }
+  ] },
+
+  wifi: { title: 'Wi-Fi', groups: [
+    { rows: [ { t: 'toggle', key: 'wifi', label: 'Wi-Fi', bind: 'nm.WirelessEnabled' } ] },
+    { title: 'My Network', rows: [
+      { t: 'value', label: st => 'homenode-5g', value: () => st.wifi && !st.air ? 'Connected' : '—', bind: 'nm.ActiveConnection' } ] },
+    { title: 'Networks', rows: [
+      { t: 'value', label: () => 'homenode-2g', value: () => '' },
+      { t: 'value', label: () => 'workshop-iot', value: () => '' },
+      { t: 'value', label: () => 'pi-hotspot', value: () => '' } ],
+      note: 'Scan results come from NetworkManager over D-Bus. The renderer does not know what a network is — it draws whatever rows the pane hands it.' }
+  ] },
+
+  bluetooth: { title: 'Bluetooth', groups: [
+    { rows: [ { t: 'toggle', key: 'bt', label: 'Bluetooth', bind: 'org.bluez.Adapter1.Powered' } ] },
+    { title: 'My Devices', rows: [
+      { t: 'value', label: () => 'Workshop Keyboard', value: () => st.bt ? 'Connected' : 'Not Connected', bind: 'org.bluez.Device1' },
+      { t: 'value', label: () => 'Bench Speaker', value: () => 'Not Connected', bind: 'org.bluez.Device1' } ] }
+  ] },
+
+  display: { title: 'Display & Brightness', groups: [
+    { title: 'Appearance', rows: [ { t: 'choice', key: 'appearance', options: ['Light', 'Dark'], label: 'Theme' } ] },
+    { title: 'Brightness', rows: [ { t: 'slider', key: 'bright', bind: '/sys/class/backlight/*/brightness' } ],
+      note: 'This slider is wired to the screen dimmer above it. Drag it and the whole shell dims.' },
+    { rows: [ { t: 'choice', key: 'textSize', options: ['Default', 'Large'], label: 'Text Size' } ],
+      note: 'Text size changes the home grid: Large drops the row count from 6 to 5. That is why the grid is config, not a constant.' }
+  ] },
+
+  sound: { title: 'Sound & Haptics', groups: [
+    { title: 'Ringer and Alerts', rows: [ { t: 'slider', key: 'vol', bind: 'org.pipewire / wpctl set-volume' } ] },
+    { rows: [ { t: 'value', label: () => 'Output Device', value: () => 'HDMI 1 (Pi 5)', bind: 'pipewire default.sink' } ],
+      note: 'A Pi has no haptic engine. Add a DRV2605 over I²C and this pane gains a real Haptics section.' }
+  ] },
+
+  general: { title: 'General', groups: [
+    { rows: [ { t: 'nav', to: 'about', label: 'About' } ] },
+    { rows: [
+      { t: 'value', label: () => 'Shell Version', value: () => '0.4.0 (prototype)' },
+      { t: 'value', label: () => 'Compositor', value: () => 'none — browser', bind: 'planned: QtWaylandCompositor' } ] },
+    { rows: [ { t: 'value', label: () => 'Reset Home Layout', value: () => '' } ],
+      note: 'Panes are declared in one object. This whole app is roughly a hundred lines of data and one renderer.' }
+  ] },
+
+  about: { title: 'About', groups: [
+    { rows: [
+      { t: 'value', label: () => 'Name', value: () => 'Cupertino Pi' },
+      { t: 'value', label: () => 'Model', value: () => 'Raspberry Pi 5 · 8 GB' },
+      { t: 'value', label: () => 'Kernel', value: () => 'Linux 6.6 aarch64', bind: 'uname -r' },
+      { t: 'value', label: () => 'Display', value: () => '393 × 852 @ 60 Hz' },
+      { t: 'value', label: () => 'Uptime', value: () => '4 days, 2 hours', bind: 'systemd' } ] },
+    { rows: [ { t: 'value', label: () => 'Icons & Type', value: () => 'Original' } ],
+      note: 'No Apple assets ship with this shell. Type is Inter; every glyph on the home screen was drawn for this project.' }
+  ] }
+};
+
+function renderPane(key, push) {
+  const pane = SCHEMA[key];
+  const body = el('div', 'app-body');
+  pane.groups.forEach(grp => {
+    if (grp.title) body.appendChild(el('div', 'gtitle', grp.title));
+    const g = el('div', 'group');
+    grp.rows.forEach(r => {
+      const row = el(r.t === 'nav' ? 'button' : 'div', 'row');
+      if (r.t === 'nav') { row.type = 'button'; row.dataset.tap = '1'; }
+      if (r.icon) row.appendChild(el('span', 'ico', svgIco(r.icon))).style.background = r.tint || '#8e8e93';
+      const txt = el('div', 'txt');
+      const labelText = typeof r.label === 'function' ? r.label(st) : (r.label || '');
+      if (labelText) txt.appendChild(el('div', 'lab2', labelText));
+      if (st.bindings && r.bind) txt.appendChild(el('div', 'bind', r.bind));
+      row.appendChild(txt);
+
+      if (r.t === 'toggle') {
+        const sw = el('button', 'sw' + (st[r.key] ? ' on' : ''), '<i></i>');
+        sw.type = 'button'; sw.setAttribute('data-nograb', ''); sw.setAttribute('role', 'switch');
+        sw.setAttribute('aria-checked', String(!!st[r.key]));
+        sw.setAttribute('aria-label', labelText);
+        sw.addEventListener('click', () => {
+          st[r.key] = !st[r.key];
+          sw.classList.toggle('on', st[r.key]); sw.setAttribute('aria-checked', String(st[r.key]));
+          if (r.key === 'air' && st.air) { st.wifi = false; st.cell = false; }
+          push(key, true);
+        });
+        row.appendChild(sw);
+      } else if (r.t === 'slider') {
+        row.classList.add('rowcol');
+        const s = el('div', 'slider', '<div class="fill"></div>');
+        s.setAttribute('data-nograb', '');
+        const fill = s.querySelector('.fill');
+        fill.style.width = (st[r.key] * 100) + '%';
+        const drag = (ev) => {
+          const rc = s.getBoundingClientRect();
+          st[r.key] = clamp((ev.clientX - rc.left) / rc.width, 0.04, 1);
+          fill.style.width = (st[r.key] * 100) + '%';
+          if (r.key === 'bright') applyBright();
+        };
+        s.addEventListener('pointerdown', ev => { s.setPointerCapture(ev.pointerId); drag(ev); });
+        s.addEventListener('pointermove', ev => { if (ev.buttons) drag(ev); });
+        row.appendChild(s);
+      } else if (r.t === 'choice') {
+        const v = el('div', 'val', st[r.key]);
+        row.dataset.tap = '1'; row.setAttribute('data-nograb', '');
+        row.addEventListener('click', () => {
+          const i = r.options.indexOf(st[r.key]);
+          st[r.key] = r.options[(i + 1) % r.options.length];
+          v.textContent = st[r.key];
+          if (r.key === 'textSize') applyTextSize();
+          if (r.key === 'appearance') applyAppearance();
+        });
+        row.appendChild(v);
+      } else {
+        const v = r.value ? r.value(st) : '';
+        if (v) row.appendChild(el('div', 'val', v));
+        if (r.t === 'nav') row.appendChild(el('span', 'chev', svgIco('chev', 13)));
+      }
+      if (r.t === 'nav') row.addEventListener('click', () => push(r.to));
+      g.appendChild(row);
+    });
+    body.appendChild(g);
+    if (grp.note) body.appendChild(el('div', 'note', grp.note));
+  });
+  return body;
+}
+
+/* Theme and text size are wired through, so neither row is decorative. */
+function applyAppearance() {
+  document.querySelectorAll('.appwrap .app').forEach(a => a.classList.toggle('light', st.appearance === 'Light'));
+}
+
+/* Large text really does re-flow the grid — proof the layout is config. */
+function applyTextSize() {
+  const rows = st.textSize === 'Large' ? 5 : 6;
+  const scale = st.textSize === 'Large' ? 1.14 : 1;
+  document.querySelectorAll('.page .grid').forEach((g, i) => {
+    g.style.gridAutoRows = (82 * scale) + 'px';
+    g.style.rowGap = (19 * scale) + 'px';
+    [...g.children].forEach((c, j) => c.style.display = j < COLS * rows ? '' : 'none');
+  });
+  document.querySelectorAll('.icon .art').forEach(a => { a.style.width = a.style.height = (60 * scale) + 'px'; });
+}
+
+/* ---- app builders ---- */
+function buildSettings() {
+  const app = el('div', 'app');
+  const nav = el('div', 'app-nav');
+  const back = el('button', 'back', svgIco('chev', 15) + '<span></span>');
+  back.type = 'button'; back.style.display = 'none'; back.setAttribute('data-nograb', '');
+  const title = el('h2');
+  nav.appendChild(back); nav.appendChild(title);
+  app.appendChild(nav);
+  let stack = ['root'], bodyEl = null;
+  function push(key, replace) {
+    if (!replace) { if (key !== stack[stack.length - 1]) stack.push(key); }
+    else stack[stack.length - 1] = key;
+    draw();
+  }
+  function draw() {
+    const key = stack[stack.length - 1];
+    title.textContent = SCHEMA[key].title;
+    back.style.display = stack.length > 1 ? '' : 'none';
+    if (stack.length > 1) back.querySelector('span').textContent = '';
+    bodyEl && bodyEl.remove();
+    bodyEl = renderPane(key, push);
+    app.appendChild(bodyEl);
+  }
+  back.addEventListener('click', () => { stack.pop(); draw(); });
+  draw();
+  applyAppearance();
+  return app;
+}
+
+function buildTransports() {
+  const rows = [
+    { k: 'waypipe',   n: 'Home Node',      s: 'Linux apps over SSH',        d: 'waypipe · 10.8.0.2', extra: 'Each remote app arrives as its own Wayland surface, so the shell frames it like a local app.' },
+    { k: 'redroid',   n: 'Android Cloud',  s: 'Containerised Android',      d: 'redroid · WebRTC',   extra: 'One container per instance. Stream in, inject touch back out.' },
+    { k: 'moonlight', n: 'Desktop',        s: 'Full session, hardware encoded', d: 'Sunshine · HEVC', extra: 'For heavy apps where per-window forwarding costs too much.' }
+  ];
+  const app = el('div', 'app');
+  const wrap = el('div', 'tp');
+  wrap.innerHTML = `<div class="hero"><h2>Displays</h2>
+    <p>Three transports, one shell. Every source below registers as an app with its own icon and its own card in the switcher.</p></div>`;
+  const body = el('div', 'app-body');
+  rows.forEach(r => {
+    const g = el('div', 'group');
+    const row = el('div', 'row');
+    row.dataset.tap = '1'; row.setAttribute('data-nograb', '');
+    const state = () => st.transports[r.k];
+    const pill = el('span', 'pill');
+    const paint = () => {
+      const s = state();
+      pill.className = 'pill ' + (s === 'ok' ? 'ok' : s === 'busy' ? 'busy' : 'off');
+      pill.textContent = s === 'ok' ? 'CONNECTED' : s === 'busy' ? 'CONNECTING' : 'OFF';
+    };
+    row.innerHTML = `<div class="txt"><div class="lab2">${r.n}</div><div class="sub">${r.s}</div><div class="bind">${r.d}</div></div>`;
+    row.appendChild(pill);
+    row.addEventListener('click', () => {
+      if (state() === 'busy') return;
+      if (state() === 'ok') { st.transports[r.k] = 'off'; paint(); return; }
+      st.transports[r.k] = 'busy'; paint();
+      setTimeout(() => { st.transports[r.k] = 'ok'; paint(); }, 900);
+    });
+    paint();
+    g.appendChild(row);
+    body.appendChild(g);
+    body.appendChild(el('div', 'note', r.extra));
+  });
+  wrap.appendChild(body);
+  app.appendChild(wrap);
+  return app;
+}
+
+function buildCalc() {
+  const app = el('div', 'app');
+  const n = el('div', 'calc');
+  n.innerHTML = `<div class="out" data-nograb>0</div><div class="keys" data-nograb></div>`;
+  const out = n.querySelector('.out'), keys = n.querySelector('.keys');
+  const KEYS = [['AC','fn'],['+/−','fn'],['%','fn'],['÷','op'],['7',''],['8',''],['9',''],['×','op'],
+                ['4',''],['5',''],['6',''],['−','op'],['1',''],['2',''],['3',''],['+','op'],
+                ['0','wide'],['.',''],['=','op']];
+  let acc = null, op = null, cur = '0', fresh = true;
+  const show = () => out.textContent = cur.length > 9 ? Number(cur).toPrecision(7) : cur;
+  const calc = (a, b, o) => o === '+' ? a + b : o === '−' ? a - b : o === '×' ? a * b : b === 0 ? NaN : a / b;
+  KEYS.forEach(([k, cls]) => {
+    const b = el('button', cls, k); b.type = 'button';
+    b.addEventListener('click', () => {
+      keys.querySelectorAll('.op').forEach(x => x.classList.remove('armed'));
+      if (k === 'AC') { acc = null; op = null; cur = '0'; fresh = true; }
+      else if (k === '+/−') cur = String(-Number(cur));
+      else if (k === '%') cur = String(Number(cur) / 100);
+      else if ('+−×÷'.includes(k)) {
+        if (op && !fresh) { acc = calc(acc, Number(cur), op); cur = String(acc); }
+        else acc = Number(cur);
+        op = k; fresh = true; b.classList.add('armed');
+      } else if (k === '=') {
+        if (op != null) { const r = calc(acc, Number(cur), op); cur = Number.isFinite(r) ? String(r) : 'Error'; acc = null; op = null; }
+        fresh = true;
+      } else if (k === '.') { if (fresh) { cur = '0.'; fresh = false; } else if (!cur.includes('.')) cur += '.'; }
+      else { cur = fresh ? k : (cur === '0' ? k : cur + k); fresh = false; }
+      show();
+    });
+    keys.appendChild(b);
+  });
+  show();
+  app.appendChild(n);
+  return app;
+}
+
+function buildPhotos() {
+  const app = el('div', 'app');
+  app.innerHTML = `<div class="app-nav"><h2>Photos</h2></div>`;
+  const body = el('div', 'app-body');
+  const g = el('div', 'pgrid');
+  const tiles = [];
+  for (let i = 0; i < 33; i++) {
+    const h = (i * 47) % 360, h2 = (h + 55) % 360;
+    const bg = `linear-gradient(${(i * 37) % 360}deg,hsl(${h} 72% 58%),hsl(${h2} 66% 38%))`;
+    tiles.push(bg);
+    const b = el('button'); b.type = 'button'; b.style.background = bg;
+    b.setAttribute('data-nograb', ''); b.setAttribute('aria-label', 'Photo ' + (i + 1));
+    b.addEventListener('click', () => {
+      const v = el('div', 'viewer'); v.setAttribute('data-nograb', '');
+      const ph = el('div', 'ph'); ph.style.background = bg; v.appendChild(ph);
+      app.appendChild(v);
+      spring({ from: 0, to: 1, stiffness: 220, damping: 26, onUpdate: t => { v.style.opacity = String(t); ph.style.transform = `scale(${lerp(.86, 1, t)})`; } });
+      v.addEventListener('click', () => v.remove());
+    });
+    g.appendChild(b);
+  }
+  body.appendChild(g);
+  body.appendChild(el('div', 'note', 'Every tile is generated at runtime from an index. The shell ships no image assets — one fewer thing to license, and it boots faster on a Pi.'));
+  app.appendChild(body);
+  return app;
+}
+
+const NOTES = [
+  ['Grid maths', `4 columns × 6 rows = 24 apps per page, plus a 4-slot dock.
+
+At 393 pt wide with 60 pt icons and 27 pt side margins, the column gap works out to 33 pt: (393 − 240 − 54) ÷ 3.
+
+Larger devices and the Large text size change the row count, so treat every number here as config. Settings → Display → Text Size flips this grid to 5 rows live.`],
+  ['Why springs', `iOS transitions are spring-driven and interruptible. You can catch a mid-flight animation with your finger and drag it back.
+
+If your transitions are ease-in-out and un-grabbable, it will never feel right no matter how good the pixels are. This is the single biggest thing people get wrong.
+
+Every animation in this shell runs through one semi-implicit Euler integrator with sub-stepping, and every one of them hands back position and velocity when you interrupt it.`],
+  ['Rubber band', `offset = (x · d · c) / (d + c · |x|)
+
+x is the distance dragged past the edge, d is the dimension being scrolled, c is 0.55. Drag the home screen past the last page to feel it.
+
+Deceleration rate for momentum scrolling: 0.998 normal, 0.99 fast.`],
+  ['Squircles', `iOS icons are superellipses, not rounded rectangles. A plain border-radius reads as a knockoff immediately.
+
+This shell samples x = sign(cos t)·|cos t|^(2/n), y = sign(sin t)·|sin t|^(2/n) at n = 5, builds an SVG path, and uses it as a mask so it scales with the element.`],
+  ['On the Pi', `Get a Pi 5. Live backdrop-filter at 60 fps is the thing that will fight you — toggle it off under the bezel and watch the frame counter.
+
+The touchscreen matters more than the software. A cheap digitiser with poor palm rejection kills the illusion no matter how good the springs are.`]
+];
+function buildNotes() {
+  const app = el('div', 'app');
+  const nav = el('div', 'app-nav');
+  const back = el('button', 'back', svgIco('chev', 15)); back.type = 'button';
+  back.style.display = 'none'; back.setAttribute('data-nograb', '');
+  const title = el('h2', null, 'Notes');
+  nav.appendChild(back); nav.appendChild(title);
+  app.appendChild(nav);
+  let body = null;
+  const list = () => {
+    title.textContent = 'Notes'; back.style.display = 'none';
+    body && body.remove(); body = el('div', 'app-body notelist');
+    const g = el('div', 'group');
+    NOTES.forEach(([t, txt], i) => {
+      const r = el('div', 'row'); r.dataset.tap = '1'; r.setAttribute('data-nograb', '');
+      r.innerHTML = `<div class="txt"><div class="lab2">${t}</div><div class="sub">${txt.split('\n')[0].slice(0, 42)}…</div></div>`;
+      r.appendChild(el('span', 'chev', svgIco('chev', 13)));
+      r.addEventListener('click', () => open(i));
+      g.appendChild(r);
+    });
+    body.appendChild(g); app.appendChild(body);
+  };
+  const open = (i) => {
+    title.textContent = NOTES[i][0]; back.style.display = '';
+    body && body.remove(); body = el('div', 'app-body');
+    body.appendChild(el('div', 'notebody', NOTES[i][1].replace(/&/g, '&amp;').replace(/</g, '&lt;')));
+    app.appendChild(body);
+  };
+  back.addEventListener('click', list);
+  list();
+  return app;
+}
+
+function buildMusic() {
+  const app = el('div', 'app');
+  const n = el('div', 'now');
+  n.innerHTML = `
+    <div class="cover" style="background:linear-gradient(150deg,#fc4d6b,#5e5ce6 60%,#0a84ff)"></div>
+    <div class="meta"><div class="t1">Bench Loop</div><div class="t2">Compositor Sessions</div></div>
+    <div class="bar"><i></i></div>
+    <div class="times"><span class="a">0:00</span><span class="b">-3:20</span></div>
+    <div class="ctrls" data-nograb>
+      <button aria-label="Previous">${svgIco('prev', 30)}</button>
+      <button class="pp" aria-label="Play">${svgIco('play', 38)}</button>
+      <button aria-label="Next">${svgIco('next', 30)}</button>
+    </div>`;
+  const fill = n.querySelector('.bar i'), a = n.querySelector('.a'), b = n.querySelector('.b'), pp = n.querySelector('.pp');
+  const LEN = 200; let pos = 0, timer = null;
+  const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  const paint = () => { fill.style.width = (pos / LEN * 100) + '%'; a.textContent = mmss(pos); b.textContent = '-' + mmss(LEN - pos); };
+  pp.addEventListener('click', () => {
+    st.playing = !st.playing;
+    pp.innerHTML = svgIco(st.playing ? 'pause' : 'play', 38);
+    pp.setAttribute('aria-label', st.playing ? 'Pause' : 'Play');
+    clearInterval(timer);
+    if (st.playing) timer = setInterval(() => { pos = (pos + 1) % LEN; paint(); }, 1000);
+  });
+  paint();
+  app.appendChild(n);
+  return app;
+}
+
+function buildStub(id) {
+  const app = el('div', 'app');
+  app.innerHTML = `<div class="app-nav"><h2>${APPS[id].name}</h2></div>
+    <div class="app-body"><div class="stub">
+      Not built.<br>This slot is a placeholder so the home screen shows a full 4 × 6 page.
+      <div class="k">APPS.${id} → no handler<br>window transitions, gestures and the switcher all work anyway</div>
+    </div></div>`;
+  return app;
+}
+
+function buildApp(id) {
+  switch (id) {
+    case 'settings': return buildSettings();
+    case 'transports': return buildTransports();
+    case 'calc': return buildCalc();
+    case 'photos': return buildPhotos();
+    case 'notes': return buildNotes();
+    case 'music': return buildMusic();
+    default: return buildStub(id);
+  }
+}
+
+/* ---- home indicator: tap goes home, same as the swipe ---- */
+document.getElementById('hbar').addEventListener('click', () => {
+  if (switcherOn) return hideSwitcher();
+  if (current) closeApp(false);
+});
+addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (overlay) closeOverlay();
+  else if (switcherOn) hideSwitcher();
+  else if (current) closeApp(false);
+  else if (locked) unlock(-600);
+});
+
+/* ---- workbench controls ---- */
+const tblur = document.getElementById('tblur');
+tblur.addEventListener('click', () => {
+  const off = dev.classList.toggle('noblur');
+  tblur.setAttribute('aria-pressed', String(off));
+  tblur.textContent = 'Live blur: ' + (off ? 'off' : 'on');
+});
+document.getElementById('tlock').addEventListener('click', () => locked ? unlock(-600) : lockNow());
+
+/* ---- frame counter: the number that decides your Pi ---- */
+const fpsEl = document.getElementById('fps');
+let frames = 0, mark = performance.now();
+(function loop(now) {
+  frames++;
+  if (now - mark >= 500) {
+    const v = Math.round(frames * 1000 / (now - mark));
+    fpsEl.innerHTML = `<b>${v}</b> fps`;
+    frames = 0; mark = now;
+  }
+  requestAnimationFrame(loop);
+})(performance.now());
+</script>

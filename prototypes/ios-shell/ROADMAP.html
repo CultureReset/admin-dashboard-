@@ -1,0 +1,360 @@
+<title>Cupertino Pi Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#ECEEF2; --card:#fff; --rule:#D2D5DE; --rule-soft:#E3E5EC;
+  --ink:#14161C; --ink-2:#565C6B; --ink-3:#7B8292;
+  --accent:#C7285C; --accent-soft:#FAE7EE; --good:#1C7147; --risk:#8C5D07;
+  --code:#F1F0F4;
+  --disp:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0C0E13; --card:#161923; --rule:#262B36; --rule-soft:#1E222C;
+  --ink:#E9EBF1; --ink-2:#98A0B0; --ink-3:#767E8E;
+  --accent:#FF6E97; --accent-soft:#2B1520; --good:#4FD79A; --risk:#E3B14C;
+  --code:#1A1E28;
+}}
+:root[data-theme="dark"]{
+  --paper:#0C0E13; --card:#161923; --rule:#262B36; --rule-soft:#1E222C;
+  --ink:#E9EBF1; --ink-2:#98A0B0; --ink-3:#767E8E;
+  --accent:#FF6E97; --accent-soft:#2B1520; --good:#4FD79A; --risk:#E3B14C;
+  --code:#1A1E28;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--body);
+  font-size:17px; line-height:1.62; margin:0; padding:0 20px 96px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:840px;margin:0 auto}
+p,li{max-width:66ch}
+h1,h2,h3{font-family:var(--disp);letter-spacing:-.02em;text-wrap:balance;margin:0}
+a{color:var(--accent);text-underline-offset:3px;text-decoration-thickness:1px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+code,.m{font-family:var(--mono);font-size:.86em}
+code{background:var(--code);padding:1.5px 5px;border-radius:4px}
+
+/* masthead */
+header{padding:88px 0 40px;border-bottom:2px solid var(--ink)}
+.kicker{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:20px;
+}
+h1{font-size:clamp(42px,7.5vw,74px);line-height:.98;font-weight:800}
+.lede{font-size:20px;line-height:1.5;color:var(--ink-2);margin:22px 0 0;max-width:56ch}
+.meta{
+  display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:30px;
+  font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.03em;
+}
+.meta b{color:var(--ink);font-weight:500}
+
+section{padding-top:60px}
+h2{font-size:31px;font-weight:700;margin-bottom:6px}
+.h2sub{color:var(--ink-3);font-size:15px;margin:0 0 26px;font-style:italic}
+h3{font-size:19px;font-weight:700;margin:30px 0 6px}
+
+/* layer diagram */
+.stack{display:flex;flex-direction:column;gap:8px;margin:26px 0 6px}
+.band{
+  background:var(--card);border:1px solid var(--rule);border-radius:10px;
+  padding:15px 18px;display:grid;grid-template-columns:112px 1fr;gap:18px;align-items:baseline;
+}
+.band .who{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.band .what{font-size:15.5px;line-height:1.5;color:var(--ink-2)}
+.band .what b{color:var(--ink);font-weight:600;font-family:var(--disp);letter-spacing:-.01em}
+.feeds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.feeds .band{grid-template-columns:1fr;gap:4px;padding:13px 15px}
+
+/* phase rail — the numbering is real: each phase needs the one above it */
+.phase{
+  display:grid;grid-template-columns:66px 1fr;gap:0 22px;
+  padding:26px 0;border-top:1px solid var(--rule-soft);
+}
+.phase:first-of-type{border-top:1px solid var(--rule)}
+.num{
+  font-family:var(--disp);font-size:40px;font-weight:800;line-height:1;
+  color:var(--accent);letter-spacing:-.04em;font-variant-numeric:tabular-nums;
+}
+.phase h3{margin:0 0 4px;font-size:21px}
+.phase p{margin:8px 0 0}
+.done{
+  margin-top:12px;font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--ink-2);
+  border-left:2px solid var(--accent);padding-left:12px;
+}
+.done b{color:var(--ink);font-weight:500}
+
+/* tables */
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-family:var(--disp);font-size:14.5px}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+th{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;
+}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:700;white-space:nowrap}
+.rate{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;
+  text-transform:uppercase;white-space:nowrap;margin-bottom:4px}
+td .sub{color:var(--ink-2);font-size:13.5px;line-height:1.45;display:block}
+.rate.a{color:var(--good)}.rate.b{color:var(--risk)}.rate.c{color:var(--ink-3)}
+
+/* spec list */
+.specs{list-style:none;padding:0;margin:20px 0;display:grid;gap:1px;background:var(--rule-soft);
+  border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.specs li{
+  background:var(--card);padding:13px 17px;display:grid;grid-template-columns:172px 1fr;gap:16px;
+  align-items:baseline;max-width:none;
+}
+.specs .k{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.03em}
+.specs .v{font-size:15px;color:var(--ink-2)}
+.specs .v b{color:var(--ink);font-family:var(--mono);font-size:13.5px;font-weight:500}
+
+/* tool inventory */
+.tools{display:grid;gap:10px;margin:20px 0}
+.tool{
+  background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:14px 17px;
+  display:grid;grid-template-columns:1fr auto;gap:4px 16px;align-items:start;
+}
+.tool .n{grid-column:1;grid-row:1;font-family:var(--disp);font-weight:700;font-size:16px}
+.tool .d{grid-column:1;grid-row:2;font-size:14.5px;color:var(--ink-2);line-height:1.5}
+.tag{
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 8px;border-radius:20px;border:1px solid currentColor;white-space:nowrap;
+  grid-column:2;grid-row:1/3;align-self:center;justify-self:end;
+}
+.tag.core{color:var(--accent);background:var(--accent-soft)}
+.tag.read{color:var(--ink-3)}
+.tag.later{color:var(--risk)}
+
+.callout{
+  border-left:3px solid var(--accent);background:var(--card);border-radius:0 10px 10px 0;
+  padding:16px 20px;margin:24px 0;
+}
+.callout p{margin:0;max-width:62ch}
+.callout p + p{margin-top:10px}
+ul.plain{padding-left:1.15em}
+ul.plain li{margin:7px 0}
+footer{
+  margin-top:76px;padding-top:24px;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:11.5px;color:var(--ink-3);line-height:1.8;
+}
+@media (max-width:620px){
+  .feeds{grid-template-columns:1fr}
+  .band{grid-template-columns:1fr;gap:4px}
+  .phase{grid-template-columns:1fr;gap:8px}
+  .num{font-size:28px}
+  .specs li{grid-template-columns:1fr;gap:2px}
+  header{padding-top:56px}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="kicker">Build plan · iOS-shaped shell on Linux</div>
+  <h1>Cupertino&nbsp;Pi</h1>
+  <p class="lede">An iPhone face over a Raspberry Pi, fed by your home node. What to build,
+    in what order, and which open source does the parts you should not write yourself.</p>
+  <div class="meta">
+    <span>Target <b>Raspberry Pi 5 · 8 GB</b></span>
+    <span>Prototype <b><a href="https://claude.ai/code/artifact/935970b6-6c0c-4561-b838-f6265429d872">Phase 1–2, live</a></b></span>
+    <span>Effort <b>~4 months, evenings</b></span>
+  </div>
+</header>
+
+<section>
+  <h2>Three systems, not one</h2>
+  <p class="h2sub">Splitting these is the most useful decision in the whole project.</p>
+  <p>What you described gets conflated constantly, and conflating it is why these projects stall.
+     It is three independent pieces with three different risk profiles.</p>
+  <div class="stack">
+    <div class="band"><span class="who">Layer 1</span>
+      <span class="what"><b>The shell</b> — lock screen, home grid, dock, Control Center, notifications,
+      app switcher, Settings. The part that has to look and feel like iOS. Highest design cost, lowest technical risk.</span></div>
+    <div class="band"><span class="who">Layer 2</span>
+      <span class="what"><b>The compositor</b> — puts other programs' windows inside your shell, so an app
+      opens by zooming out of its icon. Without this you have a pretty launcher, not an OS. Highest technical risk.</span></div>
+    <div class="band"><span class="who">Layer 3</span>
+      <span class="what"><b>The transports</b> — how apps actually arrive. Three of them, each solving
+      a different problem. Lowest risk: all three are off-the-shelf.</span></div>
+  </div>
+  <div class="feeds">
+    <div class="band"><span class="who">waypipe</span><span class="what">Linux apps from the home node, each as its own Wayland surface.</span></div>
+    <div class="band"><span class="who">Waydroid / redroid</span><span class="what">Android apps, locally in a container or streamed from the cloud.</span></div>
+    <div class="band"><span class="who">Sunshine → Moonlight</span><span class="what">The whole desktop, hardware encoded, for heavy apps.</span></div>
+  </div>
+  <p style="margin-top:22px">All three ride one flat <b>WireGuard or Tailscale</b> network. Set that up
+     first — before any UI work — so the Pi, the home node and the cloud Android instance can address
+     each other directly. Every later decision gets easier once the network is boring.</p>
+</section>
+
+<section>
+  <h2>Picking the stack</h2>
+  <p class="h2sub">The one fork in the road. Everything downstream depends on it.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Stack</th><th>iOS look</th><th>Pi performance</th><th>Hosts real apps</th></tr></thead>
+    <tbody>
+      <tr><td>Flutter (Cupertino)</td><td><span class="rate a">excellent</span><span class="sub">Cupertino widgets are an open-source iOS recreation</span></td><td><span class="rate a">very good</span><span class="sub">via flutter-pi, bare KMS/DRM</span></td><td><span class="rate b">needs work</span></td></tr>
+      <tr><td>Qt Quick / QML</td><td><span class="rate b">good</span><span class="sub">all hand-rolled</span></td><td><span class="rate a">best</span></td><td><span class="rate a">yes</span><span class="sub">QtWaylandCompositor</span></td></tr>
+      <tr><td>Web (Chromium kiosk)</td><td><span class="rate a">excellent</span><span class="sub">fastest to iterate</span></td><td><span class="rate c">weakest</span><span class="sub">blur will hurt</span></td><td><span class="rate c">no</span><span class="sub">needs a separate compositor</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout">
+    <p><b>Prototype in web, ship in QML.</b> You will get pixel-accurate in days on your laptop, where
+      the feedback loop is instant and nothing is cross-compiled. The linked prototype is that step,
+      already done.</p>
+    <p>Then port the shell to QML, because it is the only option where <i>the shell is the compositor</i>
+      is a solved, shipping pattern — Plasma Mobile and Ubuntu Touch's Lomiri both work exactly this way,
+      and both are open source you can read rather than invent.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Order of work</h2>
+  <p class="h2sub">Each phase is usable on its own and needs the one before it.</p>
+
+  <div class="phase"><div class="num">1</div><div>
+    <h3>Static shell, on your laptop</h3>
+    <p>Home grid, pagination, dock, status bar, squircle icons, wallpaper, spring physics. No Pi, no
+      cross-compiling, no compositor. Iterate where reload is instant.</p>
+    <p class="done"><b>Done when</b> you can hand someone your phone with the page open and they
+      hesitate before deciding it isn't a real iPhone.</p>
+  </div></div>
+
+  <div class="phase"><div class="num">2</div><div>
+    <h3>Gestures and system surfaces</h3>
+    <p>Swipe-up-to-home, app switcher, Control Center, Notification Center, lock screen. Every one
+      of them interruptible — you can catch a mid-flight animation with your finger and drag it back.</p>
+    <p class="done"><b>Done when</b> no transition can be caught in a state it cannot recover from,
+      and a fast gesture never leaves the shell in the wrong screen.</p>
+  </div></div>
+
+  <div class="phase"><div class="num">3</div><div>
+    <h3>Settings as a schema</h3>
+    <p>Do not hand-build hundreds of panes. Build <i>one</i> iOS-style list renderer driven by a
+      declarative tree — pane, sections, rows, control type, backend binding — then bind rows to real
+      services over D-Bus: NetworkManager for Wi-Fi, BlueZ for Bluetooth, PipeWire for audio,
+      <code>systemd-timedated</code> for time.</p>
+    <p class="done"><b>Done when</b> adding a settings pane is a data change, and four rows
+      (Wi-Fi, Bluetooth, volume, brightness) move real hardware.</p>
+  </div></div>
+
+  <div class="phase"><div class="num">4</div><div>
+    <h3>Become a compositor</h3>
+    <p>The hard phase. Host one real application surface and nail the zoom-from-icon open and close.
+      Read Plasma Mobile's window management before writing your own — the lifecycle edge cases
+      (a surface that dies mid-animation, an app that refuses to close) are where the weeks go.</p>
+    <p class="done"><b>Done when</b> a real Linux app opens out of its icon, appears as a card in
+      the switcher, and closes back into the icon without a frame drop.</p>
+  </div></div>
+
+  <div class="phase"><div class="num">5</div><div>
+    <h3>Wire up the transports</h3>
+    <p>waypipe, Waydroid, Moonlight — each registered as an app with its own icon, its own switcher
+      card, and its own connection state. Waydroid in multi-window mode gives each Android app
+      its own Wayland surface, which is what makes them feel independent rather than mirrored.</p>
+    <p class="done"><b>Done when</b> a home-node app, an Android app and a desktop stream sit
+      side by side in the switcher and none of them looks like a remote session.</p>
+  </div></div>
+
+  <div class="phase"><div class="num">6</div><div>
+    <h3>Boot into it</h3>
+    <p>The Pi comes up straight into the shell with no desktop behind it, no cursor, no way out
+      without a keyboard. Kiosk hardening, watchdog, auto-reconnect on the transports.</p>
+    <p class="done"><b>Done when</b> you can pull the power, plug it back in, and it returns to
+      the lock screen with its sessions restored.</p>
+  </div></div>
+</section>
+
+<section>
+  <h2>The numbers</h2>
+  <p class="h2sub">You asked for the layout exactly. This is what "exactly" means.</p>
+  <ul class="specs">
+    <li><span class="k">home grid</span><span class="v"><b>4 × 6 = 24</b> per page, plus a <b>4</b>-slot dock. Varies by device size and text size — make it config, never a constant.</span></li>
+    <li><span class="k">column gap</span><span class="v">At 393 pt wide with 60 pt icons and 27 pt margins: <b>(393 − 240 − 54) ÷ 3 = 33 pt</b>.</span></li>
+    <li><span class="k">icon shape</span><span class="v">A superellipse, not a rounded rect. Sample <b>|cos t|^(2/n)</b>, <b>|sin t|^(2/n)</b> at <b>n = 5</b> and use it as a mask so it scales.</span></li>
+    <li><span class="k">rubber band</span><span class="v"><b>offset = (x · d · c) / (d + c · |x|)</b> — x past the edge, d the dimension, <b>c = 0.55</b>.</span></li>
+    <li><span class="k">deceleration</span><span class="v"><b>0.998</b> normal, <b>0.99</b> fast.</span></li>
+    <li><span class="k">materials</span><span class="v">Backdrop blur <i>plus</i> a saturation boost around <b>180%</b>, with vibrancy on the text above it.</span></li>
+    <li><span class="k">motion</span><span class="v">Springs, never bezier curves — and every one of them interruptible.</span></li>
+  </ul>
+  <div class="callout">
+    <p><b>Motion is where the feel lives, not the pixels.</b> Roughly 80% of "that's an iPhone" is
+      spring physics and gesture-driven, grabbable transitions. If your animations are
+      <code>ease-in-out</code> and cannot be caught mid-flight, it will never feel right no matter how
+      accurate the layout is. Budget for this like it is the main work, because it is.</p>
+  </div>
+</section>
+
+<section>
+  <h2>What to use rather than write</h2>
+  <p class="h2sub">Tagged by how you should treat each one.</p>
+  <div class="tools">
+    <div class="tool"><span class="n">Framework7</span><span class="tag core">build on</span>
+      <span class="d">A web framework whose entire purpose is an iOS theme — navbars, sheets, list views, swipe-back. The fastest route through Phase 1.</span></div>
+    <div class="tool"><span class="n">Konsta UI</span><span class="tag core">build on</span>
+      <span class="d">Same author, Tailwind-based iOS and Material components. Pick this over Framework7 if you are already in Tailwind.</span></div>
+    <div class="tool"><span class="n">Flutter — Cupertino library</span><span class="tag core">build on</span>
+      <span class="d">Google's open-source recreation of the iOS widget set. Runs on bare KMS/DRM via <code>flutter-pi</code>, no X or Wayland underneath.</span></div>
+    <div class="tool"><span class="n">Plasma Mobile · Lomiri · Phosh</span><span class="tag read">read first</span>
+      <span class="d">Three shipping mobile Linux shells. Do not fork them for the look — read how they handle window lifecycle and the app switcher, which is the part you would otherwise get wrong twice.</span></div>
+    <div class="tool"><span class="n">QtWaylandCompositor</span><span class="tag core">build on</span>
+      <span class="d">Lets your QML shell <i>be</i> the compositor. The single most important dependency in Phase 4.</span></div>
+    <div class="tool"><span class="n">Smithay</span><span class="tag later">only if</span>
+      <span class="d">Rust compositor toolkit. Reach for it only if you have a reason to reject Qt — it is more control and considerably more work.</span></div>
+    <div class="tool"><span class="n">waypipe</span><span class="tag core">build on</span>
+      <span class="d">Forwards individual Wayland apps over SSH. The reason home-node apps can feel independent instead of mirrored.</span></div>
+    <div class="tool"><span class="n">Waydroid · redroid</span><span class="tag core">build on</span>
+      <span class="d">Android in a container — locally on the Pi, or in the cloud with a WebRTC pipeline. Waydroid needs binder kernel modules; check your distro ships them before committing.</span></div>
+    <div class="tool"><span class="n">Sunshine + Moonlight</span><span class="tag core">build on</span>
+      <span class="d">Self-hosted, hardware-encoded desktop streaming with a good Pi client. For the heavy apps that per-window forwarding cannot carry.</span></div>
+    <div class="tool"><span class="n">Inter · Phosphor · Lucide</span><span class="tag core">build on</span>
+      <span class="d">Type and icons. Inter is deliberately close to SF's feel. Apple's SF Pro and SF Symbols are licensed and not redistributable — this is the substitution that keeps you clear.</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>What will actually bite you</h2>
+  <p class="h2sub">In rough order of how much time it will cost.</p>
+  <ul class="plain">
+    <li><b>The touchscreen, more than the software.</b> A cheap digitiser with poor palm rejection and
+      80 ms of latency kills the illusion no matter how good your springs are. Spend real money here;
+      it is the one component you cannot fix in code.</li>
+    <li><b>Live blur at 60 fps.</b> Backdrop blur is the thing most likely to blow your frame budget
+      on a Pi. Mitigate with pre-blurred wallpaper layers instead of a live filter. The prototype has
+      a blur toggle and a frame counter under the bezel so you can measure this before you commit.</li>
+    <li><b>A Pi is the wrong shape for a phone.</b> Battery, modem, suspend/resume and thermals are a
+      separate multi-month project with none of the fun. As a wall panel, desk display or big-screen
+      thin client — which is what you actually described — it is an excellent fit. Aim there.</li>
+    <li><b>Settings has no bottom.</b> iOS Settings in full is essentially unbounded, and most of its
+      panes have no Linux equivalent. The schema approach in Phase 3 is what keeps this finite.</li>
+    <li><b>Legal.</b> Personal use is fine. Do not distribute or sell it, and ship none of Apple's
+      fonts, symbols, icon artwork or wallpapers — redistribution is the line that gets enforced,
+      not the resemblance.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Where the prototype gets you</h2>
+  <p class="h2sub">Honest accounting of what is real in the linked build.</p>
+  <p><b>Real:</b> the spring integrator, and every animation running through it with position and
+    velocity handed back on interrupt. Rubber-banded pagination. Superellipse icon masks. Gesture-driven
+    app open and close from the icon rect. Swipe-up-and-hold to the switcher, armed on dwell time rather
+    than velocity. Control Center and Notification Center as draggable overlays. A schema-driven Settings
+    app where Brightness dims the actual screen and Text Size re-flows the actual grid. A working
+    calculator, notes, photos and player.</p>
+  <p><b>Not real:</b> it is a web page, so there is no compositor and no transport. Every "app" is
+    drawn by the same page rather than hosted. That is exactly the Phase 4 boundary — and the point of
+    stopping there is that Phases 1 through 3 are worth validating before you spend a month on
+    Wayland surface lifecycles.</p>
+</section>
+
+<footer>
+  Cupertino Pi · build plan v1<br>
+  Prototype: <a href="https://claude.ai/code/artifact/935970b6-6c0c-4561-b838-f6265429d872">claude.ai/code/artifact/935970b6</a><br>
+  No Apple assets, code, or artwork are used or reproduced in this plan or the prototype.
+</footer>
+</div>
