@@ -1,0 +1,604 @@
+<title>Zero to Launch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#EDEEF3; --card:#fff; --sunk:#E4E6EC; --rule:#D3D6E0; --hair:#E5E7EE;
+  --ink:#0F1117; --ink-2:#4F5563; --ink-3:#7A8090;
+  --acc:#8A5A0B; --acc-soft:#F6EEDD;
+  --go:#1A6F49; --go-soft:#DFF0E7;
+  --kill:#A3302F; --kill-soft:#FAE5E4;
+  --code:#F0F1F6;
+  --disp:"Archivo",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#08090F; --card:#12141D; --sunk:#0C0E15; --rule:#232634; --hair:#1B1E27;
+  --ink:#E7E9F1; --ink-2:#949AAC; --ink-3:#6E7486;
+  --acc:#E0AC5D; --acc-soft:#2A1F0C;
+  --go:#4CD79B; --go-soft:#0C2419;
+  --kill:#FF7B72; --kill-soft:#2B1312;
+  --code:#171A25;
+}}
+:root[data-theme="dark"]{
+  --paper:#08090F; --card:#12141D; --sunk:#0C0E15; --rule:#232634; --hair:#1B1E27;
+  --ink:#E7E9F1; --ink-2:#949AAC; --ink-3:#6E7486;
+  --acc:#E0AC5D; --acc-soft:#2A1F0C;
+  --go:#4CD79B; --go-soft:#0C2419;
+  --kill:#FF7B72; --kill-soft:#2B1312;
+  --code:#171A25;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:15.5px;line-height:1.65;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--disp);letter-spacing:-.018em;text-wrap:balance;margin:0}
+p,li{max-width:70ch}
+a{color:var(--acc);text-underline-offset:3px;text-decoration-thickness:1px}
+a:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:3px}
+code{font-family:var(--mono);font-size:.86em;background:var(--code);padding:1.5px 5px;border-radius:4px}
+pre{font-family:var(--mono);font-size:12.5px;line-height:1.62;background:var(--code);
+  border:1px solid var(--hair);border-radius:9px;padding:14px 16px;overflow-x:auto;
+  margin:16px 0;max-width:100%}
+pre code{background:none;padding:0;font-size:inherit}
+.cm{color:var(--ink-3)}
+.kw{color:var(--acc)}
+.shell{max-width:1240px;margin:0 auto;padding:0 22px 110px;display:grid;
+  grid-template-columns:minmax(0,1fr);gap:0}
+.shell>main{min-width:0}
+@media (min-width:1060px){
+  .shell{grid-template-columns:228px minmax(0,1fr);gap:52px;padding-left:26px;padding-right:26px}
+  .shell>nav.toc{display:block}
+}
+nav.toc{display:none;position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;
+  padding:36px 0 40px;font-size:12.5px;line-height:1.45}
+nav.toc::-webkit-scrollbar{width:0}
+nav.toc .grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);margin:20px 0 7px}
+nav.toc a{display:flex;gap:8px;padding:3.5px 0;color:var(--ink-2);text-decoration:none}
+nav.toc a:hover{color:var(--acc)}
+nav.toc a b{font-family:var(--mono);font-weight:500;color:var(--ink-3);flex:0 0 17px;font-size:11px}
+header{padding:74px 0 34px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:18px}
+h1{font-size:clamp(38px,6.2vw,62px);line-height:1;font-weight:800}
+.lede{font-size:18.5px;line-height:1.52;color:var(--ink-2);margin:20px 0 0;max-width:58ch}
+.mmeta{display:flex;flex-wrap:wrap;gap:9px 24px;margin-top:26px;
+  font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.mmeta b{color:var(--ink);font-weight:500}
+section{padding-top:54px;scroll-margin-top:18px}
+.shead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.snum{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--acc);flex:0 0 auto}
+h2{font-size:28px;font-weight:700;flex:1 1 auto;min-width:min(100%,320px)}
+.sdek{color:var(--ink-3);font-size:14.5px;margin:0 0 22px;max-width:66ch}
+h3{font-size:18px;font-weight:700;margin:32px 0 8px}
+.chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:9.5px;font-weight:500;
+  letter-spacing:.11em;text-transform:uppercase;padding:3px 8px;border-radius:4px;white-space:nowrap;vertical-align:2px}
+.chip.gate{color:var(--acc);background:var(--acc-soft)}
+.chip.go{color:var(--go);background:var(--go-soft)}
+.chip.kill{color:var(--kill);background:var(--kill-soft)}
+.callout{border-left:3px solid var(--acc);background:var(--card);border-radius:0 9px 9px 0;
+  padding:15px 19px;margin:22px 0}
+.callout.go{border-left-color:var(--go)}
+.callout.kill{border-left-color:var(--kill)}
+.callout p{margin:0;max-width:64ch}
+.callout p+p{margin-top:9px}
+.callout .ct{font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:6px;display:block}
+.tw{overflow-x:auto;max-width:100%;margin:20px 0;border:1px solid var(--rule);
+  border-radius:9px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:540px;font-size:13.5px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--hair);vertical-align:top}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.k{font-weight:600;white-space:nowrap}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+tfoot td{font-weight:700;background:var(--sunk);border-top:1px solid var(--rule)}
+.good{color:var(--go);font-weight:600}
+.bad{color:var(--kill);font-weight:600}
+.mid{color:var(--acc);font-weight:600}
+ul.plain,ol.plain{padding-left:1.2em;margin:12px 0}
+ul.plain li,ol.plain li{margin:6px 0}
+figure{margin:26px 0}
+figure svg{max-width:100%;height:auto;display:block;color:var(--ink-2)}
+figcaption{font-size:13px;color:var(--ink-3);margin-top:10px;max-width:66ch;line-height:1.5}
+footer{margin-top:78px;padding-top:22px;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:11px;color:var(--ink-3);line-height:1.85}
+@media (max-width:640px){header{padding-top:48px}h2{font-size:23px}}
+</style>
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <div class="grp">Framing</div>
+  <a href="#s1"><b>1</b>What "launch" means</a>
+  <a href="#s2"><b>2</b>The riskiest assumption</a>
+  <div class="grp">The plan</div>
+  <a href="#s3"><b>3</b>Six phases, five gates</a>
+  <a href="#s4"><b>4</b>Phase −1 · Fake it</a>
+  <a href="#s5"><b>5</b>Phase 0 · The node</a>
+  <a href="#s6"><b>6</b>Phase 1 · The wearable</a>
+  <a href="#s7"><b>7</b>Phase 2 · Three apps</a>
+  <a href="#s8"><b>8</b>Phase 3 · Ten people</a>
+  <a href="#s9"><b>9</b>Phase 4 · Ship it</a>
+  <div class="grp">Resources</div>
+  <a href="#s10"><b>10</b>What to buy</a>
+  <a href="#s11"><b>11</b>What to write, in order</a>
+  <a href="#s12"><b>12</b>Time and money</a>
+  <div class="grp">Reality</div>
+  <a href="#s13"><b>13</b>What kills this</a>
+  <a href="#s14"><b>14</b>Monday morning</a>
+</nav>
+
+<main>
+<header>
+  <div class="eyebrow">Execution plan · v0.1</div>
+  <h1>Zero to Launch</h1>
+  <p class="lede">The spec says what to build. The build guide says how it stays separated.
+    This says what you actually do, in what order, with what money — and where you are allowed
+    to stop.</p>
+  <div class="mmeta">
+    <span>Phases <b>6</b></span>
+    <span>Kill gates <b>5</b></span>
+    <span>To ten users <b>~$1,000 · 6–9 months of evenings</b></span>
+  </div>
+</header>
+
+<section id="s1">
+  <div class="shead"><span class="snum">01</span><h2>What "launch" means</h2></div>
+  <p class="sdek">Pick one now. Each is a different company, and two of them you are not trying to start.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Launch as</th><th>You ship</th><th>You become</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="k">Personal tool</td>
+        <td>Nothing. You wear it.</td>
+        <td>Someone with very good glasses</td>
+        <td class="mid">A legitimate ending. Reached at phase 2.</td>
+      </tr>
+      <tr>
+        <td class="k">Open platform</td>
+        <td>Protocol, node, reference build guide, three apps</td>
+        <td>The maintainer of a standard</td>
+        <td class="good">Recommended</td>
+      </tr>
+      <tr>
+        <td class="k">Hardware product</td>
+        <td>Assembled glasses, in boxes, with support</td>
+        <td>A hardware company: certification, tooling, RMAs, inventory</td>
+        <td class="bad">A different life. Not this project.</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <div class="callout">
+    <span class="ct">Why open platform</span>
+    <p>Your own architecture doc already reached this conclusion in §24–25: the defensible thing is
+      the <b>device protocol and the node</b>, not the frames. The Pi is replaceable, the sensor is
+      replaceable, the glasses are replaceable — the protocol third parties build against is not.</p>
+    <p>So: publish the protocol and the node, publish a reference build anyone can assemble from
+      $60 of parts, and let other people make the hardware. You get the ecosystem without becoming
+      a manufacturer, which is the specific way projects like this die.</p>
+  </div>
+  <p>If you ever do sell assembled hardware, one practical note worth knowing now: build around a
+     <b>pre-certified radio module</b> (the ESP32-S3-WROOM-1 is FCC/CE certified) and use its
+     reference antenna. That qualifies you for modular approval and drops radio certification from
+     a five-figure exercise to a much smaller one. Designing your own RF front end reverses that.</p>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="snum">02</span><h2>The riskiest assumption <span class="chip kill">Test this first</span></h2></div>
+  <p class="sdek">It is not technical, and it is testable in two weeks with no hardware.</p>
+  <p>Everything in the spec is buildable. None of it is research. The real risk is quieter:</p>
+  <ol class="plain">
+    <li><b>Will you actually reach for it?</b> Wearables die of disuse, not of engineering failure.
+        Most people who build one wear it for a fortnight and stop.</li>
+    <li><b>Are the answers good enough to be worth asking?</b> "What is that?" against a real
+        street scene is a much harder question than against a clean product photo.</li>
+    <li>Then, distantly: latency, battery, comfort. All solvable, all measurable, all in the spec.</li>
+  </ol>
+  <div class="callout kill">
+    <span class="ct">The order this implies</span>
+    <p>Do not build glasses to find out whether you want glasses. Put a phone in your shirt pocket
+      with the camera poking out, wear an earbud, and use it exactly as if it were the real thing —
+      for two weeks, in public, in shops, on walks.</p>
+    <p>It costs nothing and it answers the only question that can kill the project after you have
+      spent six months on it.</p>
+  </div>
+</section>
+
+<section id="s3">
+  <div class="shead"><span class="snum">03</span><h2>Six phases, five gates</h2></div>
+  <p class="sdek">Every gate has an exit. The cheapest exit comes first, on purpose.</p>
+
+  <figure>
+    <svg viewBox="0 0 900 250" role="img"
+         aria-label="Six phases in sequence — fake it, node, wearable, apps, ten users, launch — separated by five gates. Each gate has a downward exit marked stop, with the question that decides it: used daily, under 1.2 seconds, worn a week, second person with no code changes, and ten users who stayed.">
+      <defs>
+        <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+        </marker>
+        <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="var(--kill)"/>
+        </marker>
+      </defs>
+
+      <line x1="40" y1="70" x2="746" y2="70" stroke="currentColor" stroke-width="1.25"
+            opacity=".35" marker-end="url(#a1)"/>
+
+      <g fill="var(--paper)" stroke="currentColor" stroke-width="1.25">
+        <rect x="40"  y="45" width="110" height="50" rx="8"/>
+        <rect x="182" y="45" width="110" height="50" rx="8"/>
+        <rect x="324" y="45" width="110" height="50" rx="8"/>
+        <rect x="466" y="45" width="110" height="50" rx="8"/>
+        <rect x="608" y="45" width="110" height="50" rx="8"/>
+      </g>
+      <rect x="750" y="45" width="110" height="50" rx="8" fill="var(--paper)" stroke="var(--acc)" stroke-width="2"/>
+
+      <g font-family="IBM Plex Sans, sans-serif" font-size="13" fill="currentColor" text-anchor="middle">
+        <text x="95"  y="68">Fake it</text>
+        <text x="237" y="68">Node</text>
+        <text x="379" y="68">Wearable</text>
+        <text x="521" y="68">Apps</text>
+        <text x="663" y="68">Ten people</text>
+      </g>
+      <text x="805" y="68" font-family="IBM Plex Sans, sans-serif" font-size="13.5" font-weight="600"
+            fill="var(--acc)" text-anchor="middle">Ship</text>
+      <g font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6" text-anchor="middle">
+        <text x="95"  y="86">2 wk · $0</text>
+        <text x="237" y="86">4 wk</text>
+        <text x="379" y="86">4 wk</text>
+        <text x="521" y="86">3 wk</text>
+        <text x="663" y="86">8 wk</text>
+        <text x="805" y="86">4 wk</text>
+      </g>
+
+      <!-- gates -->
+      <g>
+        <g fill="var(--kill)">
+          <circle cx="166" cy="70" r="4"/><circle cx="308" cy="70" r="4"/>
+          <circle cx="450" cy="70" r="4"/><circle cx="592" cy="70" r="4"/>
+          <circle cx="734" cy="70" r="4"/>
+        </g>
+        <g stroke="var(--kill)" stroke-width="1.25" stroke-dasharray="4 3" marker-end="url(#a2)">
+          <line x1="166" y1="76" x2="166" y2="132"/>
+          <line x1="308" y1="76" x2="308" y2="132"/>
+          <line x1="450" y1="76" x2="450" y2="132"/>
+          <line x1="592" y1="76" x2="592" y2="132"/>
+          <line x1="734" y1="76" x2="734" y2="132"/>
+        </g>
+      </g>
+
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--kill)" text-anchor="middle">
+        <text x="166" y="156">used it</text><text x="166" y="170">3× a day?</text>
+        <text x="308" y="156">answers in</text><text x="308" y="170">under 1.2 s?</text>
+        <text x="450" y="156">worn a week</text><text x="450" y="170">without fuss?</text>
+        <text x="592" y="156">2nd person,</text><text x="592" y="170">zero changes?</text>
+        <text x="734" y="156">did the ten</text><text x="734" y="170">keep using it?</text>
+      </g>
+      <text x="450" y="206" font-family="IBM Plex Sans, sans-serif" font-size="12.5"
+            fill="var(--kill)" text-anchor="middle" opacity=".85">no at any gate → stop, or go back one phase. Both are wins.</text>
+    </svg>
+    <figcaption>Each gate is a question with a real exit, and the exits get progressively more
+      expensive to reach — which is why the two-week, zero-cost gate is deliberately first.
+      A project with no defined way to stop does not stop; it just gets quietly abandoned after
+      you have spent the money.</figcaption>
+  </figure>
+</section>
+
+<section id="s4">
+  <div class="shead"><span class="snum">04</span><h2>Phase −1 · Fake it <span class="chip go">2 weeks · $0</span></h2></div>
+  <p class="sdek">No hardware, no node, no code you keep. You are buying information, not building.</p>
+  <h3>The rig</h3>
+  <ul class="plain">
+    <li>Phone in your shirt pocket, camera lens poking over the edge, one earbud in.</li>
+    <li>A shortcut or a tiny app: press → photo + record → send to a hosted multimodal model →
+        speak the answer. An afternoon's work, and you throw it away.</li>
+    <li>Use a hosted model here deliberately. You are testing whether the <i>experience</i> is worth
+        having, not whether you can self-host it.</li>
+  </ul>
+  <h3>What to record, every time</h3>
+  <p>Keep a note. One line per use: what you asked, whether the answer was useful, and what you
+     wished it had done instead. Two weeks of that note is worth more than any amount of
+     architecture.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Measure</th><th>How</th><th>Gate</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Uses per day</td><td>Count them</td><td class="mid">3+ per day, sustained across week 2</td></tr>
+      <tr><td class="k">Useful rate</td><td>Your own yes/no per use</td><td class="mid">Over half genuinely useful</td></tr>
+      <tr><td class="k">What you asked</td><td>The note</td><td>Clusters into 3–5 recurring intents</td></tr>
+      <tr><td class="k">Week 2 vs week 1</td><td>Compare counts</td><td class="mid">Flat or up. A drop is the answer.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout kill">
+    <span class="ct">Gate 1</span>
+    <p>If usage falls off in week two, glasses will not rescue it. Better hardware makes a useful
+      thing convenient; it does not make an unused thing used. Stop here, having spent a fortnight
+      and nothing else — or take what the note actually says people want and redesign around that.</p>
+  </div>
+  <p>There is a real chance the note tells you the product is something adjacent: hands-free
+     capture, or memory, or reading signs in another language. That is not failure, it is the
+     cheapest possible pivot.</p>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="snum">05</span><h2>Phase 0 · The node <span class="chip go">4 weeks</span></h2></div>
+  <p class="sdek">All of it testable with curl. Do not touch a soldering iron in this phase.</p>
+  <p>This is the biggest realisation about sequencing: <b>the entire system can be built and
+     measured before any hardware exists.</b> A laptop webcam and a microphone stand in for the
+     glasses perfectly, because the glasses are stateless by design (spec §3.1).</p>
+  <div class="tw"><table>
+    <thead><tr><th>Week</th><th>Build</th><th>Proves</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td>Schema with <code>person_id</code>, RLS forced, two seeded people, the CI check</td><td>Isolation is structural from commit 1</td></tr>
+      <tr><td class="n">2</td><td>Capability host: <code>invoke()</code>, person context, audit in the same transaction</td><td>One door, and it is the only one</td></tr>
+      <tr><td class="n">3</td><td>Pipeline: Whisper, a 4B VLM under MLX, Piper. Pure functions.</td><td>The models work and fit in memory</td></tr>
+      <tr><td class="n">4</td><td>Wire it together, measure end to end, optimise per spec §12</td><td>The latency budget is real</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout go">
+    <span class="ct">Gate 2</span>
+    <p><code>curl</code> an image and a question, get spoken audio back in <b>under 1.2 seconds</b>,
+      twenty times in a row. Then run two people's requests through a connection pooler
+      simultaneously and confirm neither sees the other's rows.</p>
+    <p>If latency will not come under about two seconds here, it never will — everything after this
+      adds time, none of it removes any. That is a legitimate stop.</p>
+  </div>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="snum">06</span><h2>Phase 1 · The wearable <span class="chip go">4 weeks</span></h2></div>
+  <p class="sdek">Breadboard, then a clip. You are not making frames.</p>
+  <ol class="plain">
+    <li><b>Week 1 — on the bench.</b> XIAO ESP32-S3 Sense, USB power, no battery. Capture a frame,
+        open a WebSocket, ship it, play the reply through a wired transducer. Ugly is fine.</li>
+    <li><b>Week 2 — untethered.</b> Add the LiPo and charge circuit. Measure actual draw against
+        the §11 budget, because your firmware will be worse than the model.</li>
+    <li><b>Week 3 — on your face.</b> 3D-print a clip-on module for a cheap pair of safety glasses
+        or readers. Expect four or five iterations; each is a few pounds of filament and a night.</li>
+    <li><b>Week 4 — wear it.</b> Every day, in public. Fix what annoys you, not what is elegant.</li>
+  </ol>
+  <div class="callout">
+    <span class="ct">Do not make frames</span>
+    <p>Injection-mould tooling is five figures and it is the last thing you would ever do, if ever.
+      Buy frames, print a clip. It will look like a prototype. Everyone who matters at this stage
+      knows what a prototype looks like.</p>
+  </div>
+  <div class="callout kill">
+    <span class="ct">Gate 3</span>
+    <p>Wear it for a full week. Does it survive contact with your actual life — battery lasting the
+      day, no burning temple, no fiddling to make it connect, not embarrassing enough to leave at
+      home? A no here is usually a comfort or battery problem, both of which are fixable. A no
+      because you stopped wanting to is gate 1 arriving late.</p>
+  </div>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="snum">07</span><h2>Phase 2 · Three apps <span class="chip go">3 weeks</span></h2></div>
+  <p class="sdek">Built against the same capability API third parties will eventually get. No app store yet.</p>
+  <div class="tw"><table>
+    <thead><tr><th>App</th><th>Exercises</th><th>Done when</th></tr></thead>
+    <tbody>
+      <tr><td class="k">What is this?</td><td>Capture → vision → speech; the whole latency path</td><td>Under 1.2 s from end of speech, on the glasses, twenty times</td></tr>
+      <tr><td class="k">Remember this.</td><td>The observation schema and retrieval</td><td>A question a week later returns the right row from SQL, not from a model's recollection</td></tr>
+      <tr><td class="k">Add this to my list.</td><td>Intent routing, capability tokens, identity node</td><td>Lands on the right person's list, with the photo, with the internet unplugged</td></tr>
+    </tbody>
+  </table></div>
+  <p>Then add the second person. Per the build guide, this is the checkpoint that matters: it must
+     require zero schema changes, zero new parameters and zero special cases. If it does not, phases
+     0–2 were built single-tenant and this is the cheapest moment you will ever have to find out.</p>
+  <div class="callout go">
+    <span class="ct">Gate 4 — and a legitimate ending</span>
+    <p>Two people, two pairs of glasses, one node, three apps, no code changes between the first
+      person and the second.</p>
+    <p>You can stop here. You have the thing you wanted, it works, and you own all of it. Everything
+      past this point is about other people, which is a different kind of work and not everyone
+      wants it.</p>
+  </div>
+</section>
+
+<section id="s8">
+  <div class="shead"><span class="snum">08</span><h2>Phase 3 · Ten people <span class="chip go">8 weeks</span></h2></div>
+  <p class="sdek">The first phase where you find out whether this is a product or a very good hobby.</p>
+  <h3>Who</h3>
+  <p>Ten people who will tell you the truth, not ten people who will be polite. Prefer someone with
+     a reason to want it — a mechanic, a birder, someone with low vision, a warehouse manager —
+     over ten friends who think it is cool. A specific need produces specific feedback.</p>
+  <h3>What you have to build for them that you did not need yourself</h3>
+  <ul class="plain">
+    <li><b>Pairing that a stranger can do.</b> You have been running <code>adb</code> commands. They
+        will not.</li>
+    <li><b>An answer to "my node is off."</b> The degradation matrix stops being theoretical.</li>
+    <li><b>Ten assembled units.</b> Budget a full weekend; hand assembly is slower than you think
+        and the tenth is not much faster than the first.</li>
+    <li><b>A way to see what broke</b> without asking them to read logs.</li>
+  </ul>
+  <h3>What to measure</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Measure</th><th>Meaning</th><th>Gate</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Week 4 retention</td><td>How many still wear it after the novelty</td><td class="mid">6 of 10</td></tr>
+      <tr><td class="k">Uses per active day</td><td>Whether it became a habit</td><td class="mid">3+</td></tr>
+      <tr><td class="k">Support load</td><td>Your hours per user per week</td><td class="mid">Under 1. Above that it cannot scale past you.</td></tr>
+      <tr><td class="k">Intent spread</td><td>Do they want the same 3 things or 30 different ones?</td><td>Either answer is useful. Thirty means build the app store.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout kill">
+    <span class="ct">Gate 5</span>
+    <p>Week-four retention is the honest number. Everybody uses a new gadget in week one. If six of
+      ten are still wearing it in week four, you have something. If two are, you have a
+      demonstration — which is fine, and knowing it now is worth eight weeks.</p>
+  </div>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="snum">09</span><h2>Phase 4 · Ship it <span class="chip go">4 weeks</span></h2></div>
+  <p class="sdek">Launch is a publishing exercise, not a manufacturing one.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Artefact</th><th>What it is</th><th>Why it matters</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Protocol</td><td><code>ogp/1</code> schema, frozen, versioned, with a conformance test suite</td><td>The thing other hardware implements. Freeze it or nobody can build against it.</td></tr>
+      <tr><td class="k">Node</td><td>Source, migrations, one-command install</td><td>The product. Everything else is a client of it.</td></tr>
+      <tr><td class="k">Reference build</td><td>BOM, wiring, printable STLs, firmware image</td><td>Someone can have working glasses for about $60 and a weekend</td></tr>
+      <tr><td class="k">Three apps</td><td>Source, as worked examples of the capability API</td><td>Documentation people can run</td></tr>
+      <tr><td class="k">Honest README</td><td>What works, what does not, battery life, latency, what it cannot do</td><td>The single best filter for the users you want</td></tr>
+    </tbody>
+  </table></div>
+  <p>Choose a licence deliberately. Permissive for the protocol — you want it adopted, including by
+     people who will not share back. Copyleft is defensible for the node if you care that hosted
+     forks contribute upstream. These two do not have to match, and for a platform play they
+     usually should not.</p>
+  <div class="callout">
+    <span class="ct">The measure of a launch, here</span>
+    <p>Not stars and not press. <b>Someone you have never met builds the reference hardware and
+      opens an issue about it.</b> That is the moment the protocol stopped being your project and
+      started being a standard, and it is the only signal at this stage that means anything.</p>
+  </div>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="snum">10</span><h2>What to buy</h2></div>
+  <p class="sdek">Buy per phase, never ahead. Each gate might end the project, and unopened boxes are the receipt for ignoring one.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Phase</th><th>Item</th><th>Why</th><th>Qty</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td class="n">−1</td><td class="k">Nothing</td><td>Phone and earbuds you already own</td><td class="n">—</td><td class="n good">$0</td></tr>
+      <tr><td class="n">0</td><td class="k">Mac mini M4, 24–32 GB</td><td>The node. Unified memory runs a 4B VLM under MLX; idles at 5–10 W.</td><td class="n">1</td><td class="n">$800–1,400</td></tr>
+      <tr><td class="n">1</td><td class="k">XIAO ESP32-S3 Sense</td><td>Camera, mic and Wi-Fi on one module. Buy spares — you will kill one.</td><td class="n">3</td><td class="n">$45</td></tr>
+      <tr><td class="n">1</td><td class="k">Bone conduction transducer</td><td>Leaves the ear open; nobody else hears the answer</td><td class="n">2</td><td class="n">$25</td></tr>
+      <tr><td class="n">1</td><td class="k">400 mAh LiPo + charge board</td><td>Per the §11 budget, with headroom</td><td class="n">3</td><td class="n">$25</td></tr>
+      <tr><td class="n">1</td><td class="k">Cheap frames</td><td>Safety glasses or readers. You are printing a clip, not making frames.</td><td class="n">3</td><td class="n">$30</td></tr>
+      <tr><td class="n">1</td><td class="k">Filament, wire, JST, solder</td><td>Five clip iterations is normal</td><td class="n">—</td><td class="n">$120</td></tr>
+      <tr><td class="n">2</td><td class="k">Refurbished Android handset</td><td>One identity node. Only if you need unattended action — see spec §6.1.</td><td class="n">1</td><td class="n">$150</td></tr>
+      <tr><td class="n">3</td><td class="k">Ten assembled units</td><td>~$60 of parts each</td><td class="n">10</td><td class="n">$600</td></tr>
+      <tr><td class="n">later</td><td class="k">A display device</td><td>Prototype <code>display.card()</code> against real optics before designing your own</td><td class="n">1</td><td class="n">$350–600</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="4">To gate 4 (two people working), assuming you own a Mac</td><td class="n good">~$400</td></tr>
+      <tr><td colspan="4">To gate 5 (ten users), buying a node</td><td class="n">~$2,400</td></tr>
+    </tfoot>
+  </table></div>
+  <div class="callout">
+    <span class="ct">Two purchases to defer hard</span>
+    <p><b>The display.</b> V1 is audio-only. The <code>display.card()</code> capability is designed
+      (spec §10) and costs nothing to leave unimplemented — devices answer <code>class:"none"</code>
+      and the router speaks instead. Buy optics when you know people want a screen.</p>
+    <p><b>The AI Camera.</b> One frame per query needs no on-sensor neural net. It earns its price
+      only for continuous passive perception, which is a phase-5 product.</p>
+  </div>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="snum">11</span><h2>What to write, in order</h2></div>
+  <p class="sdek">Ten files. Each one is testable before the next exists.</p>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>File</th><th>Testable by</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td class="k"><code>proto/ogp-1.json</code></td><td>Schema validates a handcrafted handshake. Everything downstream references it, so it goes first.</td></tr>
+      <tr><td class="n">2</td><td class="k"><code>node/store/migrations/0001_init.sql</code></td><td>Two seeded people; B's context cannot read A's rows</td></tr>
+      <tr><td class="n">3</td><td class="k"><code>node/store/check-rls.test</code></td><td>Fails on a table added without <code>person_id</code> or forced RLS</td></tr>
+      <tr><td class="n">4</td><td class="k"><code>node/capabilities/host.ts</code></td><td>An <code>invoke()</code> with a forged scope is refused</td></tr>
+      <tr><td class="n">5</td><td class="k"><code>node/pipeline/{stt,vision,tts}.ts</code></td><td>Each called directly with a fixture file</td></tr>
+      <tr><td class="n">6</td><td class="k"><code>node/router/classify.ts</code></td><td>Twenty recorded utterances route correctly</td></tr>
+      <tr><td class="n">7</td><td class="k"><code>node/gateway/session.ts</code></td><td>A websocket client binds and gets a scoped token</td></tr>
+      <tr><td class="n">8</td><td class="k"><code>apps/what-is-this.ts</code></td><td>End to end over curl, timed</td></tr>
+      <tr><td class="n">9</td><td class="k"><code>firmware/main.c</code></td><td>The real device replaces curl. <b>Ninth, not first.</b></td></tr>
+      <tr><td class="n">10</td><td class="k"><code>companion/</code></td><td>Hotspot, GPS, offline queue with idempotency keys</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout go">
+    <span class="ct">Why firmware is ninth</span>
+    <p>The glasses are stateless by design, so a laptop webcam and a <code>curl</code> command are a
+      complete stand-in. Writing firmware first means debugging your architecture through a serial
+      cable at 115200 baud, which is roughly ten times slower than debugging it in a terminal.</p>
+  </div>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="snum">12</span><h2>Time and money</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>Phase</th><th>Work</th><th>Evenings &amp; weekends<br>(~12 h/week)</th><th>Full time</th></tr></thead>
+    <tbody>
+      <tr><td class="k">−1 Fake it</td><td>Rig and use it</td><td class="n">2 weeks</td><td class="n">2 weeks</td></tr>
+      <tr><td class="k">0 Node</td><td>Schema, host, pipeline</td><td class="n">7 weeks</td><td class="n">3 weeks</td></tr>
+      <tr><td class="k">1 Wearable</td><td>Firmware, battery, clip</td><td class="n">7 weeks</td><td class="n">3 weeks</td></tr>
+      <tr><td class="k">2 Apps</td><td>Three apps, second person</td><td class="n">5 weeks</td><td class="n">2 weeks</td></tr>
+      <tr><td class="k">3 Ten people</td><td>Onboarding, assembly, support</td><td class="n">12 weeks</td><td class="n">6 weeks</td></tr>
+      <tr><td class="k">4 Ship</td><td>Docs, licence, conformance suite</td><td class="n">6 weeks</td><td class="n">3 weeks</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="2">Zero to launch</td><td class="n">~9 months</td><td class="n">~4½ months</td></tr>
+      <tr><td colspan="2">Zero to gate 4 (it works, for two people)</td><td class="n good">~5 months</td><td class="n good">~2½ months</td></tr>
+    </tfoot>
+  </table></div>
+  <p>Phase −1 does not scale with hours — it is two calendar weeks either way, because you are
+     measuring your own behaviour and behaviour takes wall-clock time. The same is quietly true of
+     phase 3: ten people take a month to reveal anything regardless of how many hours you put in.</p>
+  <h3>Running cost</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Item</th><th>Cost</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Node power</td><td class="n">$30–50 / yr</td><td class="good">A Mac mini idles at 5–10 W. A GPU tower would be $150–250 — a real argument for Apple Silicon here.</td></tr>
+      <tr><td class="k">External model calls</td><td class="n">$0–20 / user / mo</td><td>Zero if policy keeps everything on the node</td></tr>
+      <tr><td class="k">Identity handset battery</td><td class="n">~$40 / yr each</td><td>Trickle-charged cells swell. Budget replacement or cap the charge.</td></tr>
+      <tr><td class="k">Your support time</td><td class="n">the real cost</td><td class="mid">At ten users this is the thing that limits you, not money</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="snum">13</span><h2>What kills this</h2></div>
+  <p class="sdek">In order of likelihood, from watching projects of exactly this shape.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Failure</th><th>Looks like</th><th>Defence</th></tr></thead>
+    <tbody>
+      <tr><td class="k">You stop wearing it</td><td>Six months in, it lives in a drawer</td><td class="good">Phase −1 finds this in two weeks for free</td></tr>
+      <tr><td class="k">Becoming a hardware company</td><td>Enclosure revisions, certification quotes, a supplier who went quiet</td><td class="good">Launch as a platform. Publish the reference build; let others assemble.</td></tr>
+      <tr><td class="k">Building the app store first</td><td>A WASM host and a signing pipeline, and nothing to run in them</td><td class="good">Three first-party apps for a month before anyone external</td></tr>
+      <tr><td class="k">Answers not good enough</td><td>The VLM is confidently wrong about real street scenes</td><td class="mid">Phase −1 measures it with a frontier model — the ceiling, not your floor</td></tr>
+      <tr><td class="k">Latency you can't fix</td><td>Three seconds, and it never feels conversational</td><td class="good">Gate 2 tests this before any hardware exists</td></tr>
+      <tr><td class="k">Retrofitting isolation</td><td>Second user needs a schema migration and every query rewritten</td><td class="good">Two seeded people from commit 1</td></tr>
+      <tr><td class="k">Support swallows you</td><td>Ten users, and no time to build</td><td class="mid">Measure support hours per user at gate 5. Over one, stop adding users.</td></tr>
+      <tr><td class="k">Scope creep into the deck</td><td>Federation, cellular, world-locked AR, before two people work</td><td class="good">The build guide's §16 exists for exactly this</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout kill">
+    <span class="ct">The one that actually gets people</span>
+    <p>Not any single failure — it is spending four months on the node and the firmware
+      <i>before</i> discovering you only reach for it twice a week. Every hour of phase −1 is
+      insurance against the most expensive version of being wrong, and it is the phase people skip
+      because it does not feel like building.</p>
+  </div>
+</section>
+
+<section id="s14">
+  <div class="shead"><span class="snum">14</span><h2>Monday morning</h2></div>
+  <p class="sdek">The first week, concretely.</p>
+  <ol class="plain">
+    <li><b>Mon.</b> Write the phone rig. A shortcut or a fifty-line app: button → photo + audio →
+        hosted multimodal model → speak the answer. Ship it badly; it gets deleted in two weeks.</li>
+    <li><b>Tue.</b> Start a plain text file, one line per use: what you asked, was it useful, what
+        you wished it did. Carry the phone in your shirt pocket from today.</li>
+    <li><b>Wed.</b> Use it in a shop. This is the real test — public, hands busy, moderate noise.</li>
+    <li><b>Thu.</b> Order nothing. It is deliberate. Gate 1 is nine days away.</li>
+    <li><b>Fri.</b> Read your own note. What are the three things you keep asking for?</li>
+    <li><b>Weekend.</b> Wear it out properly. Not around the house — around other people, which is
+        where you find out whether you are comfortable using it.</li>
+  </ol>
+  <p>In parallel, if you want something to build while the fortnight runs: write
+     <code>proto/ogp-1.json</code>. It is pure specification, it needs no hardware and no models,
+     and it is the one artefact that survives whatever phase −1 tells you — because if the answer
+     is "the product is memory, not identification", the protocol barely changes.</p>
+  <div class="callout go">
+    <span class="ct">Then, on day fifteen</span>
+    <p>Count the note. Three or more uses a day in week two, still climbing or flat: buy the node
+      and start phase 0. Fewer: you have learned the most valuable thing in this entire document
+      for the price of two weeks and no money, and either ending is a good one.</p>
+  </div>
+</section>
+
+<footer>
+  Zero to Launch v0.1 · execution companion to the Open Glasses Spec and Building the Node<br>
+  Six phases, five gates. Every gate has an exit, and the cheapest one comes first.
+</footer>
+</main>
+</div>

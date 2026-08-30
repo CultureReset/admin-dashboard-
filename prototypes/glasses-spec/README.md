@@ -6,6 +6,8 @@ Two standalone documents, no build step. Open either in a browser.
   *Open Smart Glasses Ecosystem* deck: what the system does, in numbers and schemas.
 - `BUILD.html` — **Building the Node.** How to build it, and how every part stays
   separated per person.
+- `LAUNCH.html` — **Zero to Launch.** The execution plan: six phases, five kill gates,
+  what to buy, what to write in order, and honest time and money.
 
 ## Why it exists
 
@@ -73,3 +75,43 @@ code review problem rather than a structural one — and code review does not sc
 Adding the second person must require zero schema changes, zero new parameters and zero special
 cases. Seed a second person in phase 0 and keep them in every test run — that is what stops the
 system quietly becoming single-tenant.
+
+
+---
+
+# Zero to Launch
+
+`LAUNCH.html` — what you actually do, in what order, and where you are allowed to stop.
+
+## The framing that changes everything
+
+**Launch the platform, not the hardware.** The architecture doc reached this conclusion itself in
+§24–25: the defensible thing is the device protocol and the node, not the frames. Publish the
+protocol, the node, and a reference build anyone can assemble from ~$60 of parts. You get the
+ecosystem without becoming a manufacturer, which is the specific way projects like this die.
+
+## The riskiest assumption is not technical
+
+Nothing in the spec is research; it is all buildable. The real risk is whether you will reach for
+it. Phase −1 tests that in two weeks for $0 — phone in a shirt pocket, one earbud, a note file —
+before any hardware exists. Every hour spent there is insurance against the most expensive version
+of being wrong, and it is the phase people skip because it does not feel like building.
+
+## Firmware is the ninth file you write, not the first
+
+The glasses are stateless by design, so a laptop webcam and `curl` are a complete stand-in for
+them. Writing firmware first means debugging your architecture through a serial cable.
+
+## Six phases, five gates
+
+| Phase | Gate |
+|---|---|
+| −1 Fake it · 2 wk · $0 | Used it 3× a day, sustained into week two? |
+| 0 Node · 4 wk | Answers in under 1.2 s, twenty times? |
+| 1 Wearable · 4 wk | Worn a week without fuss? |
+| 2 Apps · 3 wk | Second person works with zero code changes? |
+| 3 Ten people · 8 wk | Six of ten still wearing it at week four? |
+| 4 Ship · 4 wk | A stranger builds the reference hardware and files an issue. |
+
+Roughly nine months of evenings to launch, five to the point where it works for two people.
+About $400 to that point if you already own a Mac.
