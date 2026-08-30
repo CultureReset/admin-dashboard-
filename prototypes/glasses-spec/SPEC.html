@@ -1,0 +1,1053 @@
+<title>Open Glasses Spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#EDEFF3; --card:#fff; --sunk:#E4E7EC; --rule:#D3D8E0; --hair:#E5E8EE;
+  --ink:#0E1218; --ink-2:#4E5765; --ink-3:#79828F;
+  --acc:#07707E; --acc-soft:#DEF0F1;
+  --ok:#1A6F49; --ok-soft:#DFF0E7;
+  --warn:#8E5605; --warn-soft:#FAEEDC;
+  --stop:#A3302F; --stop-soft:#FAE5E4;
+  --code:#F1F3F6;
+  --disp:"Archivo",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#080B11; --card:#111620; --sunk:#0C1017; --rule:#212836; --hair:#1A2029;
+  --ink:#E6EAF1; --ink-2:#939CAC; --ink-3:#6D7686;
+  --acc:#3ECFDC; --acc-soft:#0C2A2E;
+  --ok:#4CD79B; --ok-soft:#0C2419;
+  --warn:#E4A94F; --warn-soft:#2A1F0C;
+  --stop:#FF7B72; --stop-soft:#2B1312;
+  --code:#161C27;
+}}
+:root[data-theme="dark"]{
+  --paper:#080B11; --card:#111620; --sunk:#0C1017; --rule:#212836; --hair:#1A2029;
+  --ink:#E6EAF1; --ink-2:#939CAC; --ink-3:#6D7686;
+  --acc:#3ECFDC; --acc-soft:#0C2A2E;
+  --ok:#4CD79B; --ok-soft:#0C2419;
+  --warn:#E4A94F; --warn-soft:#2A1F0C;
+  --stop:#FF7B72; --stop-soft:#2B1312;
+  --code:#161C27;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:15.5px;line-height:1.65;margin:0;padding:0;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--disp);letter-spacing:-.018em;text-wrap:balance;margin:0}
+p,li{max-width:70ch}
+a{color:var(--acc);text-underline-offset:3px;text-decoration-thickness:1px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:3px}
+code{font-family:var(--mono);font-size:.86em;background:var(--code);padding:1.5px 5px;border-radius:4px}
+pre{
+  font-family:var(--mono);font-size:12.5px;line-height:1.62;background:var(--code);
+  border:1px solid var(--hair);border-radius:9px;padding:14px 16px;overflow-x:auto;margin:16px 0;
+  max-width:100%;
+}
+pre code{background:none;padding:0;font-size:inherit}
+.cm{color:var(--ink-3)}
+.kw{color:var(--acc)}
+
+/* shell */
+.shell{max-width:1240px;margin:0 auto;padding:0 22px 110px;display:grid;
+  grid-template-columns:minmax(0,1fr);gap:0}
+.shell>main{min-width:0}
+@media (min-width:1060px){
+  .shell{grid-template-columns:228px minmax(0,1fr);gap:52px;padding-left:26px;padding-right:26px}
+  .shell>nav.toc{display:block}
+}
+nav.toc{
+  display:none;position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;
+  padding:36px 0 40px;font-size:12.5px;line-height:1.45;
+}
+nav.toc::-webkit-scrollbar{width:0}
+nav.toc .grp{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);margin:20px 0 7px;
+}
+nav.toc a{
+  display:flex;gap:8px;padding:3.5px 0;color:var(--ink-2);text-decoration:none;
+}
+nav.toc a:hover{color:var(--acc)}
+nav.toc a b{font-family:var(--mono);font-weight:500;color:var(--ink-3);flex:0 0 17px;font-size:11px}
+
+/* masthead */
+header{padding:74px 0 34px;border-bottom:2px solid var(--ink)}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:18px;
+}
+h1{font-size:clamp(38px,6.2vw,62px);line-height:1;font-weight:800}
+.lede{font-size:18.5px;line-height:1.52;color:var(--ink-2);margin:20px 0 0;max-width:58ch}
+.masthead-meta{
+  display:flex;flex-wrap:wrap;gap:9px 24px;margin-top:26px;
+  font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.02em;
+}
+.masthead-meta b{color:var(--ink);font-weight:500}
+
+/* status chips */
+.chip{
+  display:inline-flex;align-items:center;font-family:var(--mono);font-size:9.5px;font-weight:500;
+  letter-spacing:.11em;text-transform:uppercase;padding:3px 8px;border-radius:4px;
+  white-space:nowrap;vertical-align:2px;
+}
+.chip.decided{color:var(--ok);background:var(--ok-soft)}
+.chip.spec{color:var(--acc);background:var(--acc-soft)}
+.chip.open{color:var(--warn);background:var(--warn-soft)}
+.chip.fix{color:var(--stop);background:var(--stop-soft)}
+
+section{padding-top:54px;scroll-margin-top:18px}
+.shead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.snum{
+  font-family:var(--mono);font-size:12px;font-weight:600;color:var(--acc);
+  letter-spacing:.06em;flex:0 0 auto;
+}
+h2{font-size:28px;font-weight:700;flex:1 1 auto;min-width:min(100%,320px)}
+.sdek{color:var(--ink-3);font-size:14.5px;margin:0 0 22px;max-width:66ch}
+h3{font-size:18px;font-weight:700;margin:32px 0 8px}
+h4{font-size:14.5px;font-weight:600;margin:22px 0 6px;color:var(--ink)}
+
+/* blocks */
+.callout{
+  border-left:3px solid var(--acc);background:var(--card);border-radius:0 9px 9px 0;
+  padding:15px 19px;margin:22px 0;
+}
+.callout.warn{border-left-color:var(--warn)}
+.callout.stop{border-left-color:var(--stop)}
+.callout.ok{border-left-color:var(--ok)}
+.callout p{margin:0;max-width:64ch}
+.callout p+p{margin-top:9px}
+.callout .ct{
+  font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:6px;display:block;
+}
+.tw{overflow-x:auto;max-width:100%;margin:20px 0;border:1px solid var(--rule);
+  border-radius:9px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:540px;font-size:13.5px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--hair);vertical-align:top}
+th{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;background:var(--sunk);
+}
+tr:last-child td{border-bottom:0}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.k{font-weight:600;white-space:nowrap}
+.good{color:var(--ok);font-weight:600}
+.bad{color:var(--stop);font-weight:600}
+.mid{color:var(--warn);font-weight:600}
+ul.plain,ol.plain{padding-left:1.2em;margin:12px 0}
+ul.plain li,ol.plain li{margin:6px 0}
+dl.defs{margin:16px 0;display:grid;gap:1px;background:var(--hair);border:1px solid var(--rule);border-radius:9px;overflow:hidden}
+dl.defs>div{background:var(--card);padding:12px 16px;display:grid;grid-template-columns:150px 1fr;gap:16px}
+dl.defs dt{font-family:var(--mono);font-size:12.5px;color:var(--acc);font-weight:500}
+dl.defs dd{margin:0;font-size:14px;color:var(--ink-2);line-height:1.5;max-width:62ch}
+@media (max-width:640px){dl.defs>div{grid-template-columns:1fr;gap:3px}}
+footer{
+  margin-top:78px;padding-top:22px;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:11px;color:var(--ink-3);line-height:1.85;
+}
+@media (max-width:640px){header{padding-top:48px}h2{font-size:23px}}
+</style>
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <div class="grp">Foundation</div>
+  <a href="#s0"><b>0</b>How to read this</a>
+  <a href="#s1"><b>1</b>Decisions locked</a>
+  <a href="#s2"><b>2</b>The thesis</a>
+  <div class="grp">Normative spec</div>
+  <a href="#s3"><b>3</b>Device Protocol v1</a>
+  <a href="#s4"><b>4</b>The Observation</a>
+  <a href="#s5"><b>5</b>Four data layers</a>
+  <a href="#s6"><b>6</b>Identity &amp; Android nodes</a>
+  <a href="#s7"><b>7</b>The router</a>
+  <a href="#s8"><b>8</b>Capability tokens</a>
+  <a href="#s9"><b>9</b>Policy routing</a>
+  <a href="#s10"><b>10</b>Display</a>
+  <div class="grp">Budgets &amp; limits</div>
+  <a href="#s11"><b>11</b>Power</a>
+  <a href="#s12"><b>12</b>Latency</a>
+  <a href="#s13"><b>13</b>Degradation</a>
+  <a href="#s14"><b>14</b>Hardware</a>
+  <div class="grp">Corrections</div>
+  <a href="#s15"><b>15</b>Deck fixes</a>
+  <a href="#s16"><b>16</b>Positioning</a>
+  <a href="#s17"><b>17</b>Build first</a>
+</nav>
+
+<main>
+<header>
+  <div class="eyebrow">Engineering specification · v0.1</div>
+  <h1>Open Glasses Spec</h1>
+  <p class="lede">The engineering layer under the ten-slide deck: the device protocol, the
+    observation schema, the identity model, and the four budgets that decide whether any of it
+    is buildable.</p>
+  <div class="masthead-meta">
+    <span>Companion to <b>Open Smart Glasses Ecosystem</b> (slides 1–9)</span>
+    <span>Status <b>Draft for review</b></span>
+    <span>Blocking decisions <b>6 open</b></span>
+  </div>
+</header>
+
+<section id="s0">
+  <div class="shead"><span class="snum">00</span><h2>How to read this</h2></div>
+  <p class="sdek">The deck says what the system is. This says what it does, in numbers and schemas.</p>
+  <p>Every block carries a status. They mean specific things:</p>
+  <dl class="defs">
+    <div><dt><span class="chip decided">Decided</span></dt><dd>Settled. Build to it. Changing it means revisiting things downstream.</dd></div>
+    <div><dt><span class="chip spec">Spec</span></dt><dd>Normative. Implement exactly as written — third parties will build against it.</dd></div>
+    <div><dt><span class="chip open">Open</span></dt><dd>Needs your decision. Named explicitly rather than assumed, so nothing gets silently invented.</dd></div>
+    <div><dt><span class="chip fix">Fix</span></dt><dd>Contradicts something in the deck or the architecture doc. Resolve before either is published.</dd></div>
+  </dl>
+  <p>Where this document disagrees with the deck, the deck is older. Section 15 lists every
+     conflict in one place so the slides can be corrected in a single pass.</p>
+</section>
+
+<section id="s1">
+  <div class="shead"><span class="snum">01</span><h2>Decisions locked <span class="chip decided">Decided</span></h2></div>
+  <p class="sdek">Settled in review. Rationale recorded so they can be revisited on evidence, not memory.</p>
+
+  <h3>1.1 &nbsp;Wi-Fi only. No BLE.</h3>
+  <p>One radio, one stack, WebSocket end to end. The usual objection is that BLE is needed for a
+     milliwatt-class always-on control channel — but on an ESP32-S3, Wi-Fi modem-sleep with DTIM3
+     averages <b>1–2 mA</b>, which is the same order as a maintained BLE connection at this duty
+     cycle. You delete an entire protocol stack and pay almost nothing.</p>
+  <p><b>What you give up:</b> BLE proximity pairing, so "connects automatically when near your phone"
+     has to come from mDNS discovery plus a saved network instead. Acceptable.</p>
+  <p><b>Consequence:</b> deck slide 2 collapses from two planes to one. See §15.</p>
+
+  <h3>1.2 &nbsp;One Android device per person, physically attached to the node.</h3>
+  <p>The home node is shared compute and shared storage. <b>Identity is not shared.</b> Each person
+     gets a dedicated Android device holding their own logged-in sessions, so accounts never mix and
+     the system can act as that person in apps that have no API. Full treatment in §6.</p>
+
+  <h3>1.3 &nbsp;The glasses are not a Raspberry Pi.</h3>
+  <p>Forced by §11. The Pi Zero 2 W has no suspend-to-RAM, so it cannot be duty-cycled — it either
+     runs continuously or cold-boots for 20+ seconds. Running continuously needs <b>104 g of
+     battery</b>. This is the single most consequential finding in the document.</p>
+
+  <h3>1.4 &nbsp;The display capability is semantic, never a framebuffer.</h3>
+  <p>Devices receive <code>display.card()</code>, not pixels. One call, many renderers — green text on
+     a waveguide or a full framebuffer on birdbath optics. §10.</p>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="snum">02</span><h2>The thesis</h2></div>
+  <p class="sdek">What is actually being built, stated so it fits on one line.</p>
+  <div class="callout">
+    <span class="ct">The product</span>
+    <p>A <b>device protocol</b> and a <b>private node</b>. Any hardware that implements the protocol
+      gains the entire app ecosystem; the node owns the data and decides where computation happens.
+      The glasses are the reference implementation, not the product.</p>
+  </div>
+  <p>This matters because it determines what is defensible. Not the Pi, not the Sony sensor, not the
+     frames — all replaceable within a year. What is defensible is the protocol third parties build
+     against and the data model their apps depend on. Ship those wrong and every device becomes a
+     special case in the router; ship them right and someone else can build a pendant, a helmet, a
+     car module or earbuds and inherit everything.</p>
+  <p>The deck currently has an <i>app</i> protocol (slide 6) but no <i>device</i> protocol. That is
+     the largest gap in it, and §3 fills it.</p>
+</section>
+
+<section id="s3">
+  <div class="shead"><span class="snum">03</span><h2>Device Protocol v1 <span class="chip spec">Spec</span></h2></div>
+  <p class="sdek">Ten verbs, a capability descriptor, and a versioned handshake. Everything else is built on this.</p>
+
+  <h3>3.1 &nbsp;Design rules</h3>
+  <ol class="plain">
+    <li><b>Semantic, never raw.</b> Devices receive intent (<code>display a card</code>,
+        <code>speak this</code>), never pixels or PCM buffers. This is what lets a 40-character
+        monochrome HUD and a 1080p birdbath display satisfy the same call.</li>
+    <li><b>Devices declare, the router adapts.</b> No device is assumed to have a camera, a screen,
+        or a speaker. The router reads the capability descriptor and degrades accordingly.</li>
+    <li><b>Devices are dumb and stateless between requests.</b> All persistent state lives on the
+        node. A device that loses power and reboots rejoins with no local recovery.</li>
+    <li><b>Every message is versioned and cancellable.</b> Both from day one, or you can never
+        change anything and you leak in-flight work forever.</li>
+  </ol>
+
+  <h3>3.2 &nbsp;Transport</h3>
+  <p>WebSocket over TLS, inside a WireGuard tunnel, one persistent connection per device.
+     The device dials out; the node never dials in. That means no inbound firewall rules, no
+     NAT traversal, and the same code path whether the device is on home Wi-Fi or tethered to a
+     phone on cellular.</p>
+  <pre><code><span class="cm"># at home                     # away</span>
+device → LAN → node          device → phone hotspot → WireGuard → node</code></pre>
+  <p>At home the phone drops out of the path entirely and the system works with the internet
+     disconnected. That property is worth a slide of its own — it is the strongest argument the
+     architecture has, and it is currently absent from the deck.</p>
+
+  <h3>3.3 &nbsp;Handshake and capability descriptor</h3>
+  <p>First message after connect. The router caches this and uses it for every routing decision
+     afterwards.</p>
+  <pre><code>{
+  <span class="kw">"proto"</span>: <span class="kw">"ogp/1"</span>,
+  <span class="kw">"device"</span>: {
+    <span class="kw">"id"</span>: <span class="kw">"dev_8f21c0"</span>,          <span class="cm">// stable, factory-assigned</span>
+    <span class="kw">"kind"</span>: <span class="kw">"glasses"</span>,           <span class="cm">// glasses | pendant | vehicle | speaker | watch</span>
+    <span class="kw">"make"</span>: <span class="kw">"acme"</span>, <span class="kw">"model"</span>: <span class="kw">"v1"</span>,
+    <span class="kw">"firmware"</span>: <span class="kw">"0.4.1"</span>
+  },
+  <span class="kw">"capabilities"</span>: {
+    <span class="kw">"capture"</span>:  { <span class="kw">"still"</span>: <span class="kw">true</span>, <span class="kw">"video"</span>: <span class="kw">false</span>,
+                   <span class="kw">"max"</span>: [2304, 1296], <span class="kw">"fov"</span>: 78, <span class="kw">"indicator"</span>: <span class="kw">"hardwired"</span> },
+    <span class="kw">"listen"</span>:   { <span class="kw">"channels"</span>: 2, <span class="kw">"rate"</span>: 16000, <span class="kw">"wakeword"</span>: <span class="kw">true</span>, <span class="kw">"vad"</span>: <span class="kw">true</span> },
+    <span class="kw">"speak"</span>:    { <span class="kw">"codecs"</span>: [<span class="kw">"opus"</span>], <span class="kw">"transducer"</span>: <span class="kw">"bone"</span> },
+    <span class="kw">"display"</span>:  { <span class="kw">"class"</span>: <span class="kw">"text"</span>,       <span class="cm">// none | text | rich | framebuffer</span>
+                   <span class="kw">"cols"</span>: 40, <span class="kw">"rows"</span>: 5, <span class="kw">"mono"</span>: <span class="kw">true</span>, <span class="kw">"anchor"</span>: [<span class="kw">"head"</span>] },
+    <span class="kw">"location"</span>: { <span class="kw">"source"</span>: <span class="kw">"companion"</span> },  <span class="cm">// none | onboard | companion</span>
+    <span class="kw">"sensor"</span>:   { <span class="kw">"imu"</span>: <span class="kw">true</span>, <span class="kw">"presence"</span>: <span class="kw">true</span>, <span class="kw">"tap"</span>: <span class="kw">true</span> }
+  },
+  <span class="kw">"limits"</span>: { <span class="kw">"uplink_kbps"</span>: 8000, <span class="kw">"max_payload_kb"</span>: 512 }
+}</code></pre>
+  <p><code>display.class</code> is the field that makes §10 work. A device answering
+     <code>"none"</code> simply never receives display calls, and the router falls back to speech —
+     no special-casing anywhere else in the system.</p>
+
+  <h3>3.4 &nbsp;The verbs</h3>
+  <p>Seven from the architecture doc, plus three the doc omitted that a third party cannot implement
+     without.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Verb</th><th>Direction</th><th>Purpose</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="k">announce</td><td>device → node</td><td>Handshake, capability descriptor</td><td class="mid">Added — the router cannot route without it</td></tr>
+      <tr><td class="k">authenticate</td><td>both</td><td>Device attestation, session token</td><td class="mid">Added — slide 9 step 5 had no verb</td></tr>
+      <tr><td class="k">capture</td><td>node → device</td><td>Take a still or short clip</td><td>Returns an <code>observation</code> (§4)</td></tr>
+      <tr><td class="k">listen</td><td>node → device</td><td>Open an audio stream until VAD endpoint</td><td>Streams; not request/response</td></tr>
+      <tr><td class="k">speak</td><td>node → device</td><td>Play synthesized audio</td><td>Streamed Opus, first chunk plays immediately</td></tr>
+      <tr><td class="k">display</td><td>node → device</td><td>Show a semantic card or list</td><td>No-op if <code>class: "none"</code></td></tr>
+      <tr><td class="k">notify</td><td>node → device</td><td>Alert without a pending request</td><td>The only node-initiated interaction</td></tr>
+      <tr><td class="k">location</td><td>node → device</td><td>Current position and accuracy</td><td>May proxy to the companion phone</td></tr>
+      <tr><td class="k">sensor</td><td>node → device</td><td>Read IMU, presence, tap events</td><td>Subscribe or poll</td></tr>
+      <tr><td class="k">state</td><td>device → node</td><td>Battery, thermal, link quality</td><td class="mid">Added — battery is a routing input (§7)</td></tr>
+      <tr><td class="k">cancel</td><td>both</td><td>Abort an in-flight request by id</td><td class="mid">Added — user walks away mid-request</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>3.5 &nbsp;The same interface on three devices</h3>
+  <p>This is the payoff. One app, no branching.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Capability</th><th>Glasses</th><th>Pendant</th><th>Car module</th></tr></thead>
+    <tbody>
+      <tr><td class="k">capture</td><td class="good">still + video</td><td class="good">still</td><td class="good">still, forward-facing</td></tr>
+      <tr><td class="k">display</td><td class="mid">text, 40×5 mono</td><td class="bad">none</td><td class="good">framebuffer, dash screen</td></tr>
+      <tr><td class="k">speak</td><td class="good">bone conduction</td><td class="good">speaker</td><td class="good">cabin audio</td></tr>
+      <tr><td class="k">location</td><td class="mid">via companion</td><td class="mid">via companion</td><td class="good">onboard GPS</td></tr>
+      <tr><td class="k">sensor</td><td class="good">IMU, presence, tap</td><td class="mid">tap only</td><td class="good">speed, heading</td></tr>
+    </tbody>
+  </table></div>
+  <p>An app that asks for <code>display</code> gets text on the glasses, speech on the pendant, and a
+     full card on the dash — because it asked semantically. That is the whole argument for §3.1 rule 1.</p>
+
+  <h3>3.6 &nbsp;Versioning <span class="chip spec">Spec</span></h3>
+  <ul class="plain">
+    <li><code>proto</code> is <code>ogp/&lt;major&gt;</code>. A node must accept every major version it
+        has ever supported, or you break deployed hardware you do not control.</li>
+    <li>New capability <i>fields</i> are additive and optional. Absent means unsupported.</li>
+    <li>New <i>verbs</i> require a major bump. Devices reject unknown verbs with
+        <code>{"error":"unsupported_verb"}</code> rather than failing the connection.</li>
+    <li>Devices never auto-upgrade protocol version. The node negotiates down to the device.</li>
+  </ul>
+</section>
+
+<section id="s4">
+  <div class="shead"><span class="snum">04</span><h2>The Observation <span class="chip spec">Spec</span></h2></div>
+  <p class="sdek">The core datatype. It appears in your architecture doc only as a word inside an example — everything else depends on it.</p>
+
+  <p>Section 8 of the architecture doc gives the right instinct — <i>"you don't want an AI model being
+     your database; the AI should operate on the database"</i> — and then illustrates it with a query
+     against <code>observations</code>. That table is never defined anywhere. It is the thing every
+     capture produces, every app reads and every memory query runs against. Define it once, here,
+     or every app invents its own shape.</p>
+
+  <h3>4.1 &nbsp;Schema</h3>
+  <pre><code><span class="kw">create table</span> observation (
+  id             uuid primary key,
+  person_id      uuid not null,          <span class="cm">-- whose observation, always</span>
+  device_id      text not null,          <span class="cm">-- which device produced it</span>
+  captured_at    timestamptz not null,
+  received_at    timestamptz not null,   <span class="cm">-- differs when queued offline</span>
+
+  <span class="cm">-- what was captured</span>
+  kind           text not null,          <span class="cm">-- image | audio | text | sensor | composite</span>
+  media_ref      text,                   <span class="cm">-- pointer into object storage, never inline bytes</span>
+  media_sha256   text,
+  transcript     text,                   <span class="cm">-- if audio was transcribed</span>
+  description    text,                   <span class="cm">-- if vision described it</span>
+
+  <span class="cm">-- where and how</span>
+  location       geography(point),
+  location_acc_m real,
+  heading_deg    real,
+
+  <span class="cm">-- provenance: which model said the description, so it can be re-run later</span>
+  derived_by     jsonb,                  <span class="cm">-- {"vision":"qwen3-vl-4b@q4","stt":"whisper-small"}</span>
+  confidence     real,
+
+  <span class="cm">-- policy travels with the row, it is not looked up later</span>
+  policy         text not null,          <span class="cm">-- local | node | private_cloud | external</span>
+  retain_until   timestamptz,            <span class="cm">-- null = keep; camera mode sets this at capture</span>
+  redactions     text[],                 <span class="cm">-- fields stripped before any egress</span>
+
+  <span class="cm">-- linkage</span>
+  request_id     uuid,                   <span class="cm">-- the interaction that produced it</span>
+  entity_ids     uuid[]                  <span class="cm">-- structured entities resolved from it (§5)</span>
+);
+
+<span class="kw">create index</span> on observation (person_id, captured_at desc);
+<span class="kw">create index</span> on observation using gist (location);
+<span class="kw">create index</span> on observation (retain_until) where retain_until is not null;</code></pre>
+
+  <h3>4.2 &nbsp;The four rules that make it work</h3>
+  <ol class="plain">
+    <li><b>Policy is a column, not a lookup.</b> Every row carries the policy it was captured under.
+        If the user tightens their settings tomorrow, yesterday's rows keep the promise made when
+        they were taken. Re-deriving policy at query time is how privacy systems leak.</li>
+    <li><b>Retention is set at capture.</b> The camera mode (§9.3) writes <code>retain_until</code>
+        when the row is created. A nightly job deletes expired rows and their media. "Keep locally
+        for 24 hours" is one column, not a subsystem.</li>
+    <li><b>Media is referenced, never embedded.</b> Rows stay small enough to scan; blobs live in
+        object storage and are deleted by the same retention job.</li>
+    <li><b>Provenance is mandatory.</b> <code>derived_by</code> means a better model can re-describe
+        old observations later, and a wrong answer is traceable to the model that gave it.</li>
+  </ol>
+
+  <div class="callout">
+    <span class="ct">Why this makes memory work</span>
+    <p><i>"Where did I see those shoes yesterday?"</i> becomes a SQL query — person, time window,
+      description match, ordered by location — not a prompt against a model's recollection. The
+      embedding is an accelerator on top, never the source of truth. That distinction is the
+      difference between a system that remembers and one that confabulates.</p>
+  </div>
+
+  <h3>4.3 &nbsp;Who may write one <span class="chip spec">Spec</span></h3>
+  <p>Only the capture pipeline. Third-party apps <b>read</b> observations through a capability and
+     may <b>annotate</b> them by creating entities that reference them — they may never insert or
+     mutate an observation row. An app that could forge an observation could forge your memory.</p>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="snum">05</span><h2>Four data layers</h2></div>
+  <p class="sdek">Promote this from a paragraph in the doc to a slide. It is what "Personal Memory" on slide 5 is hiding.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Layer</th><th>Contains</th><th>Written by</th><th>Queried by</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Raw</td><td>Images, audio, video, documents. Immutable blobs.</td><td>Capture pipeline only</td><td>Rarely — by reference from an observation</td></tr>
+      <tr><td class="k">Structured</td><td>Observations (§4) and the entities resolved from them: people, places, products, tasks, events</td><td>Capture pipeline; apps via capabilities</td><td>Everything. This is the working set.</td></tr>
+      <tr><td class="k">Knowledge</td><td>Relationships and history between entities. Preferences. "Poppy is my daughter." "I shop at this store."</td><td>Inferred, then user-confirmable</td><td>The router, for context assembly</td></tr>
+      <tr><td class="k">AI memory</td><td>Summaries, embeddings, learned context. <b>Derived and disposable.</b></td><td>Background jobs</td><td>Retrieval, as an index over Structured</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout ok">
+    <span class="ct">The test</span>
+    <p>You must be able to <b>delete the entire AI memory layer and rebuild it</b> from Raw and
+      Structured with no loss. If you cannot, something authoritative has leaked into the model's
+      memory, and you have made an LLM your database.</p>
+  </div>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="snum">06</span><h2>Identity and Android nodes <span class="chip decided">Decided</span></h2></div>
+  <p class="sdek">One shared brain, one private identity per person. This solves multi-user and the no-API problem at once.</p>
+
+  <h3>6.1 &nbsp;The problem it actually solves</h3>
+  <p>Two problems, and it is worth being clear that they are separate:</p>
+  <ol class="plain">
+    <li><b>Multi-user.</b> One node, several people. Sessions, lists and memories must never mix.
+        Binding identity to a physical device makes the boundary obvious and auditable rather than
+        a row-level-security policy someone has to get right.</li>
+    <li><b>No API surface.</b> Most of what people actually want done has no API — a specific
+        retailer, a loyalty account, a utility, a bank. A logged-in Android running the real app is a
+        universal adapter for exactly those.</li>
+  </ol>
+
+  <div class="callout warn">
+    <span class="ct">The objection to answer first</span>
+    <p>"Why not use the person's own phone? It is already logged into everything." Because the phone
+      is with them, asleep, or out of signal. The dedicated device exists to act
+      <b>unattended</b> — overnight, while they are driving, while the phone is in a pocket. If you
+      never need unattended action, you do not need this and slide 3's phone is enough. Decide that
+      deliberately; it removes five devices from the bill of materials.</p>
+  </div>
+
+  <h3>6.2 &nbsp;Why physical devices, not virtual ones</h3>
+  <p>Your instinct here is right, and the reason is not performance:</p>
+  <ul class="plain">
+    <li><b>Container Android cannot run on macOS.</b> Waydroid and redroid need Linux kernel binder
+        and ashmem modules. A Mac mini cannot provide them at any price.</li>
+    <li><b>The Android emulator will not hold sessions.</b> AVDs run fine on Apple Silicon, but Play
+        Integrity fails on emulated and rooted devices. Banking, retail and streaming apps — exactly
+        the ones with no API, exactly the ones you need — detect this and refuse.</li>
+    <li><b>Stock, unrooted, physical devices pass.</b> That is the whole reason to buy hardware.</li>
+  </ul>
+  <p>So the architecture is a Mac mini for shared compute and storage, plus N cheap physical Android
+     handsets, one per person.</p>
+
+  <h3>6.3 &nbsp;Wiring: skip the splitter</h3>
+  <p>You mentioned needing a splitter. You probably do not.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Approach</th><th>Pros</th><th>Cons</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Powered USB hub + ADB</td><td>Rock solid, survives reboots, devices always charged</td><td>Needs a <b>powered</b> hub (5 phones draw 10 W+); cable sprawl; permanent charging kills batteries</td><td class="mid">Workable</td></tr>
+      <tr><td class="k">ADB over Wi-Fi</td><td>No hub, no cables, devices can sit anywhere, charge on a schedule</td><td><code>adb tcpip</code> needs re-enabling after a device reboot — script it</td><td class="good">Recommended</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout stop">
+    <span class="ct">The failure nobody plans for</span>
+    <p>Lithium cells held at 100% charge at room temperature swell within about a year. Five phones
+      trickle-charging 24/7 on a hub is five swollen batteries and five replacements. Either use
+      devices with a hard charge cap (Samsung's "Protect battery" holds at 85%; Sony exposes real
+      limits) or put the hub on a switched schedule that cycles them between 40% and 80%. Budget for
+      this or it becomes a recurring surprise.</p>
+  </div>
+
+  <h3>6.4 &nbsp;Control stack</h3>
+  <pre><code>node
+ ├── adb            <span class="cm">// device lifecycle, install, shell</span>
+ ├── scrcpy         <span class="cm">// mirror + inject input when a human needs to look</span>
+ └── companion app  <span class="cm">// resident agent on each device, HTTP on localhost</span>
+        ├── native path   → the app's own API/intent where one exists
+        └── fallback      → UiAutomator2 / Appium when it does not</code></pre>
+  <p>Write the companion app. Driving everything through screen automation is brittle and slow;
+     driving it through Android intents and app APIs where they exist, with UiAutomator only as a
+     fallback, is the difference between a demo and something that survives an app update.</p>
+
+  <h3>6.5 &nbsp;Security boundary <span class="chip spec">Spec</span></h3>
+  <p>The Android node holds a person's real credentials. It is the highest-value target in the
+     system, so it sits behind the capability layer like everything else:</p>
+  <pre><code><span class="cm">// what an app may call</span>
+<span class="kw">await</span> sdk.identity.act({ provider: <span class="kw">"retailer.example"</span>,
+                          intent:   <span class="kw">"cart.add"</span>,
+                          args:     { sku: <span class="kw">"…"</span> } });
+
+<span class="cm">// what an app may never reach</span>
+adb -s &lt;device&gt; shell …          <span class="cm">// raw device access: node-internal only</span></code></pre>
+  <ul class="plain">
+    <li>An Android node serves exactly one <code>person_id</code>. Never two.</li>
+    <li>Third-party apps get <code>identity.act</code> with a named provider and intent, scoped by
+        capability token (§8). They never learn the device exists.</li>
+    <li>Every <code>identity.act</code> writes an audit row. This is the receipt that makes §8 real.</li>
+    <li>The node's ADB keys never leave the node.</li>
+  </ul>
+
+  <h3>6.6 &nbsp;Honest limits</h3>
+  <ul class="plain">
+    <li><b>Five is fine. Fifty is a device farm.</b> Past roughly a dozen you need racks, monitoring,
+        per-port power control and someone whose job this is.</li>
+    <li><b>The Mac mini is a good node with one real gap: no CUDA.</b> MLX runs a 4B VLM well on
+        Apple Silicon, and idle draw is 5–10 W, which is excellent. But most inference tooling is
+        CUDA-first, so you will be on the less-travelled path for anything beyond llama.cpp and MLX.
+        16 GB handles a 4B VLM at Q4; plan 32 GB+ if you want headroom.</li>
+    <li><b>App updates break screen automation.</b> Assume the fallback path needs maintenance
+        every few months. This is a real operational cost, not a one-time build.</li>
+  </ul>
+  <div class="callout open">
+    <span class="ct">Open decision</span>
+    <p>Does an Android node act only on explicit request, or does it run background automations on a
+      schedule? The second is far more useful and considerably more dangerous — an unattended device
+      logged into someone's bank, acting on a cron. Decide before building §6.4.</p>
+  </div>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="snum">07</span><h2>The router <span class="chip fix">Fix</span></h2></div>
+  <p class="sdek">Slide 4's best line is "an action router, not just a model router." Its architecture as drawn defeats its own privacy claim.</p>
+
+  <h3>7.1 &nbsp;Split the router in two</h3>
+  <p>Slide 4 draws the gateway as a box between the phone and the node. Either way that is drawn, it
+     fails:</p>
+  <ul class="plain">
+    <li>If it is a <b>separate device</b>, it is a second single point of failure in a system that
+        already has one.</li>
+    <li>If it <b>runs on the node</b>, then a request that must never leave the device has already
+        left the device in order to be told to stay local.</li>
+  </ul>
+  <p>Standard policy-engine architecture solves it: <b>one decision point, many enforcement points.</b></p>
+  <pre><code>NODE                        compiles policy  ──┐
+                                               │  signed policy bundle,
+                                               │  pushed on change
+   ┌───────────────────────────────────────────┴──────────────┐
+   ▼                        ▼                                 ▼
+GLASSES                  PHONE                             NODE
+evaluates locally        evaluates locally                 evaluates locally
+before any egress        before any egress                 before any egress</code></pre>
+  <p>Policy flows outward; data does not flow inward to be judged. Slide 4 should show both arrows.</p>
+
+  <h3>7.2 &nbsp;Route directly. Do not climb.</h3>
+  <p>Both the deck and the doc describe escalation as a ladder — try local, if unsure try the node,
+     if still unsure try the cloud. Each rung costs a full round trip, so the requests that need the
+     most help are punished the most. Architecture doc §6 has three sequential model calls in its
+     worked example.</p>
+  <p>Instead: <b>classify once at the edge, dispatch directly.</b></p>
+  <pre><code>utterance ──▶ classifier (edge, ~15 ms)
+                │  keyword match + small embedding lookup
+                │  over registered app intents and device commands
+                ▼
+        ┌───────┴────────┬─────────────┬──────────────┐
+        ▼                ▼             ▼              ▼
+   L0 device cmd    L1 edge model  L3 node       L4 external
+   (no model)                                    (if policy allows)</code></pre>
+  <p>For the genuinely ambiguous middle, run <b>speculatively</b>: fire at the node while the edge
+     classifier is still deciding, and <code>cancel</code> (§3.4) the loser. You pay a little wasted
+     compute to remove a round trip from the critical path — which is the correct trade, because
+     compute is cheap on the node and latency is expensive on someone's face.</p>
+
+  <h3>7.3 &nbsp;Routing inputs</h3>
+  <p>Slide 4 lists five. Add a sixth, and give the fifth an output path.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Input</th><th>Effect</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Privacy</td><td>Hard ceiling on destination. Evaluated per data element (§9).</td><td>In deck</td></tr>
+      <tr><td class="k">Speed</td><td>Prefers warm paths; triggers speculation for ambiguous intents.</td><td>In deck</td></tr>
+      <tr><td class="k">Cost</td><td>Caps external spend; degrades to node when exceeded.</td><td>In deck</td></tr>
+      <tr><td class="k">Capability</td><td>Which app or model can service the intent at all.</td><td>In deck</td></tr>
+      <tr><td class="k">Availability</td><td class="mid">Currently an input with <b>no output path</b>. Needs the degradation table in §13 wired to it.</td><td class="mid">Incomplete</td></tr>
+      <tr><td class="k">Battery</td><td class="mid">Below 15%: stop shipping images, audio-only, blank the display, raise the wake-word threshold to cut false wakes.</td><td class="mid">Missing</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s8">
+  <div class="shead"><span class="snum">08</span><h2>Capability tokens <span class="chip spec">Spec</span></h2></div>
+  <p class="sdek">Slide 6 is the deck's strongest slide. It grants booleans where it needs to grant scoped, expiring tokens.</p>
+  <p>"User approved once" becomes ambient authority forever. A permission checkbox at install time
+     cannot express "while the app is in the foreground", "for this request only", or "until
+     Tuesday" — and those are the grants people actually want to give.</p>
+  <pre><code>{
+  <span class="kw">"iss"</span>: <span class="kw">"node:matt"</span>,
+  <span class="kw">"sub"</span>: <span class="kw">"app:plant-identifier"</span>,
+  <span class="kw">"person"</span>: <span class="kw">"person_4a1f"</span>,
+  <span class="kw">"scope"</span>: [<span class="kw">"camera.still.on_request"</span>, <span class="kw">"observation.read.own"</span>],
+  <span class="kw">"constraints"</span>: {
+    <span class="kw">"foreground_only"</span>: <span class="kw">true</span>,
+    <span class="kw">"max_calls"</span>: 1,
+    <span class="kw">"egress"</span>: <span class="kw">"node"</span>          <span class="cm">// this app may not reach external models</span>
+  },
+  <span class="kw">"exp"</span>: 1756400000            <span class="cm">// seconds, not months</span>
+}</code></pre>
+  <h3>8.1 &nbsp;Rules</h3>
+  <ul class="plain">
+    <li>Every capability call carries a token. No token, no call — there is no ambient path.</li>
+    <li>Tokens are minted per grant and expire. Long-lived grants are refreshed, not permanent.</li>
+    <li>Just-in-time consent: an app may request a capability mid-session and the user answers then,
+        in context, the way iOS does. Install-time is the worst moment to ask.</li>
+    <li>Revocation is immediate and takes effect on the next call, not the next launch.</li>
+    <li>Every call writes an audit row: app, scope, person, timestamp, destination.</li>
+  </ul>
+  <div class="callout">
+    <span class="ct">The feature that actually builds trust</span>
+    <p>Not the toggle — the <b>receipt</b>. "This week: 14 requests to an external model, 3 to Maps,
+      0 images sent, 2 identity actions." A single "Internet ✓/✕" switch on slide 7 gets flipped on
+      during setup and never looked at again. A weekly ledger gets read.</p>
+  </div>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="snum">09</span><h2>Policy routing <span class="chip fix">Fix</span></h2></div>
+  <p class="sdek">Slide 7's slider is the best concept in the deck. Its granularity is wrong, and your own example proves it.</p>
+
+  <h3>9.1 &nbsp;One request, several policies</h3>
+  <p><i>"Add this to my Christmas list"</i> contains two data elements with opposite requirements:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Element</th><th>Wants</th><th>Policy</th><th>Handling</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Camera frame</td><td>Vision model, possibly external</td><td class="good">external allowed</td><td>Strip EXIF location, strip faces, then send</td></tr>
+      <tr><td class="k">List contents</td><td>Nothing — it is the destination</td><td class="bad">node only</td><td>Never leaves. Not included in the prompt.</td></tr>
+      <tr><td class="k">Utterance audio</td><td>STT</td><td class="mid">node only</td><td>Local Whisper; raw audio never egresses</td></tr>
+      <tr><td class="k">Location</td><td>Optional enrichment</td><td class="bad">node only</td><td>Attached to the observation, not to the vision call</td></tr>
+    </tbody>
+  </table></div>
+  <p>A single all-or-nothing slider cannot express this. Policy must be evaluated
+     <b>per data element</b>, strictest element wins for the request as a whole, and the router must
+     be able to <b>redact and downgrade</b> — send the image externally while everything else stays
+     home.</p>
+  <div class="callout ok">
+    <span class="ct">This is the genuinely novel part</span>
+    <p>"Split the request and route the parts differently" is what makes this architecture different
+      from a model router with a privacy checkbox. Right now the slide undersells it as a choice
+      between four settings. Redraw it as a request being <b>decomposed</b>, each part taking a
+      different exit.</p>
+  </div>
+
+  <h3>9.2 &nbsp;Redaction is a pipeline stage, not a policy</h3>
+  <pre><code>element ──▶ policy check ──▶ redactors ──▶ egress
+                              │
+                              ├── strip EXIF (gps, device serial)
+                              ├── face blur / person removal
+                              ├── OCR scrub (cards, screens, documents)
+                              └── record what was stripped → observation.redactions</code></pre>
+  <p>Writing the redaction list back onto the observation matters: it is how you later prove what
+     left, and how a re-run against a better model knows what it never saw.</p>
+
+  <h3>9.3 &nbsp;Camera modes <span class="chip spec">Spec</span></h3>
+  <p>Architecture doc §9 is right that the user, not the hardware, sets this. Formalised, each mode
+     is just a pair of columns on the observation plus a capture trigger:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Mode</th><th>Trigger</th><th><code>retain_until</code></th><th>Feasible on</th></tr></thead>
+    <tbody>
+      <tr><td class="k">on_demand</td><td>Button or wake word</td><td>null (kept)</td><td class="good">All devices</td></tr>
+      <tr><td class="k">interval</td><td>Every N seconds</td><td>capture + 24 h</td><td class="good">All devices</td></tr>
+      <tr><td class="k">detect_only</td><td>Continuous, on-sensor NN</td><td class="good">immediate — frames discarded, only detections stored</td><td class="mid">Needs IMX500-class sensor</td></tr>
+      <tr><td class="k">continuous</td><td>Always recording</td><td>capture + 24 h</td><td class="bad">Not on battery. See below.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout stop">
+    <span class="ct">Contradiction to resolve</span>
+    <p>Architecture doc §9 offers "record continuously, keep locally for 24 hours" on the hardware in
+      §1. Continuous 720p is 1–2 GB/hour with the encoder pinned — it is incompatible with any
+      wearable power budget in §11. Either add a "requires" column to the modes list, or drop
+      <code>continuous</code> to a tethered/desk device only.</p>
+  </div>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="snum">10</span><h2>Display <span class="chip decided">Decided</span></h2></div>
+  <p class="sdek">Two architectures exist. Build the first, design the API so the second drops in.</p>
+
+  <h3>10.1 &nbsp;The two options</h3>
+  <div class="tw"><table>
+    <thead><tr><th></th><th>A · Semantic HUD</th><th>B · Pixel display</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Device receives</td><td>Commands — "draw this text here for 4 s"</td><td>A framebuffer</td></tr>
+      <tr><td class="k">Optics</td><td>Monochrome microLED into a waveguide</td><td>Birdbath, or full waveguide</td></tr>
+      <tr><td class="k">Bandwidth</td><td class="good">Kilobits</td><td class="bad">15–25 Mbps H.264</td></tr>
+      <tr><td class="k">Power</td><td class="good">~40 mW while text is up</td><td class="bad">~1 W while on</td></tr>
+      <tr><td class="k">Battery impact</td><td class="good">+0.07 Wh/day (§11)</td><td class="mid">+1.8 Wh/day — triples the cell</td></tr>
+      <tr><td class="k">Shows</td><td class="mid">Text and simple glyphs, ~40×5</td><td class="good">Anything. Your shell renders into it directly.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>10.2 &nbsp;The API is the same either way</h3>
+  <p>This is the whole point of §3.1 rule 1. One call, two renderers, chosen from
+     <code>capabilities.display.class</code>:</p>
+  <pre><code><span class="kw">await</span> sdk.display.card({
+  title: <span class="kw">"Bald Eagle"</span>,
+  body:  <span class="kw">"Haliaeetus leucocephalus"</span>,
+  meta:  <span class="kw">"92% confidence"</span>,
+  ttl:   4000,
+  anchor: <span class="kw">"head"</span>
+});
+
+<span class="cm">// class:"text"        → 3 lines of green text, ~40 cols</span>
+<span class="cm">// class:"framebuffer" → rendered by the shell, full layout</span>
+<span class="cm">// class:"none"        → falls back to speak(), no app change</span></code></pre>
+  <p>Your architecture doc already reserved <code>display()</code> in the §25 device protocol, even
+     though §16 defers displays to a later version. Those reconcile cleanly: <b>V1 devices may
+     implement <code>display()</code> as a no-op.</b> State that explicitly or implementers will
+     assume it is mandatory.</p>
+
+  <h3>10.3 &nbsp;The constraint that needs its own slide</h3>
+  <div class="callout warn">
+    <span class="ct">Head-locked works remotely. World-locked does not.</span>
+    <p>A panel that floats at a fixed spot relative to your head tolerates 80 ms of latency — nothing
+      needs to stay pinned to the world, so remote rendering is fine and your redirect works exactly
+      as it does for the shell.</p>
+    <p>A label that sticks to the actual building needs motion-to-photon under <b>~20 ms</b>. No
+      cloud round trip achieves that, ever. The fix is asynchronous timewarp: render remotely at
+      whatever latency, then reproject locally against the newest IMU pose in the final ~2 ms before
+      scanout. That needs a local GPU — a phone or a Pi 5 can, an ESP32 cannot.</p>
+  </div>
+  <p>So add a rule to the execution ladder on slide 8: <b>anything in the motion-to-photon path
+     never leaves the device</b>, even when its content came from Level 4. Rendering is a Level 0
+     concern regardless of where the words came from.</p>
+  <p><b>V1 is head-locked.</b> World-locked AR is a different product with a local GPU in it.</p>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="snum">11</span><h2>Power budget <span class="chip decided">Decided</span></h2></div>
+  <p class="sdek">The missing slide the whole deck rests on. Assumptions: 16 waking hours, 30 queries per day, 87% conversion efficiency, ~20 g per 1000 mAh including protection.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>Configuration</th><th>Continuous</th><th>Per query</th><th>Daily</th><th>Cell</th><th>Weight</th></tr></thead>
+    <tbody>
+      <tr><td class="k">A · Pi Zero 2 W, always on</td><td class="n">1.05 W</td><td class="n">2.2 Ws</td><td class="n bad">19.33 Wh</td><td class="n">5225 mAh</td><td class="n bad">~104 g</td></tr>
+      <tr><td class="k">B · ESP32-S3 only</td><td class="n">50 mW</td><td class="n">2.2 Ws</td><td class="n good">0.94 Wh</td><td class="n">254 mAh</td><td class="n good">~5 g</td></tr>
+      <tr><td class="k">C · ESP32-S3 + text HUD</td><td class="n">54 mW</td><td class="n">2.2 Ws</td><td class="n good">1.01 Wh</td><td class="n">274 mAh</td><td class="n good">~5 g</td></tr>
+      <tr><td class="k">D · ESP32-S3 + birdbath OLED</td><td class="n">150 mW</td><td class="n">2.2 Ws</td><td class="n mid">2.78 Wh</td><td class="n">751 mAh</td><td class="n mid">~15 g</td></tr>
+    </tbody>
+  </table></div>
+  <p>For scale: Ray-Ban Meta is about <b>50 g in total</b>, frames included. Anything over roughly
+     70 g on the bridge of your nose becomes uncomfortable inside an hour.</p>
+
+  <h3>11.1 &nbsp;Why the Pi cannot be duty-cycled</h3>
+  <p>The obvious rescue for configuration A is to sleep the Pi between queries. It does not exist.</p>
+  <ul class="plain">
+    <li><b>Raspberry Pi has no suspend-to-RAM.</b> Not on the Zero 2 W, not on any model — the GPU
+        firmware does not support it. There is an
+        <a href="https://github.com/bhoot1234567890/vc4-suspend">experimental firmware project</a>
+        targeting 2–5 mA suspend with sub-second wake, but nothing has been validated on hardware.</li>
+    <li><b>Cold boot is 20–30 seconds</b>, or 8–10 with an aggressively stripped image. Either is
+        unusable as a per-query wake.</li>
+  </ul>
+  <div class="callout stop">
+    <span class="ct">The finding</span>
+    <p>The Pi Zero 2 W is disqualified not because it draws too much power, but because
+      <b>it cannot be turned off between queries</b>. That forces continuous operation, which forces
+      104 g of battery, which is twice the total weight of a finished pair of consumer glasses.</p>
+    <p>Slide 1's "powers the glasses for all-day use" is off by roughly an order of magnitude, and
+      slides 2 and 3 inherit the assumption.</p>
+  </div>
+
+  <h3>11.2 &nbsp;What this changes</h3>
+  <p>Your architecture doc already argued the right case in §1 — <i>"keep them deliberately stupid:
+     capture, compress, encrypt, route"</i> — and then specified a Linux SBC. Those four verbs are an
+     MCU job. The Pi is the one component that contradicts the document's own thesis, and the power
+     budget is what settles it.</p>
+  <p>Configuration <b>C</b> is the design: an ESP32-S3, a text HUD, a ~400 mAh cell, ~25 hours of
+     runtime, under 10 g of electronics and battery. Everything the deck asks the glasses to do
+     — capture, listen, speak, trigger, display — fits inside it.</p>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="snum">12</span><h2>Latency budget <span class="chip spec">Spec</span></h2></div>
+  <p class="sdek">Slide 9 has ten steps and no times. Measured from end-of-speech, because time the user spends talking does not feel like waiting.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>Stage</th><th>Serial (slide 9 as drawn)</th><th>Optimised</th><th>How</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Wi-Fi association</td><td class="n bad">1200 ms</td><td class="n good">0 ms</td><td>Bring the radio up on the tap, under the utterance</td></tr>
+      <tr><td class="k">Image upload</td><td class="n">130 ms</td><td class="n good">0 ms</td><td>Upload at tap-time, under the utterance</td></tr>
+      <tr><td class="k">Final audio chunk</td><td class="n">—</td><td class="n">60 ms</td><td>Only the tail is left to send</td></tr>
+      <tr><td class="k">Gateway auth</td><td class="n">30 ms</td><td class="n good">0 ms</td><td>Cached session token on the persistent socket</td></tr>
+      <tr><td class="k">STT</td><td class="n">250 ms</td><td class="n">250 ms</td><td>Critical path. faster-whisper small on GPU.</td></tr>
+      <tr><td class="k">Vision encode</td><td class="n bad">450 ms</td><td class="n good">0 ms</td><td>Runs during the utterance; image tokens prefix-cached</td></tr>
+      <tr><td class="k">Text prefill + first token</td><td class="n">250 ms</td><td class="n">300 ms</td><td>Critical path. Only the question remains to prefill.</td></tr>
+      <tr><td class="k">Intent + app dispatch</td><td class="n">80 ms</td><td class="n">80 ms</td><td>Critical path</td></tr>
+      <tr><td class="k">Database write</td><td class="n">40 ms</td><td class="n good">0 ms</td><td>Speak optimistically, reconcile on failure</td></tr>
+      <tr><td class="k">TTS first chunk</td><td class="n">150 ms</td><td class="n">150 ms</td><td>Stream sentence by sentence, do not wait for the whole utterance</td></tr>
+      <tr><td class="k">Return + playback buffer</td><td class="n">150 ms</td><td class="n">150 ms</td><td>Critical path</td></tr>
+      <tr><td class="k">Total from end-of-speech</td><td class="n bad">2730 ms</td><td class="n good">990 ms</td><td><b>All scheduling. No faster hardware.</b></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout ok">
+    <span class="ct">The three moves that buy 1.7 seconds</span>
+    <p><b>1.</b> Everything that can start on the tap, starts on the tap — radio, capture, upload,
+      vision encode. The 1.5 seconds someone spends saying "add this to my Christmas list" is free
+      transfer window.</p>
+    <p><b>2.</b> STT and vision are independent. Fork them; the diagram should show a fork that
+      rejoins at intent, not a chain.</p>
+    <p><b>3.</b> Speak before the write confirms. If the write fails, correct it — that is rarer than
+      the 40 ms is common.</p>
+  </div>
+  <div class="callout warn">
+    <span class="ct">Hard requirement</span>
+    <p>These numbers assume a GPU on the node. A 4B VLM on CPU answers in seconds to tens of seconds —
+      fine for batch, useless with someone waiting. An M-series Mac with unified memory qualifies;
+      a CPU-only mini does not.</p>
+  </div>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="snum">13</span><h2>Degradation matrix <span class="chip spec">Spec</span></h2></div>
+  <p class="sdek">Slide 4 lists Availability as a routing input and gives it no output path. This is that path.</p>
+  <div class="tw"><table>
+    <thead><tr><th>State</th><th>Still works</th><th>Degrades</th><th>Fails</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="k">At home, internet down</td>
+        <td class="good">Everything. Glasses → LAN → node. L0–L3 intact.</td>
+        <td>External enrichment (prices, web lookup) unavailable</td>
+        <td class="mid">L4 only</td>
+      </tr>
+      <tr>
+        <td class="k">Away, node unreachable</td>
+        <td class="good">L0 device commands, L1 wake word, L2 phone STT + tiny LLM</td>
+        <td>Generic answers only, no personal context. Writes queue on the phone and sync on reconnect.</td>
+        <td class="bad">Personal memory, lists, identity actions</td>
+      </tr>
+      <tr>
+        <td class="k">No internet at all</td>
+        <td class="good">L0, L1, L2 on the phone</td>
+        <td>Same as above</td>
+        <td class="bad">Node and cloud both</td>
+      </tr>
+      <tr>
+        <td class="k">External providers down or over budget</td>
+        <td class="good">Everything local, L0–L3</td>
+        <td>Node answers with lower confidence <b>and says so</b></td>
+        <td class="mid">L4 only</td>
+      </tr>
+      <tr>
+        <td class="k">Glasses battery under 15%</td>
+        <td class="good">Voice in, voice out</td>
+        <td>No image capture, display blanked, wake-word threshold raised to cut false wakes</td>
+        <td class="mid">Anything needing vision</td>
+      </tr>
+      <tr>
+        <td class="k">Android identity node offline</td>
+        <td class="good">Everything else</td>
+        <td>Identity actions queue with a named error, not a generic failure</td>
+        <td class="bad">That person's app actions</td>
+      </tr>
+      <tr>
+        <td class="k">Model unavailable / OOM</td>
+        <td class="good">Deterministic commands, retrieval, structured queries</td>
+        <td>Falls to a smaller model, states the downgrade</td>
+        <td class="mid">Multimodal reasoning</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <div class="callout ok">
+    <span class="ct">The row worth putting on a slide</span>
+    <p><b>At home with the internet down, everything still works.</b> No cloud relay, no external
+      dependency, full personal context. That is the single most persuasive property this
+      architecture has over every commercial pair of glasses, and it is currently nowhere in the deck.</p>
+  </div>
+  <h3>13.1 &nbsp;Two rules that make degradation usable</h3>
+  <ul class="plain">
+    <li><b>Always say which level answered.</b> "I'm offline from your node, so this is a general
+        answer" is a good product. Silently downgrading and sounding equally confident is not.</li>
+    <li><b>Queue writes, never drop them.</b> Every write travels with an idempotency key so a
+        reconnect cannot double-add an item to a list.</li>
+  </ul>
+</section>
+
+<section id="s14">
+  <div class="shead"><span class="snum">14</span><h2>Hardware <span class="chip decided">Decided</span></h2></div>
+  <p class="sdek">What slide 1 should say instead.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Component</th><th>Part</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Compute</td><td>ESP32-S3 (XIAO Sense class)</td><td>Capture, compress, encrypt, route — the four verbs the doc asked for. Wi-Fi + camera + mic on one module. Can actually sleep.</td></tr>
+      <tr><td class="k">Camera</td><td>OV-class module, or IMX500 only if you want <code>detect_only</code></td><td>One frame per query needs no on-sensor NN. IMX500 earns its price only for continuous passive perception.</td></tr>
+      <tr><td class="k">Microphone</td><td>MEMS I²S, 2×</td><td>Two channels give you beamforming and a shot at wake-word accuracy in wind</td></tr>
+      <tr><td class="k">Audio out</td><td>Bone conduction transducer</td><td>Leaves the ear canal open; nobody else hears the answer</td></tr>
+      <tr><td class="k">Display</td><td>Monochrome microLED + waveguide, ~40×5 text</td><td>Configuration C in §11. +0.07 Wh/day.</td></tr>
+      <tr><td class="k">IMU</td><td>6-axis</td><td class="mid"><b>Missing from slide 1.</b> Mandatory for any display, and gives tap and nod gestures free</td></tr>
+      <tr><td class="k">Presence</td><td>Capacitive or IR, nose bridge</td><td class="mid"><b>Missing from slide 1.</b> Forces re-auth when removed; stops the battery draining on a table</td></tr>
+      <tr><td class="k">Recording LED</td><td>Hardwired to the camera power rail</td><td class="mid">Not software-driven. This is the difference between a device people tolerate and one that gets you asked to leave.</td></tr>
+      <tr><td class="k">Battery</td><td>~400 mAh LiPo</td><td>~25 hours at configuration C, ~8 g</td></tr>
+      <tr><td class="k">Storage</td><td class="bad">Drop the microSD</td><td class="bad">Contradicts slide 7 — recordings on removable media leave the trust boundary. If kept, encrypt at rest with a key held by the node.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn">
+    <span class="ct">If you keep the Pi anyway</span>
+    <p>There is one honest reason to: you want Linux on the frame — containers, a local model,
+      waypipe. Then accept the pod form factor. Camera, mic and speaker on the frame; Pi and battery
+      in a shirt pocket; a CSI-over-HDMI extender between them, since CSI ribbon is only reliable to
+      about 50 cm. Glasses stay ~25 g with no heat against your temple. It looks like a prototype,
+      and it works.</p>
+  </div>
+</section>
+
+<section id="s15">
+  <div class="shead"><span class="snum">15</span><h2>Deck and doc corrections <span class="chip fix">Fix</span></h2></div>
+  <p class="sdek">Every conflict in one place, so the slides can be fixed in a single pass.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Where</th><th>Problem</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Overview vs 4 &amp; 5</td><td>Layer numbers disagree — overview calls the gateway 3 and the node 4; the detail slides call them 4 and 5</td><td>Renumber one of them</td></tr>
+      <tr><td class="k">Slide 9 vs slide 2</td><td>Step 4 sends the event over Bluetooth. Slide 2 correctly says BLE is control and Wi-Fi is data.</td><td>Now moot — §1.1 drops BLE. Redraw step 4 as Wi-Fi.</td></tr>
+      <tr><td class="k">Slide 2</td><td>Two planes, and "Wi-Fi always connected" — which is what actually drains the battery</td><td>Collapse to one plane. Radio comes up on the tap and goes back down.</td></tr>
+      <tr><td class="k">Slide 1</td><td>"All-day use" on a Pi Zero 2 W. Off by ~10×.</td><td>§11 and §14. Replace the SoC.</td></tr>
+      <tr><td class="k">Slide 1</td><td>No IMU, no presence sensor, no hardwired recording LED</td><td>Add all three (§14)</td></tr>
+      <tr><td class="k">Slide 1 vs 7</td><td>microSD storage contradicts the privacy model</td><td>Drop it, or encrypt at rest with a node-held key</td></tr>
+      <tr><td class="k">Slide 3 vs 8</td><td>Slide 3 draws the phone as plumbing; slide 8 gives it Level 2 AI. Slide 8 is right.</td><td>Redraw the phone as the offline fallback brain (§13)</td></tr>
+      <tr><td class="k">Slide 3</td><td>No mention that iOS constrains background BLE, cannot enable hotspot programmatically, and suspends background apps</td><td>Name it as a platform decision. Android is materially easier.</td></tr>
+      <tr><td class="k">Slide 4</td><td>Gateway drawn as a box in the path — defeats its own privacy claim</td><td>Split into decision point + enforcement points (§7.1)</td></tr>
+      <tr><td class="k">Slide 4</td><td>Availability is an input with no output; battery is not an input at all</td><td>§7.3 and §13</td></tr>
+      <tr><td class="k">Slide 6</td><td>Permissions are booleans; no <code>display</code> capability exists</td><td>Scoped tokens with TTL (§8); add <code>display</code> (§10)</td></tr>
+      <tr><td class="k">Slide 7</td><td>Policy slider is per-request; a single request has mixed elements</td><td>Per-element evaluation with redaction (§9)</td></tr>
+      <tr><td class="k">Slide 7</td><td>"Internet" as one toggle</td><td>Per-destination allowlist plus a weekly receipt (§8)</td></tr>
+      <tr><td class="k">Slide 8</td><td>Ladder climbs; no router; no downward path</td><td>Classify once and dispatch directly (§7.2); add the offline direction</td></tr>
+      <tr><td class="k">Slide 9</td><td>Ten serial steps, no timings</td><td>Fork STT and vision; move upload under the utterance; add §12's numbers</td></tr>
+      <tr><td class="k">Overview</td><td>App Store drawn as the bottom layer; every arrow points one way</td><td>Apps span all layers — draw as a column. Show at least one return path.</td></tr>
+      <tr><td class="k">Doc §1</td><td>"Deliberately stupid" then specifies a Linux SBC</td><td>§11 settles it</td></tr>
+      <tr><td class="k">Doc §9</td><td>Continuous recording incompatible with the §1 hardware</td><td>Add a "requires" column (§9.3)</td></tr>
+      <tr><td class="k">Doc §16 vs §25</td><td>Displays deferred, but <code>display()</code> is in the protocol</td><td>V1 devices implement it as a no-op. Say so.</td></tr>
+      <tr><td class="k">Doc §25</td><td>Seven verbs; a third party cannot implement against them</td><td>Add announce, authenticate, state, cancel (§3.4)</td></tr>
+      <tr><td class="k">Doc §8</td><td><code>observation</code> used but never defined</td><td>§4</td></tr>
+      <tr><td class="k">Doc §21</td><td>Economics claim is weak and invites an argument you lose</td><td>§16</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s16">
+  <div class="shead"><span class="snum">16</span><h2>Positioning</h2></div>
+  <p class="sdek">Two claims to change before either document goes to anyone else.</p>
+
+  <h3>16.1 &nbsp;Sell sovereignty, not savings</h3>
+  <p>Architecture doc §21 argues the home node "centralises the expensive computer." For a household
+     with several devices, partly true. For one person with glasses and a phone it is a
+     <b>new cost</b>: a capable node is $400–1500 of GPU plus 100–200 W of always-on power, against
+     compute in a phone they already own and already paid for.</p>
+  <p>Doc §22 already has the better line — <i>"your platform doesn't sell intelligence, it sells
+     orchestration."</i> Lead with that. You own the data, you choose the model, you can leave.
+     Pitching cost reduction invites an arithmetic argument you lose; pitching ownership is an
+     argument no incumbent can answer.</p>
+
+  <h3>16.2 &nbsp;The schema boundary in your own codebase <span class="chip fix">Fix</span></h3>
+  <p>Doc §13 is correct that third-party apps must never get schema access — capabilities only,
+     never <code>INSERT INTO</code>.</p>
+  <p>But the dashboard in this repository works on the opposite principle. From its README:
+     <i>"it asks the database what tables exist… and turns every table that has data into a
+     section."</i> Schema reflection is its entire design — add a table, a section appears.</p>
+  <div class="callout stop">
+    <span class="ct">Do not share this code</span>
+    <p>Both patterns are right in their own context: a first-party dashboard over your own data can
+      safely reflect schema; a third-party app store absolutely cannot. But they are opposite trust
+      models, and reusing the discovery code from one in the other hands developers exactly the SQL
+      surface §13 forbids. Write the boundary down before any code moves between them.</p>
+  </div>
+</section>
+
+<section id="s17">
+  <div class="shead"><span class="snum">17</span><h2>What to build first</h2></div>
+  <p class="sdek">Doc §26 has the right shape. Here it is with exit criteria and the corrections applied.</p>
+
+  <h3>17.1 &nbsp;V1 scope</h3>
+  <pre><code>GLASSES                    NODE (Mac mini)
+ESP32-S3                   ├── device protocol server (§3)
++ camera                   ├── faster-whisper  (STT)
++ 2× MEMS mic              ├── Qwen3-VL-4B Q4  (vision, MLX)
++ bone conduction          ├── Piper           (TTS)
++ tap sensor               ├── observation store (§4)
++ text HUD                 ├── router (§7)
+    │                      └── 1× Android identity node (§6)
+    │ Wi-Fi
+    ▼
+phone hotspot ──▶ WireGuard ──▶ node</code></pre>
+  <p>No BLE. No cellular. No Linux on the frame. No world-locked AR. No app store yet — the three
+     V1 apps are first-party, and the capability layer is exercised by them before anyone external
+     touches it.</p>
+
+  <h3>17.2 &nbsp;The three apps, and what each one proves</h3>
+  <div class="tw"><table>
+    <thead><tr><th>App</th><th>Proves</th><th>Done when</th></tr></thead>
+    <tbody>
+      <tr><td class="k">"What is this?"</td><td>Capture → vision → speech. The whole latency path.</td><td>Under 1.2 s from end-of-speech to first audio, measured, 20 times in a row</td></tr>
+      <tr><td class="k">"Remember this."</td><td>The observation schema (§4) and retrieval</td><td>"Where did I see those shoes?" returns the right row a week later, from SQL not from a model's memory</td></tr>
+      <tr><td class="k">"Add this to my list."</td><td>Intent routing, capability tokens, identity node</td><td>Item lands on the right person's list with the photo attached, and works with the internet unplugged</td></tr>
+    </tbody>
+  </table></div>
+  <p>If those three run reliably while you are walking around wearing the prototype, you have proven
+     the device protocol, the observation model, the router, the permission layer and the offline
+     path. Everything after that — more apps, third-party devices, continuous memory, the app store —
+     is addition, not architecture.</p>
+
+  <h3>17.3 &nbsp;Six decisions still open <span class="chip open">Open</span></h3>
+  <ol class="plain">
+    <li><b>Unattended identity actions.</b> May an Android node act on a schedule, or only on explicit
+        request? (§6.6)</li>
+    <li><b>iOS or Android first</b> for the companion, given iOS's background constraints. (§15)</li>
+    <li><b>Do you need identity nodes at all in V1</b>, or is the person's own phone enough until
+        unattended action matters? (§6.1)</li>
+    <li><b>Default policy</b> for a new user: node-only, or external-allowed with redaction?</li>
+    <li><b>Retention default</b> for <code>on_demand</code> captures — keep forever, or expire?</li>
+    <li><b>Does the node ship as hardware you sell</b>, software people install, or a hosted node
+        they can migrate off? This one decides the business, not just the architecture.</li>
+  </ol>
+</section>
+
+<footer>
+  Open Glasses Spec v0.1 · companion to the ten-slide Open Smart Glasses Ecosystem deck<br>
+  Power figures from <code>power.py</code>: 16 waking hours, 30 queries/day, 87% conversion.<br>
+  Latency figures assume a GPU-class node. Both are estimates to be replaced by bench measurements.
+</footer>
+</main>
+</div>
