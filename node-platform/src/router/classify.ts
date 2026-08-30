@@ -53,6 +53,14 @@ const RULES: Rule[] = [
     ],
     slots: (m) => ({ what: (m.groups?.['what'] ?? '').replace(/^(the|those|that|a)\s+/i, '').trim() }) },
 
+  // Installed apps can claim a narrower intent than a built-in. This one is
+  // matched before the general identify rule, so "what plant is this" reaches
+  // the sandboxed plant app rather than the generic one.
+  { name: 'plant.identify', level: 'L3', needsImage: true,
+    patterns: [/\bwhat (kind of )?(plant|flower|tree|shrub)\b/i,
+               /\bidentify this plant\b/i,
+               /\bwhat plant\b/i] },
+
   { name: 'vision.identify', level: 'L3', needsImage: true,
     patterns: [
       /\bwhat(?:'s| is| kind of| type of)?\b.*\b(this|that|it)\b/i,

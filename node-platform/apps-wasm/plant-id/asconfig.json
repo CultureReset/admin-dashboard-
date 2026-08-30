@@ -1,0 +1,18 @@
+{
+  "targets": {
+    "release": {
+      "outFile": "../../build/plant-id.wasm",
+      "optimizeLevel": 3,
+      "shrinkLevel": 1,
+      "converge": false,
+      "noAssert": false
+    }
+  },
+  "options": {
+    "bindings": "raw",
+    "runtime": "stub",
+    "exportRuntime": false,
+    "initialMemory": 1,
+    "maximumMemory": 16
+  }
+}

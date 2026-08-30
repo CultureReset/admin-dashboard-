@@ -153,8 +153,29 @@ export const deviceControl: App = {
   },
 };
 
-export const APPS: App[] = [whatIsThis, rememberThis, addToList, deviceControl];
+const BUILT_IN: App[] = [whatIsThis, rememberThis, addToList, deviceControl];
 
+/**
+ * Installed apps are appended at runtime. A sandboxed WASM app registers here
+ * exactly like a first-party one, so the router has no notion of "third party".
+ */
+const installed: App[] = [];
+
+export function install(app: App): void {
+  if (all().some(a => a.manifest.id === app.manifest.id)) {
+    throw new Error(`app ${app.manifest.id} is already installed`);
+  }
+  installed.push(app);
+}
+
+export function uninstall(id: string): void {
+  const i = installed.findIndex(a => a.manifest.id === id);
+  if (i >= 0) installed.splice(i, 1);
+}
+
+export const all = (): App[] => [...installed, ...BUILT_IN];
+
+/** Installed apps win, so a user can replace a built-in with a better one. */
 export function appForIntent(intent: Intent): App {
-  return APPS.find(a => a.manifest.intents.includes(intent.name)) ?? whatIsThis;
+  return all().find(a => a.manifest.intents.includes(intent.name)) ?? whatIsThis;
 }

@@ -8,10 +8,11 @@
     "dev": "tsx src/main.ts",
     "device": "tsx src/device/simulator.ts",
     "seed": "tsx src/store/seed.ts",
-    "test": "vitest run",
+    "test": "npm run build:apps && vitest run",
     "test:isolation": "vitest run test/isolation",
     "check:rls": "tsx src/store/check-rls.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:apps": "asc apps-wasm/plant-id/assembly/index.ts --config apps-wasm/plant-id/asconfig.json --target release && asc apps-wasm/spin/assembly/index.ts --config apps-wasm/spin/asconfig.json --target release"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.2.17",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@types/node": "^22.10.5",
     "@types/ws": "^8.5.13",
+    "assemblyscript": "^0.28.20",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "vitest": "^2.1.8"

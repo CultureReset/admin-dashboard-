@@ -78,12 +78,12 @@ describe('schema gate', () => {
 
 // --- helpers ---------------------------------------------------------------
 
-const REQUIRED_FOR: Record<string, Record<string, string>> = {
+const REQUIRED_FOR: Record<string, Record<string, unknown>> = {
   observation: { kind: 'text' },
   entity:      { kind: 'note', name: 'x' },
   list_item:   { list_name: 'l', title: 't' },
   app_kv:      { app_id: 'a', key: 'k', value: '{}' },
-  audit:       { app_id: 'a', capability: 'c', ok: 'true' },
+  audit:       { app_id: 'a', capability: 'c', ok: true },
 };
 
 const idCol = (t: string) => (t === 'app_kv' ? 'key' : 'id');

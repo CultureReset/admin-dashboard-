@@ -85,8 +85,9 @@ export const FIXTURES: Record<string, string> = {
 export async function loadPipeline(): Promise<Pipeline> {
   const kind = process.env['OG_PIPELINE'] ?? 'mock';
   if (kind === 'mock') return new MockPipeline(Number(process.env['OG_SPEED'] ?? 1));
-  throw new Error(
-    `pipeline "${kind}" is not implemented. Implement the Pipeline interface ` +
-    `against whisper.cpp, a local VLM and Piper, then register it in loadPipeline().`,
-  );
+  if (kind === 'local') {
+    const { LocalPipeline, configFromEnv } = await import('./local.js');
+    return new LocalPipeline(configFromEnv());
+  }
+  throw new Error(`unknown pipeline "${kind}". Use "mock" or "local".`);
 }

@@ -127,10 +127,86 @@ four methods against whisper.cpp, a local VLM and Piper, register it there, and
 nothing above it changes — the mock latencies were chosen to approximate a
 GPU-class node so the budget is exercised honestly in the meantime.
 
+## The WASM app sandbox
+
+Third-party code on a machine holding someone's entire life gets a sandbox, not
+a code review. `apps-wasm/plant-id` is a real app written in AssemblyScript,
+compiled to a 6.8 KB module, running under `src/wasm/`.
+
+```bash
+npm run build:apps
+npm run device -- --say "what kind of plant is that?" --image fixture:plant
+```
+
+A guest has **no ambient authority**. It gets exactly two imports — `og.invoke`
+and `og.log` — and nothing else: no WASI, no filesystem, no sockets, no clock,
+no environment. There is nothing to lock down after the fact because nothing was
+handed over. A module asking for `wasi_snapshot_preview1.fd_write` is refused
+before instantiation, and there is a test that builds one by hand to prove it.
+
+Guests run in a **worker thread**, which solves two problems at once. WebAssembly
+imports cannot await, but the host's capabilities are async because they touch
+Postgres — so the guest blocks on `Atomics.wait` while the main thread resolves
+the call. And a worker can actually be *terminated*, which is what makes the
+deadline a budget rather than a suggestion. `apps-wasm/spin` loops forever on
+purpose so the test has something real to kill.
+
+The cost is honest: a sandboxed app answers in ~834 ms against ~709 ms for a
+built-in — about 125 ms of worker spawn and three round trips. A worker pool
+would remove most of it and has not been written.
+
+The router cannot tell a guest from a first-party app. `install()` puts one in
+the same list, and installed apps are matched first so a user can replace a
+built-in with something better.
+
+## Real models
+
+`OG_PIPELINE=local` swaps the mock for actual backends. Two flavours cover
+almost every local setup:
+
+```bash
+OG_PIPELINE=local OG_FLAVOUR=ollama OG_VLM_MODEL=qwen2.5vl:3b npm run dev
+OG_PIPELINE=local OG_FLAVOUR=openai OG_VLM_URL=http://127.0.0.1:8080 npm run dev
+```
+
+`openai` covers llama.cpp `--server`, LM Studio, vLLM and whisper.cpp `--server`;
+`ollama` covers `ollama serve`. TTS shells out to Piper and resolves on the first
+audio chunk, since that is when playback can start.
+
+`visionPrepare` warms the backend's prefix cache with the image and a trivial
+prompt, so the encode happens during the utterance. The saving is real but
+depends on the backend caching prefixes — llama.cpp and Ollama do. If yours does
+not, it costs one cheap call and saves nothing, which is exactly why the number
+is measured (`vision_prepare_blocked`) rather than assumed. A failed warm-up is
+swallowed: it is an optimisation, not a dependency.
+
+The adapters are tested against a stub server speaking the real wire formats, so
+the request shape is verified without models installed. That proves we talk to
+these servers correctly. It does not prove answer quality.
+
+## Firmware
+
+`firmware/` is a PlatformIO project for the Seeed XIAO ESP32-S3 Sense.
+
+**It has not been flashed.** Nobody has run it on a board. The pin map and the
+I2S timings are the two things most likely to need adjusting on first contact.
+
+What *is* verified without hardware: `test/firmware.test.ts` reads the JSON
+format strings straight out of `main.cpp` and parses them with the same zod
+schema the gateway uses. Edit a format string and the test reads the new one, so
+firmware and node cannot drift apart quietly. It also asserts the ordering that
+the latency design depends on — frame uploaded at tap, audio streamed after,
+request sent last — and that the utterance ends on silence rather than a fixed
+wait, since a fixed wait would land straight on the critical path.
+
+Writing that test caught a real robustness gap: a noisy or unattached ADC would
+have emitted a battery percentage outside 0–100, and the node would have rejected
+the whole message rather than degrading. It is clamped now.
+
 ## Not built yet
 
-Firmware, the WASM app sandbox, identity nodes, the companion phone app, and the
-offline queue. See `../prototypes/glasses-spec/LAUNCH.html` for what order those
+Identity nodes, the companion phone app, the offline queue, and a worker pool for
+the sandbox. See `../prototypes/glasses-spec/LAUNCH.html` for what order those
 come in and which gates they sit behind.
 
 ## Try it
