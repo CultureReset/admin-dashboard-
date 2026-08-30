@@ -1,0 +1,724 @@
+<title>Building the Node</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#EDEEF3; --card:#fff; --sunk:#E4E6EC; --rule:#D3D6E0; --hair:#E5E7EE;
+  --ink:#0F1117; --ink-2:#4F5563; --ink-3:#7A8090;
+  --acc:#5B34C2; --acc-soft:#EAE3FB;
+  --ok:#1A6F49; --ok-soft:#DFF0E7;
+  --warn:#8E5605; --warn-soft:#FAEEDC;
+  --stop:#A3302F; --stop-soft:#FAE5E4;
+  --code:#F0F1F6;
+  --disp:"Archivo",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#08090F; --card:#12141D; --sunk:#0C0E15; --rule:#232634; --hair:#1B1E27;
+  --ink:#E7E9F1; --ink-2:#949AAC; --ink-3:#6E7486;
+  --acc:#AB94FF; --acc-soft:#1C1533;
+  --ok:#4CD79B; --ok-soft:#0C2419;
+  --warn:#E4A94F; --warn-soft:#2A1F0C;
+  --stop:#FF7B72; --stop-soft:#2B1312;
+  --code:#171A25;
+}}
+:root[data-theme="dark"]{
+  --paper:#08090F; --card:#12141D; --sunk:#0C0E15; --rule:#232634; --hair:#1B1E27;
+  --ink:#E7E9F1; --ink-2:#949AAC; --ink-3:#6E7486;
+  --acc:#AB94FF; --acc-soft:#1C1533;
+  --ok:#4CD79B; --ok-soft:#0C2419;
+  --warn:#E4A94F; --warn-soft:#2A1F0C;
+  --stop:#FF7B72; --stop-soft:#2B1312;
+  --code:#171A25;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:15.5px;line-height:1.65;margin:0;padding:0;-webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--disp);letter-spacing:-.018em;text-wrap:balance;margin:0}
+p,li{max-width:70ch}
+a{color:var(--acc);text-underline-offset:3px;text-decoration-thickness:1px}
+a:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:3px}
+code{font-family:var(--mono);font-size:.86em;background:var(--code);padding:1.5px 5px;border-radius:4px}
+pre{
+  font-family:var(--mono);font-size:12.5px;line-height:1.62;background:var(--code);
+  border:1px solid var(--hair);border-radius:9px;padding:14px 16px;overflow-x:auto;
+  margin:16px 0;max-width:100%;
+}
+pre code{background:none;padding:0;font-size:inherit}
+.cm{color:var(--ink-3)}
+.kw{color:var(--acc)}
+.shell{max-width:1240px;margin:0 auto;padding:0 22px 110px;display:grid;
+  grid-template-columns:minmax(0,1fr);gap:0}
+.shell>main{min-width:0}
+@media (min-width:1060px){
+  .shell{grid-template-columns:228px minmax(0,1fr);gap:52px;padding-left:26px;padding-right:26px}
+  .shell>nav.toc{display:block}
+}
+nav.toc{
+  display:none;position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;
+  padding:36px 0 40px;font-size:12.5px;line-height:1.45;
+}
+nav.toc::-webkit-scrollbar{width:0}
+nav.toc .grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);margin:20px 0 7px}
+nav.toc a{display:flex;gap:8px;padding:3.5px 0;color:var(--ink-2);text-decoration:none}
+nav.toc a:hover{color:var(--acc)}
+nav.toc a b{font-family:var(--mono);font-weight:500;color:var(--ink-3);flex:0 0 17px;font-size:11px}
+header{padding:74px 0 34px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:18px}
+h1{font-size:clamp(38px,6.2vw,62px);line-height:1;font-weight:800}
+.lede{font-size:18.5px;line-height:1.52;color:var(--ink-2);margin:20px 0 0;max-width:58ch}
+.mmeta{display:flex;flex-wrap:wrap;gap:9px 24px;margin-top:26px;
+  font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.mmeta b{color:var(--ink);font-weight:500}
+section{padding-top:54px;scroll-margin-top:18px}
+.shead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.snum{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--acc);flex:0 0 auto}
+h2{font-size:28px;font-weight:700;flex:1 1 auto;min-width:min(100%,320px)}
+.sdek{color:var(--ink-3);font-size:14.5px;margin:0 0 22px;max-width:66ch}
+h3{font-size:18px;font-weight:700;margin:32px 0 8px}
+.chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:9.5px;font-weight:500;
+  letter-spacing:.11em;text-transform:uppercase;padding:3px 8px;border-radius:4px;
+  white-space:nowrap;vertical-align:2px}
+.chip.hard{color:var(--stop);background:var(--stop-soft)}
+.chip.now{color:var(--acc);background:var(--acc-soft)}
+.chip.later{color:var(--warn);background:var(--warn-soft)}
+.callout{border-left:3px solid var(--acc);background:var(--card);border-radius:0 9px 9px 0;
+  padding:15px 19px;margin:22px 0}
+.callout.warn{border-left-color:var(--warn)}
+.callout.stop{border-left-color:var(--stop)}
+.callout.ok{border-left-color:var(--ok)}
+.callout p{margin:0;max-width:64ch}
+.callout p+p{margin-top:9px}
+.callout .ct{font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:6px;display:block}
+.tw{overflow-x:auto;max-width:100%;margin:20px 0;border:1px solid var(--rule);
+  border-radius:9px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:540px;font-size:13.5px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--hair);vertical-align:top}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.k{font-weight:600;white-space:nowrap}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.good{color:var(--ok);font-weight:600}
+.bad{color:var(--stop);font-weight:600}
+.mid{color:var(--warn);font-weight:600}
+ul.plain,ol.plain{padding-left:1.2em;margin:12px 0}
+ul.plain li,ol.plain li{margin:6px 0}
+figure{margin:26px 0}
+figure svg{max-width:100%;height:auto;display:block;color:var(--ink-2)}
+figcaption{font-size:13px;color:var(--ink-3);margin-top:10px;max-width:66ch;line-height:1.5}
+footer{margin-top:78px;padding-top:22px;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:11px;color:var(--ink-3);line-height:1.85}
+@media (max-width:640px){header{padding-top:48px}h2{font-size:23px}}
+</style>
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <div class="grp">The rule</div>
+  <a href="#s1"><b>1</b>Scope from commit 1</a>
+  <a href="#s2"><b>2</b>Identity model</a>
+  <div class="grp">The boundaries</div>
+  <a href="#s3"><b>3</b>Nine boundaries</a>
+  <a href="#s4"><b>4</b>Data</a>
+  <a href="#s5"><b>5</b>Blobs and keys</a>
+  <a href="#s6"><b>6</b>Apps</a>
+  <a href="#s7"><b>7</b>Inference</a>
+  <a href="#s8"><b>8</b>Sessions and devices</a>
+  <a href="#s9"><b>9</b>Network and egress</a>
+  <div class="grp">Mechanism</div>
+  <a href="#s10"><b>10</b>One request, six gates</a>
+  <a href="#s11"><b>11</b>The capability host</a>
+  <a href="#s12"><b>12</b>Delete and export</a>
+  <div class="grp">Building it</div>
+  <a href="#s13"><b>13</b>Repo layout</a>
+  <a href="#s14"><b>14</b>Build order</a>
+  <a href="#s15"><b>15</b>Isolation tests</a>
+  <a href="#s16"><b>16</b>Do not build yet</a>
+</nav>
+
+<main>
+<header>
+  <div class="eyebrow">Implementation guide · v0.1</div>
+  <h1>Building the Node</h1>
+  <p class="lede">How to build the system, and how every part of it stays separated per person.
+    Isolation is the one property you cannot add later — this is the shape it has to have from
+    the first commit.</p>
+  <div class="mmeta">
+    <span>Companion to <b><a href="https://claude.ai/code/artifact/a424344c-5fce-435a-b6a7-b9ef906bef76">Open Glasses Spec</a></b></span>
+    <span>Boundaries <b>9</b></span>
+    <span>Isolation tests <b>10</b></span>
+  </div>
+</header>
+
+<section id="s1">
+  <div class="shead"><span class="snum">01</span><h2>Scope from commit 1 <span class="chip hard">Non-negotiable</span></h2></div>
+  <p class="sdek">The single most expensive migration in software is adding tenancy to a system that did not have it.</p>
+  <p>You will build V1 for yourself. One person, one pair of glasses, one node. It is very tempting to
+     skip person scoping until there is a second user — and it is the mistake that ends up rewriting
+     every query, every storage path, every cache key and every test you wrote in between.</p>
+  <div class="callout stop">
+    <span class="ct">The rule</span>
+    <p>Every table has <code>person_id</code>. Every blob path is prefixed by person. Every capability
+      call runs inside a person context. Every cache key includes person. <b>From the first commit,
+      with one user.</b></p>
+    <p>It costs you about a day up front. Retrofitting it costs months and leaks data in the meantime.</p>
+  </div>
+  <p>The corollary matters just as much: <b>person is never a function parameter.</b> It is ambient
+     context established once, at the device session, and read by every gate below. The moment an app
+     can <i>pass</i> a person id, isolation becomes a code review problem instead of a structural
+     one — and code review does not scale to a third-party app store.</p>
+</section>
+
+<section id="s2">
+  <div class="shead"><span class="snum">02</span><h2>Identity model</h2></div>
+  <p class="sdek">Five entities. Getting the cardinalities right settles most of the design.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Entity</th><th>Is</th><th>Cardinality</th><th>Owns</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Node</td><td>One installation. A household or a business.</td><td>1</td><td>Hardware, models, shared config</td></tr>
+      <tr><td class="k">Person</td><td>A human with data on the node</td><td>N per node</td><td>Their data, keys, policy, app instances</td></tr>
+      <tr><td class="k">Device</td><td>Glasses, pendant, speaker, car module</td><td>N per person, or shared</td><td>Nothing. Devices are stateless (spec §3.1).</td></tr>
+      <tr><td class="k">Identity node</td><td>An Android handset holding one person's logins</td><td class="mid">Exactly 1 per person. Never shared.</td><td>Sessions and credentials for that person</td></tr>
+      <tr><td class="k">App instance</td><td>An installed app, scoped to one person</td><td>1 per (app, person)</td><td>Its own private storage</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>2.1 &nbsp;Shared devices need a rule</h3>
+  <p>A kitchen speaker is not bound to a person. It has to acquire person context per request — an
+     explicit claim ("it's Matt"), or voice identification. Until it has one:</p>
+  <div class="callout">
+    <span class="ct">Default for unbound devices</span>
+    <p>A device with no person context gets <b>household scope only</b>. It can answer general
+      questions and read explicitly shared data. It cannot read anything person-scoped. No
+      exceptions, no "probably Matt" heuristics — a wrong guess reads someone else's private data
+      aloud in a shared room.</p>
+  </div>
+
+  <h3>2.2 &nbsp;Genuinely shared data</h3>
+  <p>Some rows really are household-wide: the family shopping list, the thermostat, the door lock.
+     Model this explicitly with a scope column rather than by leaving <code>person_id</code> null,
+     which turns "unowned" and "shared" into the same bug.</p>
+  <pre><code><span class="cm">-- scope is explicit; the default is always private</span>
+scope        text not null default <span class="kw">'person'</span>,   <span class="cm">-- person | household</span>
+person_id    uuid not null,                  <span class="cm">-- creator, even when shared</span>
+household_id uuid not null</code></pre>
+</section>
+
+<section id="s3">
+  <div class="shead"><span class="snum">03</span><h2>Nine boundaries</h2></div>
+  <p class="sdek">Where separation is enforced, and what breaks if each one is missing.</p>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>Boundary</th><th>Enforced by</th><th>If it's missing</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td class="k">Data</td><td>Postgres RLS, forced, on every table</td><td class="bad">Any app reads anyone's rows</td></tr>
+      <tr><td class="n">2</td><td class="k">Blobs</td><td>Path prefix + per-person encryption key</td><td class="bad">Deletion is a lie; backups keep everything</td></tr>
+      <tr><td class="n">3</td><td class="k">Apps</td><td>WASM sandbox, one instance per (app, person)</td><td class="bad">An app reads another app's or person's state</td></tr>
+      <tr><td class="n">4</td><td class="k">Inference</td><td>Person-scoped retrieval; exact-prefix cache keys</td><td class="bad">Personal context bleeds between requests</td></tr>
+      <tr><td class="n">5</td><td class="k">Identity nodes</td><td>Device looked up from session, never a parameter</td><td class="bad">One person acts as another in real apps</td></tr>
+      <tr><td class="n">6</td><td class="k">Sessions</td><td>Token scoped to (device, person), short TTL</td><td class="bad">Stolen glasses are a permanent identity</td></tr>
+      <tr><td class="n">7</td><td class="k">Network</td><td>Per-device WireGuard keys, restricted AllowedIPs</td><td class="mid">Devices reach each other and the LAN</td></tr>
+      <tr><td class="n">8</td><td class="k">Egress</td><td>Redaction before send; per-person audit rows</td><td class="bad">The privacy model is decorative</td></tr>
+      <tr><td class="n">9</td><td class="k">Backups</td><td>Per-person separable, keyed per person</td><td class="bad">"Delete me" cannot be honoured</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s4">
+  <div class="shead"><span class="snum">04</span><h2>Data <span class="chip now">Build first</span></h2></div>
+  <p class="sdek">Row-level security, forced, with person context set by the host and never by the caller.</p>
+
+  <h3>4.1 &nbsp;Why row-level and not schema-per-person</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Approach</th><th>Blast radius</th><th>Migrations</th><th>Shared rows</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Row-level + RLS</td><td class="mid">One policy bug exposes everything</td><td class="good">One migration</td><td class="good">Natural</td><td class="good">Right for a household node</td></tr>
+      <tr><td class="k">Schema per person</td><td class="good">Contained</td><td class="bad">N migrations, drift</td><td class="mid">Awkward</td><td class="mid">Only past ~50 people</td></tr>
+      <tr><td class="k">Database per person</td><td class="good">Total</td><td class="bad">N databases to operate</td><td class="bad">Cross-person is a join across databases</td><td class="mid">Only for business tenants</td></tr>
+    </tbody>
+  </table></div>
+  <p>Row-level is right here — but it is only safe if the policy is <b>forced</b> and the runtime role
+     is not the table owner. Both defaults work against you.</p>
+
+  <h3>4.2 &nbsp;The pattern</h3>
+  <pre><code><span class="cm">-- once per table. No exceptions — §15 has a CI check that enforces this.</span>
+<span class="kw">alter table</span> observation <span class="kw">enable</span> row level security;
+<span class="kw">alter table</span> observation <span class="kw">force</span>  row level security;   <span class="cm">-- applies to the owner too</span>
+
+<span class="kw">create policy</span> person_isolation <span class="kw">on</span> observation
+  <span class="kw">using</span> (
+    person_id = current_setting(<span class="kw">'app.person_id'</span>)::uuid
+    <span class="kw">or</span> (scope = <span class="kw">'household'</span>
+        <span class="kw">and</span> household_id = current_setting(<span class="kw">'app.household_id'</span>)::uuid)
+  );</code></pre>
+  <p>And the only place person context is ever set — inside the capability host, per transaction:</p>
+  <pre><code><span class="kw">begin</span>;
+  <span class="kw">set local role</span> app_runtime;            <span class="cm">-- never the owner, never superuser</span>
+  <span class="kw">select</span> set_config(<span class="kw">'app.person_id'</span>,    $1, <span class="kw">true</span>);   <span class="cm">-- true = LOCAL</span>
+  <span class="kw">select</span> set_config(<span class="kw">'app.household_id'</span>, $2, <span class="kw">true</span>);
+  <span class="cm">-- the app's query runs here, and cannot see past the policy</span>
+<span class="kw">commit</span>;</code></pre>
+  <div class="callout stop">
+    <span class="ct">The classic bug</span>
+    <p><b>Never use <code>SET</code> without <code>LOCAL</code>.</b> A non-local setting survives the
+      transaction and, behind a connection pooler, is inherited by the next person's request on that
+      connection. This is the single most common multi-tenancy data leak, and it is silent — every
+      test passes, because tests rarely run two people through one pooled connection.</p>
+  </div>
+  <p>Two more rules that keep this honest:</p>
+  <ul class="plain">
+    <li><b>The runtime role owns nothing and can create nothing.</b> Migrations run as a separate role.</li>
+    <li><b>No raw SQL crosses the capability boundary.</b> Apps get typed capability calls; the host
+        writes the SQL. Spec §13 of your architecture doc already requires this — RLS is the
+        second line, not the first.</li>
+  </ul>
+</section>
+
+<section id="s5">
+  <div class="shead"><span class="snum">05</span><h2>Blobs and keys <span class="chip now">Build first</span></h2></div>
+  <p class="sdek">Path separation is bookkeeping. Key separation is what makes deletion real.</p>
+  <pre><code>node-store/
+  person_4a1f/            <span class="cm">// prefix per person — necessary, not sufficient</span>
+    obs/2026/08/30/&lt;uuid&gt;.jpg.enc
+    obs/2026/08/30/&lt;uuid&gt;.opus.enc</code></pre>
+
+  <h3>5.1 &nbsp;Two-level keys</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Key</th><th>Scope</th><th>Stored</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td class="k">DEK</td><td>One per object</td><td>Wrapped, beside the object</td><td>Encrypts the blob</td></tr>
+      <tr><td class="k">KEK</td><td>One per person</td><td>OS keychain / Secure Enclave</td><td>Wraps every DEK for that person</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout ok">
+    <span class="ct">Why this is the whole game</span>
+    <p>Deleting a person means <b>destroying one KEK</b>. Every wrapped DEK becomes undecryptable
+      instantly — including in backups, offsite copies, and snapshots you cannot reach into.</p>
+    <p><code>DELETE FROM</code> cannot do this. Backups are exactly where "delete my data" quietly
+      fails, and cryptographic erasure is the only mechanism that actually reaches them.</p>
+  </div>
+  <p>On a Mac mini the KEKs live in the Keychain, unlocked once at boot. That is a real operational
+     constraint worth stating: <b>an unattended reboot leaves the node unable to decrypt anything
+     until someone unlocks it.</b> Either accept that, or store the KEKs in a hardware token that
+     survives reboot — and understand that the second option means a stolen node is a stolen archive.</p>
+</section>
+
+<section id="s6">
+  <div class="shead"><span class="snum">06</span><h2>Apps <span class="chip later">After V1</span></h2></div>
+  <p class="sdek">Third-party code on a machine holding someone's entire life needs a sandbox, not a code review.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Option</th><th>Isolation</th><th>Cost</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Manifest only, no code</td><td class="good">Total</td><td class="good">Trivial</td><td class="good">Right for V1's three apps</td></tr>
+      <tr><td class="k">WASM module</td><td class="good">Sandboxed by construction</td><td class="mid">A host runtime to build</td><td class="good">Right for the app store</td></tr>
+      <tr><td class="k">Container per app</td><td class="mid">Kernel-level, escapable</td><td class="bad">Heavy on a Mac mini</td><td class="mid">Only if apps need real runtimes</td></tr>
+      <tr><td class="k">Node process, reviewed</td><td class="bad">None. Full filesystem and network.</td><td class="good">None</td><td class="bad">Never for third parties</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>WASM is the answer for third-party apps.</b> A module has no ambient authority at all — no
+     filesystem, no sockets, no clock beyond what you hand it. The capability API is the only import,
+     which means the sandbox boundary and the permission boundary are the same line of code instead
+     of two things that have to agree.</p>
+  <pre><code>app instance = (app_id, person_id)          <span class="cm">// two people, two isolated instances</span>
+  ├── imports: capability calls only        <span class="cm">// no WASI fs, no sockets</span>
+  ├── storage: kv scoped to (app_id, person_id)
+  └── limits:  memory cap · fuel budget · wall-clock deadline</code></pre>
+  <p>The fuel budget matters more than it looks: without it, one badly written app pins a core and
+     every other person on the node waits behind it. Isolation is a performance property too.</p>
+</section>
+
+<section id="s7">
+  <div class="shead"><span class="snum">07</span><h2>Inference <span class="chip now">Build first</span></h2></div>
+  <p class="sdek">The boundary people forget. One model server, several people's prompts.</p>
+  <p>Sharing model <i>weights</i> across people is fine and necessary — you are not loading a 4B model
+     five times. What must not be shared is context, retrieval and cache.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Thing</th><th>Shared?</th><th>Rule</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Weights</td><td class="good">Yes</td><td>One process, one queue. No isolation concern.</td></tr>
+      <tr><td class="k">Retrieval</td><td class="bad">Never</td><td>Scoped to person <b>before</b> it reaches the model. The model has no ambient data access — it receives context, it never fetches it.</td></tr>
+      <tr><td class="k">Prompt / KV cache</td><td class="mid">Conditionally</td><td>Key by the <b>exact token prefix</b> and nothing else. Identical prefix means identical content, so a hit cannot leak. Keying on anything coarser — a session id, a truncated hash — can.</td></tr>
+      <tr><td class="k">System prompt</td><td class="mid">Conditionally</td><td>If it embeds personal context it is person-specific by definition. Never build one that mixes people.</td></tr>
+      <tr><td class="k">Adapters / fine-tunes</td><td class="bad">Never</td><td>A per-person LoRA is person data. Load it under person context or not at all.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout">
+    <span class="ct">The way to think about it</span>
+    <p>The model is a pure function. Everything person-specific arrives as an argument and nothing
+      persists between calls. If you can state that truthfully about your inference layer, this
+      boundary holds. If the model can reach out and fetch something, it does not.</p>
+  </div>
+</section>
+
+<section id="s8">
+  <div class="shead"><span class="snum">08</span><h2>Sessions and devices <span class="chip now">Build first</span></h2></div>
+  <p class="sdek">Where person context is born. Everything downstream inherits whatever this gets right or wrong.</p>
+  <h3>8.1 &nbsp;Pairing binds, sessions carry</h3>
+  <pre><code>pairing   (once)   device attests → operator confirms → device_id ↔ person_id, persisted
+session   (per connect)  attested key → token { device_id, person_id, exp: minutes }
+request   (per call)     token → person context → every gate below reads it</code></pre>
+  <h3>8.2 &nbsp;Presence is a security control</h3>
+  <p>The nose-bridge presence sensor from spec §14 is not only a battery saver. Glasses removed means
+     the session suspends; putting them back on requires re-auth through the companion phone. Without
+     it, a pair of glasses left on a table is a permanent, unattended identity for whoever picks
+     them up — and unlike a phone, glasses have no lock screen.</p>
+  <h3>8.3 &nbsp;Identity nodes</h3>
+  <p>The Android handset holding a person's real logins is the highest-value target on the network.
+     Two rules, both structural:</p>
+  <ul class="plain">
+    <li><b>The device is looked up from the session's person, never passed as an argument.</b> There is
+        no code path where an app names which handset to drive.</li>
+    <li><b>ADB keys live in a per-person keystore on the node and never leave it.</b> Apps call
+        <code>identity.act({provider, intent, args})</code> and never learn a device exists.</li>
+  </ul>
+</section>
+
+<section id="s9">
+  <div class="shead"><span class="snum">09</span><h2>Network and egress</h2></div>
+  <h3>9.1 &nbsp;Devices cannot address each other</h3>
+  <pre><code><span class="cm"># one key per device; AllowedIPs restricts what each can reach</span>
+[Peer]  <span class="cm"># glasses, person A</span>
+PublicKey  = …
+AllowedIPs = 10.8.0.11/32        <span class="cm"># the node only. Not 10.8.0.0/24.</span></code></pre>
+  <p>A compromised pair of glasses should reach the node and nothing else — not the other devices,
+     not the household LAN, and certainly not the identity nodes.</p>
+  <h3>9.2 &nbsp;Segment the identity nodes</h3>
+  <p>Five Android handsets logged into banks and retailers belong on their own VLAN, reachable only
+     from the node. They are the one part of this system where a compromise is directly monetisable.</p>
+  <h3>9.3 &nbsp;Egress</h3>
+  <ul class="plain">
+    <li>Redaction runs before the send, as a pipeline stage, and writes what it stripped back onto
+        the observation (spec §9.2).</li>
+    <li><b>Per-person API keys where the provider supports them.</b> Household billing is a
+        convenience; a business tenant will require it for audit, and retrofitting per-person keys
+        means re-plumbing every provider adapter.</li>
+    <li>Every external call writes an audit row: person, app, destination, bytes, what was redacted.
+        That table is the receipt in spec §8, and it is worth more to a user than any toggle.</li>
+  </ul>
+</section>
+
+<section id="s10">
+  <div class="shead"><span class="snum">10</span><h2>One request, six gates</h2></div>
+  <p class="sdek">Person context is established once and read everywhere. No gate accepts it as an argument.</p>
+
+  <figure>
+    <svg viewBox="0 0 920 660" role="img"
+         aria-label="A request flows down through device connect, session bind, policy gate, capability host and store gate. Session bind issues a person context once, shown as a rail on the right, which the policy gate, capability host and store gate each read. A third-party WASM app calls into the capability host from below, and its attempt to pass a person_id argument is rejected.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+        </marker>
+        <marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" fill="var(--acc)"/>
+        </marker>
+      </defs>
+
+      <!-- flow boxes -->
+      <g fill="none" stroke="currentColor" stroke-width="1.25">
+        <rect x="200" y="30"  width="320" height="50" rx="8"/>
+        <rect x="200" y="210" width="320" height="50" rx="8"/>
+        <rect x="200" y="310" width="320" height="50" rx="8"/>
+        <rect x="200" y="410" width="320" height="50" rx="8"/>
+        <rect x="200" y="540" width="320" height="50" rx="8"/>
+      </g>
+      <rect x="200" y="110" width="320" height="50" rx="8" fill="none" stroke="var(--acc)" stroke-width="2"/>
+
+      <g font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="currentColor" text-anchor="middle">
+        <text x="360" y="60">Device connects · attested key</text>
+        <text x="360" y="240">Policy gate</text>
+        <text x="360" y="340">Capability host</text>
+        <text x="360" y="440">Store gate · RLS + per-person key</text>
+        <text x="360" y="570">Third-party app · WASM</text>
+      </g>
+      <text x="360" y="140" font-family="IBM Plex Sans, sans-serif" font-size="14" font-weight="600"
+            fill="var(--acc)" text-anchor="middle">Session bind</text>
+
+      <!-- main flow arrows -->
+      <g stroke="currentColor" stroke-width="1.25" marker-end="url(#ah)">
+        <line x1="360" y1="80"  x2="360" y2="106"/>
+        <line x1="360" y1="160" x2="360" y2="206"/>
+        <line x1="360" y1="260" x2="360" y2="306"/>
+        <line x1="360" y1="360" x2="360" y2="406"/>
+      </g>
+
+      <!-- person context rail -->
+      <rect x="660" y="110" width="240" height="350" rx="10"
+            fill="none" stroke="var(--acc)" stroke-width="1.25" stroke-dasharray="5 4"/>
+      <text x="680" y="140" font-family="IBM Plex Mono, monospace" font-size="11.5"
+            fill="var(--acc)" letter-spacing="1">PERSON CONTEXT</text>
+      <g font-family="IBM Plex Mono, monospace" font-size="11.5" fill="currentColor">
+        <text x="680" y="176">person_id</text>
+        <text x="680" y="200">household_id</text>
+        <text x="680" y="224">policy bundle</text>
+        <text x="680" y="248">kek handle</text>
+        <text x="680" y="272">token scopes</text>
+      </g>
+      <text x="680" y="316" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor"
+            opacity=".72">Ambient. Set once at</text>
+      <text x="680" y="333" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor"
+            opacity=".72">bind, expires with the</text>
+      <text x="680" y="350" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor"
+            opacity=".72">session, never passed.</text>
+
+      <!-- issued once -->
+      <line x1="525" y1="135" x2="655" y2="135" stroke="var(--acc)" stroke-width="1.5" marker-end="url(#ahA)"/>
+      <text x="590" y="127" font-family="IBM Plex Mono, monospace" font-size="10.5"
+            fill="var(--acc)" text-anchor="middle">issued once</text>
+
+      <!-- reads -->
+      <g stroke="var(--acc)" stroke-width="1.25" stroke-dasharray="4 4" marker-end="url(#ahA)">
+        <line x1="655" y1="235" x2="527" y2="235"/>
+        <line x1="655" y1="335" x2="527" y2="335"/>
+        <line x1="655" y1="435" x2="527" y2="435"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--acc)" text-anchor="middle">
+        <text x="591" y="227">which policy</text>
+        <text x="591" y="327">which scopes</text>
+        <text x="591" y="427">which rows + key</text>
+      </g>
+
+      <!-- app calls the host, routed around the store gate -->
+      <polyline points="200,565 140,565 140,335 195,335" fill="none"
+                stroke="currentColor" stroke-width="1.25" marker-end="url(#ah)"/>
+      <text x="132" y="452" font-family="IBM Plex Mono, monospace" font-size="10.5"
+            fill="currentColor" text-anchor="end">capability</text>
+      <text x="132" y="468" font-family="IBM Plex Mono, monospace" font-size="10.5"
+            fill="currentColor" text-anchor="end">call only</text>
+
+      <!-- the rejected path -->
+      <polyline points="520,565 700,565 700,470" fill="none" stroke="var(--stop)"
+                stroke-width="1.25" stroke-dasharray="4 4"/>
+      <g stroke="var(--stop)" stroke-width="2">
+        <line x1="686" y1="504" x2="714" y2="532"/>
+        <line x1="714" y1="504" x2="686" y2="532"/>
+      </g>
+      <text x="730" y="512" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--stop)">person_id as an</text>
+      <text x="730" y="528" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--stop)">argument · rejected</text>
+    </svg>
+    <figcaption>Session bind is the only place a person is decided. Every gate below reads that
+      context rather than receiving it, so an app has no vocabulary for naming a person other than
+      the one it is already running as — isolation becomes structural instead of a review checklist.</figcaption>
+  </figure>
+
+  <p>Traced concretely, a "what is that?" from Matt's glasses:</p>
+  <pre><code>1  device connects        attested key → known device_id
+2  session bind           device_id → person_id (from pairing) → token, 15 min
+3  policy gate            person's compiled bundle says: image → external OK, redact EXIF
+4  capability host        set local app.person_id; token scope checked
+5  store gate             insert observation → RLS stamps and filters by person
+                          blob written to person_4a1f/…, DEK wrapped by Matt's KEK
+6  egress                 image redacted, sent, audit row written under person_4a1f</code></pre>
+  <p>Nowhere in that trace does any component take a person as a parameter. Delete step 2 and the
+     whole chain fails closed, which is the property you want.</p>
+</section>
+
+<section id="s11">
+  <div class="shead"><span class="snum">11</span><h2>The capability host <span class="chip now">Build first</span></h2></div>
+  <p class="sdek">One module. Every read and write in the system goes through it. Build this before any app.</p>
+  <p>This is the door your architecture doc §13 describes, made concrete. It is the only component
+     that holds a database connection, the only one that touches blob storage, and the only one that
+     can reach an identity node. If a second component grows a database connection, the design has
+     already failed.</p>
+  <pre><code><span class="cm">// the shape every capability has — no exceptions</span>
+<span class="kw">async function</span> invoke(ctx, capability, args) {
+  assertToken(ctx.token, capability);        <span class="cm">// scope + expiry (spec §8)</span>
+  assertPolicy(ctx.policy, capability, args); <span class="cm">// per-element, may redact (spec §9)</span>
+
+  <span class="kw">return</span> withPersonContext(ctx.person, <span class="kw">async</span> (tx) =&gt; {
+    <span class="kw">const</span> result = <span class="kw">await</span> HANDLERS[capability](tx, args);
+    <span class="kw">await</span> audit(tx, ctx, capability, args);  <span class="cm">// same transaction as the effect</span>
+    <span class="kw">return</span> result;
+  });
+}</code></pre>
+  <p>Two details that are easy to get wrong and expensive to fix later:</p>
+  <ul class="plain">
+    <li><b><code>ctx.person</code> comes from the session, not from <code>args</code>.</b> There is no
+        code path that reads a person from arguments. Enforce it with a type: the handler signature
+        simply has nowhere to put one.</li>
+    <li><b>The audit row is written in the same transaction as the effect.</b> Otherwise a crash
+        between them produces an action with no receipt, which is the one failure mode that
+        destroys trust in the whole privacy story.</li>
+  </ul>
+</section>
+
+<section id="s12">
+  <div class="shead"><span class="snum">12</span><h2>Delete and export</h2></div>
+  <p class="sdek">Two operations that prove the isolation model is real rather than aspirational.</p>
+  <h3>12.1 &nbsp;Delete a person</h3>
+  <pre><code>1  revoke every session and capability token
+2  wipe and unenrol their identity node
+3  destroy the KEK            ← every blob, live and backed up, is now unreadable
+4  delete rows under person_id
+5  write a tombstone: who, when, what scope. Keep the tombstone.</code></pre>
+  <p>Step 3 is what makes the rest honest. Steps 1, 2 and 4 are reversible from a backup by anyone
+     with the tape; step 3 is not reversible by anyone, which is the point.</p>
+  <h3>12.2 &nbsp;Export a person</h3>
+  <p>Data portability is not a compliance checkbox here — it is the product claim. Section 16.2 of
+     the spec argues you sell sovereignty, and sovereignty you cannot leave with is a slogan.</p>
+  <pre><code>export/person_4a1f/
+  observations.jsonl       <span class="cm">// decrypted, with provenance intact</span>
+  entities.jsonl
+  media/                   <span class="cm">// decrypted blobs</span>
+  apps/&lt;app_id&gt;/kv.json    <span class="cm">// per-app state</span>
+  policy.json
+  audit.jsonl              <span class="cm">// what left, and when</span></code></pre>
+  <div class="callout ok">
+    <span class="ct">A test worth writing early</span>
+    <p>Export a person, delete them, import into a fresh node, and confirm the system behaves
+      identically. If that round trip works, your separation is genuine — because nothing of that
+      person was entangled in shared state. If it does not, the export is telling you exactly where
+      the leak is.</p>
+  </div>
+</section>
+
+<section id="s13">
+  <div class="shead"><span class="snum">13</span><h2>Repo layout</h2></div>
+  <p class="sdek">One repo. The boundaries in §3 should be visible in the directory tree, not just in the prose.</p>
+  <pre><code>proto/            <span class="cm">// device protocol schema, versioned. Shared by firmware and node.</span>
+  ogp-1.json      <span class="cm">// JSON Schema for every verb + capability descriptor (spec §3)</span>
+
+firmware/         <span class="cm">// ESP32-S3. Capture, compress, encrypt, route. Nothing else.</span>
+
+node/
+  gateway/        <span class="cm">// WebSocket server, device sessions, attestation, pairing  ← §8</span>
+  policy/         <span class="cm">// compile bundles, distribute to edges, evaluate            ← §9</span>
+  router/         <span class="cm">// classify once, dispatch directly, speculate (spec §7.2)</span>
+  capabilities/   <span class="cm">// THE ONLY MODULE WITH A DB CONNECTION                     ← §11</span>
+  store/          <span class="cm">// migrations, RLS policies, blob adapter, key management   ← §4, §5</span>
+  pipeline/       <span class="cm">// stt / vision / tts adapters. Pure functions.             ← §7</span>
+  identity/       <span class="cm">// android node control, per-person keystores               ← §8.3</span>
+  wasm-host/      <span class="cm">// app sandbox and fuel budgets                             ← §6</span>
+
+apps/             <span class="cm">// first-party apps. Same capability API third parties will get.</span>
+sdk/              <span class="cm">// app-facing SDK. Compiles to the WASM import surface.</span>
+companion/        <span class="cm">// phone app: hotspot, GPS, identity, offline fallback brain</span>
+shell/            <span class="cm">// display renderer for framebuffer-class devices (spec §10)</span></code></pre>
+  <div class="callout warn">
+    <span class="ct">One lint rule worth having on day one</span>
+    <p>Fail the build if anything outside <code>node/capabilities/</code> and
+      <code>node/store/</code> imports the database client. It is three lines of config and it
+      prevents the single architectural decay that ruins systems like this — a "quick" direct query
+      from the router that becomes forty of them.</p>
+  </div>
+</section>
+
+<section id="s14">
+  <div class="shead"><span class="snum">14</span><h2>Build order</h2></div>
+  <p class="sdek">Spec §17 with the isolation work folded in. Each phase is usable and each needs the one before it.</p>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>Phase</th><th>Includes the isolation work</th><th>Done when</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="n">0</td><td class="k">Schema and host</td>
+        <td>Every table with <code>person_id</code>, RLS forced, the CI check from §15, the capability host, per-person KEKs</td>
+        <td>Two seeded people exist and neither can see the other, proven by test</td>
+      </tr>
+      <tr>
+        <td class="n">1</td><td class="k">Gateway and pairing</td>
+        <td>Device attestation, session tokens, the bind that creates person context</td>
+        <td>A device pairs to a person and a forged token is rejected</td>
+      </tr>
+      <tr>
+        <td class="n">2</td><td class="k">Pipeline, no device</td>
+        <td>Person-scoped retrieval; cache keys include person</td>
+        <td>Curl an image and a question, get spoken audio back, under 1.2 s</td>
+      </tr>
+      <tr>
+        <td class="n">3</td><td class="k">Firmware</td>
+        <td>Nothing new — the device holds no state by design</td>
+        <td>Tap, speak, hear the answer. Measured, 20 times.</td>
+      </tr>
+      <tr>
+        <td class="n">4</td><td class="k">The three apps</td>
+        <td>Capability tokens with real scopes; first policy bundles</td>
+        <td>"What is this", "Remember this", "Add to my list" all work</td>
+      </tr>
+      <tr>
+        <td class="n">5</td><td class="k">Second person</td>
+        <td class="mid">The moment of truth. Everything above already assumed this.</td>
+        <td>Two pairs of glasses, two people, zero code changes</td>
+      </tr>
+      <tr>
+        <td class="n">6</td><td class="k">Identity node</td>
+        <td>Per-person keystore, VLAN, <code>identity.act</code> audit trail</td>
+        <td>An app action runs as the right person and cannot reach the other</td>
+      </tr>
+      <tr>
+        <td class="n">7</td><td class="k">Offline path</td>
+        <td>Companion queues writes with idempotency keys</td>
+        <td>Unplug the node mid-request; nothing is lost or doubled</td>
+      </tr>
+      <tr>
+        <td class="n">8</td><td class="k">Display</td>
+        <td>Nothing new — <code>display.card()</code> is a capability like any other</td>
+        <td>Text in the lens, and the same call speaks on a device without one</td>
+      </tr>
+    </tbody>
+  </table></div>
+  <div class="callout">
+    <span class="ct">Phase 5 is the checkpoint that matters</span>
+    <p>If adding the second person requires <b>any</b> schema change, any new parameter, or any
+      "just for now" special case, phases 0–4 were built wrong and this is the cheapest moment you
+      will ever have to find out. Add a second seeded person in phase 0 and keep them there — an
+      empty second account in every test run is what stops the whole thing quietly becoming
+      single-tenant.</p>
+  </div>
+</section>
+
+<section id="s15">
+  <div class="shead"><span class="snum">15</span><h2>Isolation tests <span class="chip hard">Non-negotiable</span></h2></div>
+  <p class="sdek">Isolation rots silently. These are the tests that make it fail loudly instead.</p>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>Test</th><th>Guards</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td>For <b>every</b> table, B's context cannot read, update or delete any of A's rows. Generated from the schema, so new tables are covered automatically.</td><td>§4</td></tr>
+      <tr><td class="n">2</td><td>CI fails if any table lacks <code>enable</code> <b>and</b> <code>force</code> row level security, or lacks a <code>person_id</code> column.</td><td>§4</td></tr>
+      <tr><td class="n">3</td><td>Two people's requests interleaved through one pooled connection never see each other's rows. Run it with a pooler, not a direct connection.</td><td class="mid">§4 — the <code>SET LOCAL</code> bug</td></tr>
+      <tr><td class="n">4</td><td>No capability handler signature can accept a person identifier. Enforced by type, checked by a compile-time test.</td><td>§11</td></tr>
+      <tr><td class="n">5</td><td>Destroying A's KEK makes every A blob undecryptable — including from a restored backup taken before the deletion.</td><td>§5, §12</td></tr>
+      <tr><td class="n">6</td><td>An app installed by A and B has two isolated KV namespaces; a write in one is invisible in the other.</td><td>§6</td></tr>
+      <tr><td class="n">7</td><td>A WASM app cannot open a socket, touch the filesystem, or exceed its fuel budget — and exhausting fuel kills only that instance.</td><td>§6</td></tr>
+      <tr><td class="n">8</td><td>A shared device with no person context reads household-scoped rows only, and gets an explicit refusal for anything person-scoped.</td><td>§2.1</td></tr>
+      <tr><td class="n">9</td><td>Revoking a capability token takes effect on the next call. Presence "removed" blocks calls until re-auth.</td><td>§8</td></tr>
+      <tr><td class="n">10</td><td>Export A, delete A, import into a fresh node: identical behaviour, and A's data is gone from the original.</td><td>§12</td></tr>
+    </tbody>
+  </table></div>
+  <p>Tests 2 and 3 are the two that pay for themselves. Test 2 stops the slow decay where someone
+     adds a table in a hurry; test 3 catches the pooled-connection leak, which no ordinary test
+     suite reproduces because ordinary tests run one person at a time.</p>
+</section>
+
+<section id="s16">
+  <div class="shead"><span class="snum">16</span><h2>Do not build yet <span class="chip later">Deliberately deferred</span></h2></div>
+  <p class="sdek">Each of these is a real product. None of them is on the critical path to proving the architecture.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Deferred</th><th>Why</th><th>Build it when</th></tr></thead>
+    <tbody>
+      <tr><td class="k">App store</td><td>The WASM host, review, signing and distribution are a quarter of work that proves nothing about the architecture</td><td>Your own three apps have run for a month and the capability API has stopped changing</td></tr>
+      <tr><td class="k">Third-party devices</td><td>The protocol has to stop moving before anyone can implement it</td><td>You have shipped two device types yourself</td></tr>
+      <tr><td class="k">World-locked AR</td><td>Needs a local GPU and asynchronous timewarp — a different product (spec §10.3)</td><td>Head-locked has proven people want a display at all</td></tr>
+      <tr><td class="k">Cellular in the glasses</td><td>Carrier certification, antennas, another subscription, more battery</td><td>Never, probably. The phone is already an excellent modem.</td></tr>
+      <tr><td class="k">Continuous recording</td><td>Incompatible with every wearable power budget (spec §9.3)</td><td>A tethered or desk device wants it</td></tr>
+      <tr><td class="k">Node-to-node federation</td><td>Sharing between households multiplies every boundary in §3</td><td>One node works for several people first</td></tr>
+      <tr><td class="k">Hosted nodes</td><td>Turns nine boundaries into nine boundaries plus a compliance surface</td><td>You know whether people will run their own</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout ok">
+    <span class="ct">What the whole thing rests on</span>
+    <p>Two people, two pairs of glasses, one node, three apps, and a test suite that proves neither
+      person can reach the other. Everything in the deck — the app store, third-party hardware,
+      displays, external models — is addition on top of that. Nothing above it is architecture.</p>
+  </div>
+</section>
+
+<footer>
+  Building the Node v0.1 · implementation companion to the Open Glasses Spec<br>
+  Nine boundaries, ten tests. The boundaries are cheap now and very expensive later.
+</footer>
+</main>
+</div>

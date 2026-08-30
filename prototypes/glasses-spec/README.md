@@ -1,7 +1,11 @@
 # Open Glasses Spec
 
-`SPEC.html` — the engineering layer under the ten-slide *Open Smart Glasses Ecosystem* deck.
-Standalone, no build step. Open it in a browser.
+Two standalone documents, no build step. Open either in a browser.
+
+- `SPEC.html` — **Open Glasses Spec.** The engineering layer under the ten-slide
+  *Open Smart Glasses Ecosystem* deck: what the system does, in numbers and schemas.
+- `BUILD.html` — **Building the Node.** How to build it, and how every part stays
+  separated per person.
 
 ## Why it exists
 
@@ -36,3 +40,36 @@ python3 power.py
 `DECIDED` settled · `SPEC` normative · `OPEN` needs a decision · `FIX` contradicts the deck
 
 Six decisions are still open; they are listed together in §17.3.
+
+
+---
+
+# Building the Node
+
+`BUILD.html` — the implementation companion. Isolation is the one property that cannot be
+added later, so this describes the shape it has to have from the first commit.
+
+## Nine boundaries
+
+Data (RLS, forced) · blobs (per-person keys) · apps (WASM sandbox) · inference (scoped
+retrieval, exact-prefix cache keys) · identity nodes · sessions · network · egress · backups.
+
+## The rule underneath all of them
+
+**Person is never a function parameter.** It is ambient context established once at the device
+session and read by every gate below. The moment an app can *pass* a person id, isolation is a
+code review problem rather than a structural one — and code review does not scale to an app store.
+
+## The two tests that pay for themselves
+
+- CI fails if any table lacks `person_id`, or lacks row level security both **enabled** and
+  **forced**. Stops the slow decay where someone adds a table in a hurry.
+- Two people interleaved through one **pooled** connection never see each other's rows. Catches
+  the `SET` without `LOCAL` leak, which ordinary test suites never reproduce because they run
+  one person at a time.
+
+## The checkpoint
+
+Adding the second person must require zero schema changes, zero new parameters and zero special
+cases. Seed a second person in phase 0 and keep them in every test run — that is what stops the
+system quietly becoming single-tenant.
