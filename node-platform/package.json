@@ -1,0 +1,28 @@
+{
+  "name": "@openglasses/node",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Private node for the Open Glasses platform: device protocol server, capability host, per-person isolation.",
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "device": "tsx src/device/simulator.ts",
+    "seed": "tsx src/store/seed.ts",
+    "test": "vitest run",
+    "test:isolation": "vitest run test/isolation",
+    "check:rls": "tsx src/store/check-rls.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.2.17",
+    "ws": "^8.18.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}
